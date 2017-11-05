@@ -1,2 +1,2 @@
 # Intensional-computation
-translations of a lambda abstraction to combinations of operators 
+Translations of a lambda abstraction to combinations of operators.
