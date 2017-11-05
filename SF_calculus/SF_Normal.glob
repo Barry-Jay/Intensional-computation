@@ -1,0 +1,113 @@
+DIGEST cf6a082581ae4c62a0fa24a3af41bd73
+FIntensionalLib.SF_calculus.SF_Normal
+R1477:1481 Coq.Arith.Arith <> <> lib
+R1483:1487 Coq.omega.Omega <> <> lib
+R1489:1491 Coq.Arith.Max <> <> lib
+R1509:1543 IntensionalLib.SF_calculus.SF_Terms <> <> lib
+R1563:1596 IntensionalLib.SF_calculus.General <> <> lib
+R1616:1652 IntensionalLib.SF_calculus.SF_Tactics <> <> lib
+R1672:1710 IntensionalLib.SF_calculus.SF_reduction <> <> lib
+ind 1727:1736 <> status_val
+constr 1744:1749 <> Active
+constr 1767:1773 <> Passive
+R1753:1762 IntensionalLib.SF_calculus.SF_Normal <> status_val ind
+R1777:1786 IntensionalLib.SF_calculus.SF_Normal <> status_val ind
+def 1800:1805 <> status
+R1819:1819 IntensionalLib.SF_calculus.SF_Normal <> M var
+R1829:1831 IntensionalLib.SF_calculus.SF_Terms <> Ref constr
+R1838:1843 IntensionalLib.SF_calculus.SF_Normal <> Active constr
+R1849:1850 IntensionalLib.SF_calculus.SF_Terms <> Op constr
+R1857:1863 IntensionalLib.SF_calculus.SF_Normal <> Passive constr
+R1867:1869 IntensionalLib.SF_calculus.SF_Terms <> App constr
+R1872:1874 IntensionalLib.SF_calculus.SF_Terms <> App constr
+R1877:1879 IntensionalLib.SF_calculus.SF_Terms <> App constr
+R1882:1883 IntensionalLib.SF_calculus.SF_Terms <> Op constr
+R1885:1887 IntensionalLib.SF_calculus.SF_Terms <> Fop constr
+R1903:1908 IntensionalLib.SF_calculus.SF_Normal <> status def
+R1916:1918 IntensionalLib.SF_calculus.SF_Terms <> App constr
+R1928:1933 IntensionalLib.SF_calculus.SF_Normal <> status def
+ind 1977:1982 <> normal
+constr 2003:2008 <> nf_ref
+constr 2039:2043 <> nf_op
+constr 2073:2081 <> nf_active
+constr 2241:2251 <> nf_compound
+R1988:1991 Coq.Init.Logic <> :type_scope:x_'->'_x not
+R1986:1987 IntensionalLib.SF_calculus.SF_Terms <> SF ind
+R2022:2027 IntensionalLib.SF_calculus.SF_Normal <> normal ind
+R2030:2032 IntensionalLib.SF_calculus.SF_Terms <> Ref constr
+R2034:2034 IntensionalLib.SF_calculus.SF_Normal <> n var
+R2057:2062 IntensionalLib.SF_calculus.SF_Normal <> normal ind
+R2065:2066 IntensionalLib.SF_calculus.SF_Terms <> Op constr
+R2068:2068 IntensionalLib.SF_calculus.SF_Normal <> o var
+R2108:2111 Coq.Init.Logic <> :type_scope:x_'->'_x not
+R2121:2155 Coq.Init.Logic <> :type_scope:x_'->'_x not
+R2183:2217 Coq.Init.Logic <> :type_scope:x_'->'_x not
+R2218:2223 IntensionalLib.SF_calculus.SF_Normal <> normal ind
+R2226:2228 IntensionalLib.SF_calculus.SF_Terms <> App constr
+R2233:2234 IntensionalLib.SF_calculus.SF_Normal <> M2 var
+R2230:2231 IntensionalLib.SF_calculus.SF_Normal <> M1 var
+R2174:2176 Coq.Init.Logic <> :type_scope:x_'='_x not
+R2156:2161 IntensionalLib.SF_calculus.SF_Normal <> status def
+R2164:2166 IntensionalLib.SF_calculus.SF_Terms <> App constr
+R2171:2172 IntensionalLib.SF_calculus.SF_Normal <> M2 var
+R2168:2169 IntensionalLib.SF_calculus.SF_Normal <> M1 var
+R2177:2182 IntensionalLib.SF_calculus.SF_Normal <> Active constr
+R2112:2117 IntensionalLib.SF_calculus.SF_Normal <> normal ind
+R2119:2120 IntensionalLib.SF_calculus.SF_Normal <> M2 var
+R2099:2104 IntensionalLib.SF_calculus.SF_Normal <> normal ind
+R2106:2107 IntensionalLib.SF_calculus.SF_Normal <> M1 var
+R2278:2281 Coq.Init.Logic <> :type_scope:x_'->'_x not
+R2291:2325 Coq.Init.Logic <> :type_scope:x_'->'_x not
+R2346:2349 Coq.Init.Logic <> :type_scope:x_'->'_x not
+R2350:2355 IntensionalLib.SF_calculus.SF_Normal <> normal ind
+R2358:2360 IntensionalLib.SF_calculus.SF_Terms <> App constr
+R2365:2366 IntensionalLib.SF_calculus.SF_Normal <> M2 var
+R2362:2363 IntensionalLib.SF_calculus.SF_Normal <> M1 var
+R2326:2333 IntensionalLib.SF_calculus.SF_reduction <> compound ind
+R2336:2338 IntensionalLib.SF_calculus.SF_Terms <> App constr
+R2343:2344 IntensionalLib.SF_calculus.SF_Normal <> M2 var
+R2340:2341 IntensionalLib.SF_calculus.SF_Normal <> M1 var
+R2282:2287 IntensionalLib.SF_calculus.SF_Normal <> normal ind
+R2289:2290 IntensionalLib.SF_calculus.SF_Normal <> M2 var
+R2269:2274 IntensionalLib.SF_calculus.SF_Normal <> normal ind
+R2276:2277 IntensionalLib.SF_calculus.SF_Normal <> M1 var
+R2390:2395 IntensionalLib.SF_calculus.SF_Normal <> normal ind
+def 2414:2424 <> irreducible
+R2433:2439 IntensionalLib.SF_calculus.SF_Tactics <> termred def
+R2462:2465 Coq.Init.Logic <> :type_scope:x_'->'_x not
+R2466:2470 Coq.Init.Logic <> False ind
+R2455:2457 IntensionalLib.SF_calculus.SF_Normal <> red var
+R2461:2461 IntensionalLib.SF_calculus.SF_Normal <> N var
+R2459:2459 IntensionalLib.SF_calculus.SF_Normal <> M var
+prf 2481:2495 <> ref_irreducible
+R2509:2519 IntensionalLib.SF_calculus.SF_Normal <> irreducible def
+R2529:2538 IntensionalLib.SF_calculus.SF_reduction <> sf_seqred1 ind
+R2522:2524 IntensionalLib.SF_calculus.SF_Terms <> Ref constr
+R2526:2526 IntensionalLib.SF_calculus.SF_Normal <> n var
+prf 2606:2626 <> normal_is_irreducible
+R2648:2651 Coq.Init.Logic <> :type_scope:x_'->'_x not
+R2652:2662 IntensionalLib.SF_calculus.SF_Normal <> irreducible def
+R2666:2675 IntensionalLib.SF_calculus.SF_reduction <> sf_seqred1 ind
+R2664:2664 IntensionalLib.SF_calculus.SF_Normal <> M var
+R2640:2645 IntensionalLib.SF_calculus.SF_Normal <> normal ind
+R2647:2647 IntensionalLib.SF_calculus.SF_Normal <> M var
+R2745:2759 IntensionalLib.SF_calculus.SF_Normal <> ref_irreducible thm
+R2943:2950 IntensionalLib.SF_calculus.SF_reduction <> compound ind
+prf 3117:3127 <> SF_progress
+R3143:3144 IntensionalLib.SF_calculus.SF_Terms <> SF ind
+R3156:3160 Coq.Init.Logic <> :type_scope:x_'\/'_x not
+R3185:3185 Coq.Init.Logic <> :type_scope:x_'\/'_x not
+R3148:3153 IntensionalLib.SF_calculus.SF_Normal <> normal ind
+R3155:3155 IntensionalLib.SF_calculus.SF_Normal <> M var
+R3161:3167 Coq.Init.Logic <> :type_scope:'exists'_x_'..'_x_','_x not
+R3169:3170 Coq.Init.Logic <> :type_scope:'exists'_x_'..'_x_','_x not
+R3171:3180 IntensionalLib.SF_calculus.SF_reduction <> sf_seqred1 ind
+R3184:3184 IntensionalLib.SF_calculus.SF_Normal <> N var
+R3182:3182 IntensionalLib.SF_calculus.SF_Normal <> M var
+R3321:3323 IntensionalLib.SF_calculus.SF_Terms <> App constr
+R3321:3323 IntensionalLib.SF_calculus.SF_Terms <> App constr
+R3391:3393 IntensionalLib.SF_calculus.SF_Terms <> App constr
+R3391:3393 IntensionalLib.SF_calculus.SF_Terms <> App constr
+R3516:3524 IntensionalLib.SF_calculus.SF_Normal <> nf_active constr
+R3760:3768 IntensionalLib.SF_calculus.SF_Normal <> nf_active constr
+R3800:3808 IntensionalLib.SF_calculus.SF_Normal <> nf_active constr

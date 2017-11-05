@@ -1,0 +1,37 @@
+DIGEST 157bb71bf4e04b2c373dcbc2b5d9d221
+FIntensionalLib.Fieska_calculus.Fieska_Terms
+R1624:1628 Coq.Arith.Arith <> <> lib
+R1630:1634 Coq.omega.Omega <> <> lib
+R1636:1638 Coq.Arith.Max <> <> lib
+R1640:1643 Coq.Bool.Bool <> <> lib
+R1645:1648 Coq.Lists.List <> <> lib
+R1666:1700 IntensionalLib.Fieska_calculus.Test <> <> lib
+R1718:1755 IntensionalLib.Fieska_calculus.General <> <> lib
+ind 1817:1824 <> operator
+constr 1831:1833 <> Sop
+constr 1837:1839 <> Fop
+constr 1843:1845 <> Aop
+constr 1849:1851 <> Kop
+constr 1855:1857 <> Iop
+constr 1861:1863 <> Eop
+R1834:1834 IntensionalLib.Fieska_calculus.Fieska_Terms <> operator ind
+R1840:1840 IntensionalLib.Fieska_calculus.Fieska_Terms <> operator ind
+R1846:1846 IntensionalLib.Fieska_calculus.Fieska_Terms <> operator ind
+R1852:1852 IntensionalLib.Fieska_calculus.Fieska_Terms <> operator ind
+R1858:1858 IntensionalLib.Fieska_calculus.Fieska_Terms <> operator ind
+R1864:1864 IntensionalLib.Fieska_calculus.Fieska_Terms <> operator ind
+ind 1878:1883 <> Fieska
+constr 1898:1900 <> Ref
+constr 1923:1924 <> Op
+constr 1953:1955 <> App
+R1907:1910 Coq.Init.Logic <> :type_scope:x_'->'_x not
+R1911:1916 IntensionalLib.Fieska_calculus.Fieska_Terms <> Fieska ind
+R1904:1906 Coq.Init.Datatypes <> nat ind
+R1937:1940 Coq.Init.Logic <> :type_scope:x_'->'_x not
+R1941:1946 IntensionalLib.Fieska_calculus.Fieska_Terms <> Fieska ind
+R1929:1936 IntensionalLib.Fieska_calculus.Fieska_Terms <> operator ind
+R1965:1968 Coq.Init.Logic <> :type_scope:x_'->'_x not
+R1975:1978 Coq.Init.Logic <> :type_scope:x_'->'_x not
+R1979:1984 IntensionalLib.Fieska_calculus.Fieska_Terms <> Fieska ind
+R1969:1974 IntensionalLib.Fieska_calculus.Fieska_Terms <> Fieska ind
+R1959:1964 IntensionalLib.Fieska_calculus.Fieska_Terms <> Fieska ind

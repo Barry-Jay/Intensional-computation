@@ -1,0 +1,142 @@
+DIGEST 24f96c292e51c82b048ee41b94e4bb6b
+FIntensionalLib.Fieska_calculus.Fieska_Normal
+R1477:1481 Coq.Arith.Arith <> <> lib
+R1483:1487 Coq.omega.Omega <> <> lib
+R1489:1491 Coq.Arith.Max <> <> lib
+R1493:1496 Coq.Bool.Bool <> <> lib
+R1498:1501 Coq.Lists.List <> <> lib
+R1519:1553 IntensionalLib.Fieska_calculus.Test <> <> lib
+R1571:1608 IntensionalLib.Fieska_calculus.General <> <> lib
+R1626:1668 IntensionalLib.Fieska_calculus.Fieska_Terms <> <> lib
+R1686:1730 IntensionalLib.Fieska_calculus.Fieska_Tactics <> <> lib
+R1748:1794 IntensionalLib.Fieska_calculus.Fieska_reduction <> <> lib
+ind 1808:1817 <> status_val
+constr 1825:1830 <> Active
+constr 1848:1854 <> Passive
+R1834:1843 IntensionalLib.Fieska_calculus.Fieska_Normal <> status_val ind
+R1858:1867 IntensionalLib.Fieska_calculus.Fieska_Normal <> status_val ind
+def 1881:1886 <> status
+R1900:1900 IntensionalLib.Fieska_calculus.Fieska_Normal <> M var
+R1910:1912 IntensionalLib.Fieska_calculus.Fieska_Terms <> Ref constr
+R1919:1924 IntensionalLib.Fieska_calculus.Fieska_Normal <> Active constr
+R1930:1931 IntensionalLib.Fieska_calculus.Fieska_Terms <> Op constr
+R1938:1944 IntensionalLib.Fieska_calculus.Fieska_Normal <> Passive constr
+R1948:1950 IntensionalLib.Fieska_calculus.Fieska_Terms <> App constr
+R1953:1955 IntensionalLib.Fieska_calculus.Fieska_Terms <> App constr
+R1958:1960 IntensionalLib.Fieska_calculus.Fieska_Terms <> App constr
+R1963:1964 IntensionalLib.Fieska_calculus.Fieska_Terms <> Op constr
+R1966:1968 IntensionalLib.Fieska_calculus.Fieska_Terms <> Fop constr
+R1984:1989 IntensionalLib.Fieska_calculus.Fieska_Normal <> status def
+R1997:1999 IntensionalLib.Fieska_calculus.Fieska_Terms <> App constr
+R2002:2004 IntensionalLib.Fieska_calculus.Fieska_Terms <> App constr
+R2007:2008 IntensionalLib.Fieska_calculus.Fieska_Terms <> Op constr
+R2010:2012 IntensionalLib.Fieska_calculus.Fieska_Terms <> Eop constr
+R2032:2037 IntensionalLib.Fieska_calculus.Fieska_Normal <> status def
+R2047:2052 IntensionalLib.Fieska_calculus.Fieska_Normal <> Active constr
+R2057:2062 IntensionalLib.Fieska_calculus.Fieska_Normal <> Active constr
+R2071:2076 IntensionalLib.Fieska_calculus.Fieska_Normal <> status def
+R2087:2089 IntensionalLib.Fieska_calculus.Fieska_Terms <> App constr
+R2099:2104 IntensionalLib.Fieska_calculus.Fieska_Normal <> status def
+ind 2148:2153 <> normal
+constr 2178:2183 <> nf_ref
+constr 2214:2218 <> nf_op
+constr 2248:2256 <> nf_active
+constr 2416:2426 <> nf_compound
+R2163:2166 Coq.Init.Logic <> :type_scope:x_'->'_x not
+R2157:2162 IntensionalLib.Fieska_calculus.Fieska_Terms <> Fieska ind
+R2197:2202 IntensionalLib.Fieska_calculus.Fieska_Normal <> normal ind
+R2205:2207 IntensionalLib.Fieska_calculus.Fieska_Terms <> Ref constr
+R2209:2209 IntensionalLib.Fieska_calculus.Fieska_Normal <> n var
+R2232:2237 IntensionalLib.Fieska_calculus.Fieska_Normal <> normal ind
+R2240:2241 IntensionalLib.Fieska_calculus.Fieska_Terms <> Op constr
+R2243:2243 IntensionalLib.Fieska_calculus.Fieska_Normal <> o var
+R2283:2286 Coq.Init.Logic <> :type_scope:x_'->'_x not
+R2296:2330 Coq.Init.Logic <> :type_scope:x_'->'_x not
+R2358:2392 Coq.Init.Logic <> :type_scope:x_'->'_x not
+R2393:2398 IntensionalLib.Fieska_calculus.Fieska_Normal <> normal ind
+R2401:2403 IntensionalLib.Fieska_calculus.Fieska_Terms <> App constr
+R2408:2409 IntensionalLib.Fieska_calculus.Fieska_Normal <> M2 var
+R2405:2406 IntensionalLib.Fieska_calculus.Fieska_Normal <> M1 var
+R2349:2351 Coq.Init.Logic <> :type_scope:x_'='_x not
+R2331:2336 IntensionalLib.Fieska_calculus.Fieska_Normal <> status def
+R2339:2341 IntensionalLib.Fieska_calculus.Fieska_Terms <> App constr
+R2346:2347 IntensionalLib.Fieska_calculus.Fieska_Normal <> M2 var
+R2343:2344 IntensionalLib.Fieska_calculus.Fieska_Normal <> M1 var
+R2352:2357 IntensionalLib.Fieska_calculus.Fieska_Normal <> Active constr
+R2287:2292 IntensionalLib.Fieska_calculus.Fieska_Normal <> normal ind
+R2294:2295 IntensionalLib.Fieska_calculus.Fieska_Normal <> M2 var
+R2274:2279 IntensionalLib.Fieska_calculus.Fieska_Normal <> normal ind
+R2281:2282 IntensionalLib.Fieska_calculus.Fieska_Normal <> M1 var
+R2453:2456 Coq.Init.Logic <> :type_scope:x_'->'_x not
+R2466:2500 Coq.Init.Logic <> :type_scope:x_'->'_x not
+R2521:2524 Coq.Init.Logic <> :type_scope:x_'->'_x not
+R2525:2530 IntensionalLib.Fieska_calculus.Fieska_Normal <> normal ind
+R2533:2535 IntensionalLib.Fieska_calculus.Fieska_Terms <> App constr
+R2540:2541 IntensionalLib.Fieska_calculus.Fieska_Normal <> M2 var
+R2537:2538 IntensionalLib.Fieska_calculus.Fieska_Normal <> M1 var
+R2501:2508 IntensionalLib.Fieska_calculus.Fieska_reduction <> compound ind
+R2511:2513 IntensionalLib.Fieska_calculus.Fieska_Terms <> App constr
+R2518:2519 IntensionalLib.Fieska_calculus.Fieska_Normal <> M2 var
+R2515:2516 IntensionalLib.Fieska_calculus.Fieska_Normal <> M1 var
+R2457:2462 IntensionalLib.Fieska_calculus.Fieska_Normal <> normal ind
+R2464:2465 IntensionalLib.Fieska_calculus.Fieska_Normal <> M2 var
+R2444:2449 IntensionalLib.Fieska_calculus.Fieska_Normal <> normal ind
+R2451:2452 IntensionalLib.Fieska_calculus.Fieska_Normal <> M1 var
+R2565:2570 IntensionalLib.Fieska_calculus.Fieska_Normal <> normal ind
+def 2589:2599 <> irreducible
+R2608:2614 IntensionalLib.Fieska_calculus.Fieska_Tactics <> termred def
+R2637:2640 Coq.Init.Logic <> :type_scope:x_'->'_x not
+R2641:2645 Coq.Init.Logic <> False ind
+R2630:2632 IntensionalLib.Fieska_calculus.Fieska_Normal <> red var
+R2636:2636 IntensionalLib.Fieska_calculus.Fieska_Normal <> N var
+R2634:2634 IntensionalLib.Fieska_calculus.Fieska_Normal <> M var
+prf 2656:2670 <> ref_irreducible
+R2684:2694 IntensionalLib.Fieska_calculus.Fieska_Normal <> irreducible def
+R2704:2713 IntensionalLib.Fieska_calculus.Fieska_reduction <> sf_seqred1 ind
+R2697:2699 IntensionalLib.Fieska_calculus.Fieska_Terms <> Ref constr
+R2701:2701 IntensionalLib.Fieska_calculus.Fieska_Normal <> n var
+prf 2781:2801 <> normal_is_irreducible
+R2823:2826 Coq.Init.Logic <> :type_scope:x_'->'_x not
+R2827:2837 IntensionalLib.Fieska_calculus.Fieska_Normal <> irreducible def
+R2841:2850 IntensionalLib.Fieska_calculus.Fieska_reduction <> sf_seqred1 ind
+R2839:2839 IntensionalLib.Fieska_calculus.Fieska_Normal <> M var
+R2815:2820 IntensionalLib.Fieska_calculus.Fieska_Normal <> normal ind
+R2822:2822 IntensionalLib.Fieska_calculus.Fieska_Normal <> M var
+R2912:2926 IntensionalLib.Fieska_calculus.Fieska_Normal <> ref_irreducible thm
+R3117:3124 IntensionalLib.Fieska_calculus.Fieska_reduction <> compound ind
+R3117:3124 IntensionalLib.Fieska_calculus.Fieska_reduction <> compound ind
+R3117:3124 IntensionalLib.Fieska_calculus.Fieska_reduction <> compound ind
+R3201:3208 IntensionalLib.Fieska_calculus.Fieska_reduction <> compound ind
+R3201:3208 IntensionalLib.Fieska_calculus.Fieska_reduction <> compound ind
+R3201:3208 IntensionalLib.Fieska_calculus.Fieska_reduction <> compound ind
+R3284:3291 IntensionalLib.Fieska_calculus.Fieska_reduction <> compound ind
+R3284:3291 IntensionalLib.Fieska_calculus.Fieska_reduction <> compound ind
+R3284:3291 IntensionalLib.Fieska_calculus.Fieska_reduction <> compound ind
+R3367:3374 IntensionalLib.Fieska_calculus.Fieska_reduction <> compound ind
+R3367:3374 IntensionalLib.Fieska_calculus.Fieska_reduction <> compound ind
+R3367:3374 IntensionalLib.Fieska_calculus.Fieska_reduction <> compound ind
+prf 3542:3556 <> Fieska_progress
+R3572:3577 IntensionalLib.Fieska_calculus.Fieska_Terms <> Fieska ind
+R3589:3593 Coq.Init.Logic <> :type_scope:x_'\/'_x not
+R3618:3618 Coq.Init.Logic <> :type_scope:x_'\/'_x not
+R3581:3586 IntensionalLib.Fieska_calculus.Fieska_Normal <> normal ind
+R3588:3588 IntensionalLib.Fieska_calculus.Fieska_Normal <> M var
+R3594:3600 Coq.Init.Logic <> :type_scope:'exists'_x_'..'_x_','_x not
+R3602:3603 Coq.Init.Logic <> :type_scope:'exists'_x_'..'_x_','_x not
+R3604:3613 IntensionalLib.Fieska_calculus.Fieska_reduction <> sf_seqred1 ind
+R3617:3617 IntensionalLib.Fieska_calculus.Fieska_Normal <> N var
+R3615:3615 IntensionalLib.Fieska_calculus.Fieska_Normal <> M var
+R3754:3756 IntensionalLib.Fieska_calculus.Fieska_Terms <> App constr
+R3754:3756 IntensionalLib.Fieska_calculus.Fieska_Terms <> App constr
+R3824:3826 IntensionalLib.Fieska_calculus.Fieska_Terms <> App constr
+R3824:3826 IntensionalLib.Fieska_calculus.Fieska_Terms <> App constr
+R3949:3957 IntensionalLib.Fieska_calculus.Fieska_Normal <> nf_active constr
+R4301:4304 Coq.Init.Logic <> :type_scope:x_'\/'_x not
+R4296:4298 Coq.Init.Logic <> :type_scope:x_'='_x not
+R4307:4310 Coq.Init.Logic <> :type_scope:x_'<>'_x not
+R4301:4304 Coq.Init.Logic <> :type_scope:x_'\/'_x not
+R4296:4298 Coq.Init.Logic <> :type_scope:x_'='_x not
+R4307:4310 Coq.Init.Logic <> :type_scope:x_'<>'_x not
+R4379:4387 IntensionalLib.Fieska_calculus.Fieska_Normal <> nf_active constr
+R4507:4515 IntensionalLib.Fieska_calculus.Fieska_Normal <> nf_active constr
+R4560:4568 IntensionalLib.Fieska_calculus.Fieska_Normal <> nf_active constr

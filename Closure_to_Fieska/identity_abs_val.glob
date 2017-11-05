@@ -1,0 +1,33 @@
+DIGEST 27da45dec326e07f7051162444bc6148
+FIntensionalLib.Closure_to_Fieska.identity_abs_val
+R1674:1678 Coq.Arith.Arith <> <> lib
+R1680:1684 Coq.omega.Omega <> <> lib
+R1686:1688 Coq.Arith.Max <> <> lib
+R1690:1693 Coq.Bool.Bool <> <> lib
+R1695:1698 Coq.Lists.List <> <> lib
+R1730:1733 Bignums.BigN.BigN <> <> lib
+R1753:1800 IntensionalLib.Closure_calculus.Closure_calculus <> <> lib
+R1819:1853 IntensionalLib.Fieska_calculus.Test <> <> lib
+R1871:1908 IntensionalLib.Fieska_calculus.General <> <> lib
+R1926:1968 IntensionalLib.Fieska_calculus.Fieska_Terms <> <> lib
+R1986:2030 IntensionalLib.Fieska_calculus.Fieska_Tactics <> <> lib
+R2048:2094 IntensionalLib.Fieska_calculus.Fieska_reduction <> <> lib
+R2112:2155 IntensionalLib.Fieska_calculus.Fieska_Normal <> <> lib
+R2173:2216 IntensionalLib.Fieska_calculus.Fieska_Closed <> <> lib
+R2234:2276 IntensionalLib.Fieska_calculus.Substitution <> <> lib
+R2294:2335 IntensionalLib.Fieska_calculus.Fieska_Eval <> <> lib
+R2353:2387 IntensionalLib.Fieska_calculus.Star <> <> lib
+R2405:2444 IntensionalLib.Fieska_calculus.Fixpoints <> <> lib
+R2462:2502 IntensionalLib.Fieska_calculus.Extensions <> <> lib
+R2520:2557 IntensionalLib.Fieska_calculus.Tagging <> <> lib
+R2575:2611 IntensionalLib.Fieska_calculus.Adding <> <> lib
+R2629:2670 IntensionalLib.Fieska_calculus.Fieska_size <> <> lib
+R2689:2747 IntensionalLib.Closure_to_Fieska.Abstraction_to_Combination <> <> lib
+prf 2758:2774 <> size_identity_abs
+R2859:2861 Coq.Init.Logic <> :type_scope:x_'='_x not
+R2778:2781 IntensionalLib.Fieska_calculus.Fieska_size <> size def
+R2784:2799 IntensionalLib.Closure_to_Fieska.Abstraction_to_Combination <> lambda_to_fieska def
+R2802:2804 IntensionalLib.Closure_calculus.Closure_calculus <> Abs constr
+R2834:2853 IntensionalLib.Closure_calculus.Closure_calculus <> Ref constr
+R2812:2831 IntensionalLib.Closure_calculus.Closure_calculus <> Iop constr
+R2808:2810 Coq.Init.Datatypes <> nil constr

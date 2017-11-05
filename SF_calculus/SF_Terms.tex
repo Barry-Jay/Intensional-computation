@@ -1,0 +1,40 @@
+\documentclass[12pt]{report}
+\usepackage[]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{fullpage}
+\usepackage{coqdoc}
+\usepackage{amsmath,amssymb}
+\usepackage{url}
+\begin{document}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% This file has been automatically generated with the command
+%% coqdoc SF_Terms.v --latex --no-lib-name -o SF_Terms.tex 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\coqlibrary{SF Terms}{}{SF\_Terms}
+
+\begin{coqdoccode}
+\coqdocemptyline
+\coqdocemptyline
+\end{coqdoccode}
+The operators S and F are enough, but more may be added in future. \begin{coqdoccode}
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Inductive} \coqdocvar{operator} := \ensuremath{|} \coqdocvar{Sop} \ensuremath{|} \coqdocvar{Fop} .\coqdoceol
+\coqdocemptyline
+\end{coqdoccode}
+The terms of SF-calculus are either variables (given as de Bruijn indices), operators or applications. 
+Terms are called combinations if they do not use any variables. \begin{coqdoccode}
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Inductive} \coqdocvar{SF}:  \coqdockw{Set} :=\coqdoceol
+\coqdocindent{1.00em}
+\ensuremath{|} \coqdocvar{Ref} : \coqdocvar{nat} \ensuremath{\rightarrow} \coqdocvar{SF}        \coqdoceol
+\coqdocindent{1.00em}
+\ensuremath{|} \coqdocvar{Op}  : \coqdocvar{operator} \ensuremath{\rightarrow} \coqdocvar{SF}   \coqdoceol
+\coqdocindent{1.00em}
+\ensuremath{|} \coqdocvar{App} : \coqdocvar{SF} \ensuremath{\rightarrow} \coqdocvar{SF} \ensuremath{\rightarrow} \coqdocvar{SF}   \coqdoceol
+\coqdocnoindent
+.\coqdoceol
+\coqdocemptyline
+\end{coqdoccode}
+\end{document}

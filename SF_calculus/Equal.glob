@@ -1,0 +1,11 @@
+DIGEST cc72b00dfb5fa0c96ff4c66ee236e58e
+FIntensionalLib.SF_calculus.Equal
+R1479:1487 Coq.setoid_ring.ArithRing <> <> lib
+R1489:1492 Coq.Bool.Bool <> <> lib
+R1494:1496 Coq.Arith.Max <> <> lib
+R1498:1502 Coq.omega.Omega <> <> lib
+R1520:1550 IntensionalLib.SF_calculus.Test <> <> lib
+R1570:1604 IntensionalLib.SF_calculus.SF_Terms <> <> lib
+R1624:1657 IntensionalLib.SF_calculus.General <> <> lib
+R1677:1713 IntensionalLib.SF_calculus.SF_Tactics <> <> lib
+R1733:1771 IntensionalLib.SF_calculus.SF_reduction <> <> lib

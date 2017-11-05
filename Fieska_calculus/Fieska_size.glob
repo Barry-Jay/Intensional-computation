@@ -1,0 +1,83 @@
+DIGEST 4b15f8d91bcd902860a87f2d31abe908
+FIntensionalLib.Fieska_calculus.Fieska_size
+R1667:1671 Coq.Arith.Arith <> <> lib
+R1673:1677 Coq.omega.Omega <> <> lib
+R1679:1681 Coq.Arith.Max <> <> lib
+R1683:1686 Coq.Bool.Bool <> <> lib
+R1688:1691 Coq.Lists.List <> <> lib
+R1709:1743 IntensionalLib.Fieska_calculus.Test <> <> lib
+R1761:1798 IntensionalLib.Fieska_calculus.General <> <> lib
+R1816:1858 IntensionalLib.Fieska_calculus.Fieska_Terms <> <> lib
+R1876:1920 IntensionalLib.Fieska_calculus.Fieska_Tactics <> <> lib
+R1938:1984 IntensionalLib.Fieska_calculus.Fieska_reduction <> <> lib
+R2002:2045 IntensionalLib.Fieska_calculus.Fieska_Normal <> <> lib
+R2063:2106 IntensionalLib.Fieska_calculus.Fieska_Closed <> <> lib
+R2124:2166 IntensionalLib.Fieska_calculus.Substitution <> <> lib
+R2184:2225 IntensionalLib.Fieska_calculus.Fieska_Eval <> <> lib
+R2243:2277 IntensionalLib.Fieska_calculus.Star <> <> lib
+R2295:2334 IntensionalLib.Fieska_calculus.Fixpoints <> <> lib
+R2352:2392 IntensionalLib.Fieska_calculus.Extensions <> <> lib
+R2410:2447 IntensionalLib.Fieska_calculus.Tagging <> <> lib
+R2465:2501 IntensionalLib.Fieska_calculus.Adding <> <> lib
+R2534:2537 Bignums.BigN.BigN <> <> lib
+def 2617:2620 <> size
+R2634:2634 IntensionalLib.Fieska_calculus.Fieska_size <> M var
+R2644:2646 IntensionalLib.Fieska_calculus.Fieska_Terms <> Ref constr
+R2657:2658 IntensionalLib.Fieska_calculus.Fieska_Terms <> Op constr
+R2669:2671 IntensionalLib.Fieska_calculus.Fieska_Terms <> App constr
+R2689:2691 Bignums.BigN.BigN <> :bigN_scope:x_'+'_x not
+R2682:2685 IntensionalLib.Fieska_calculus.Fieska_size <> size def
+R2692:2695 IntensionalLib.Fieska_calculus.Fieska_size <> size def
+prf 2716:2722 <> size_Y2
+R2737:2739 Coq.Init.Logic <> :type_scope:x_'='_x not
+R2725:2728 IntensionalLib.Fieska_calculus.Fieska_size <> size def
+R2731:2733 IntensionalLib.Fieska_calculus.Fixpoints <> Y_k def
+prf 2776:2782 <> size_Y3
+R2797:2799 Coq.Init.Logic <> :type_scope:x_'='_x not
+R2785:2788 IntensionalLib.Fieska_calculus.Fieska_size <> size def
+R2791:2793 IntensionalLib.Fieska_calculus.Fixpoints <> Y_k def
+prf 2836:2842 <> size_Y4
+R2857:2859 Coq.Init.Logic <> :type_scope:x_'='_x not
+R2845:2848 IntensionalLib.Fieska_calculus.Fieska_size <> size def
+R2851:2853 IntensionalLib.Fieska_calculus.Fixpoints <> Y_k def
+prf 2896:2903 <> size_tag
+R2955:2957 Coq.Init.Logic <> :type_scope:x_'='_x not
+R2907:2910 IntensionalLib.Fieska_calculus.Fieska_size <> size def
+R2913:2920 IntensionalLib.Fieska_calculus.Star <> star_opt def
+R2923:2930 IntensionalLib.Fieska_calculus.Star <> star_opt def
+R2933:2935 IntensionalLib.Fieska_calculus.Tagging <> tag def
+R2946:2948 IntensionalLib.Fieska_calculus.Fieska_Terms <> Ref constr
+R2938:2940 IntensionalLib.Fieska_calculus.Fieska_Terms <> Ref constr
+R2978:2980 IntensionalLib.Fieska_calculus.Tagging <> tag def
+R2991:3002 IntensionalLib.Fieska_calculus.Star <> star_opt_eta thm
+R2991:3002 IntensionalLib.Fieska_calculus.Star <> star_opt_eta thm
+R2991:3002 IntensionalLib.Fieska_calculus.Star <> star_opt_eta thm
+R2991:3002 IntensionalLib.Fieska_calculus.Star <> star_opt_eta thm
+R3027:3031 IntensionalLib.Fieska_calculus.Substitution <> subst def
+R3034:3042 IntensionalLib.Fieska_calculus.Substitution <> subst_rec def
+R3050:3058 IntensionalLib.Fieska_calculus.Substitution <> subst_rec def
+R3050:3058 IntensionalLib.Fieska_calculus.Substitution <> subst_rec def
+R3070:3085 IntensionalLib.Fieska_calculus.Substitution <> subst_rec_closed thm
+R3070:3085 IntensionalLib.Fieska_calculus.Substitution <> subst_rec_closed thm
+R3070:3085 IntensionalLib.Fieska_calculus.Substitution <> subst_rec_closed thm
+R3070:3085 IntensionalLib.Fieska_calculus.Substitution <> subst_rec_closed thm
+prf 3144:3151 <> size_var
+R3184:3186 Coq.Init.Logic <> :type_scope:x_'='_x not
+R3155:3158 IntensionalLib.Fieska_calculus.Fieska_size <> size def
+R3161:3168 IntensionalLib.Fieska_calculus.Star <> star_opt def
+R3171:3173 IntensionalLib.Fieska_calculus.Tagging <> var def
+R3176:3178 IntensionalLib.Fieska_calculus.Fieska_Terms <> Ref constr
+R3208:3210 IntensionalLib.Fieska_calculus.Tagging <> var def
+R3221:3232 IntensionalLib.Fieska_calculus.Star <> star_opt_eta thm
+R3221:3232 IntensionalLib.Fieska_calculus.Star <> star_opt_eta thm
+R3221:3232 IntensionalLib.Fieska_calculus.Star <> star_opt_eta thm
+R3221:3232 IntensionalLib.Fieska_calculus.Star <> star_opt_eta thm
+R3257:3261 IntensionalLib.Fieska_calculus.Substitution <> subst def
+R3272:3287 IntensionalLib.Fieska_calculus.Substitution <> subst_rec_closed thm
+R3272:3287 IntensionalLib.Fieska_calculus.Substitution <> subst_rec_closed thm
+R3272:3287 IntensionalLib.Fieska_calculus.Substitution <> subst_rec_closed thm
+R3272:3287 IntensionalLib.Fieska_calculus.Substitution <> subst_rec_closed thm
+prf 3330:3337 <> size_add
+R3348:3350 Coq.Init.Logic <> :type_scope:x_'='_x not
+R3340:3343 IntensionalLib.Fieska_calculus.Fieska_size <> size def
+R3345:3347 IntensionalLib.Fieska_calculus.Adding <> add def

@@ -1,0 +1,21 @@
+This directory contains supplementary material for the paper 
+
+
+Recursive Programs in Normal Form
+
+submitted for blind review to 
+
+PEPM 2018.
+
+The materials consist of:
+
+ - proofs of the theorems compiled using 
+
+The Coq Proof Assistant, version 8.4pl3 (January 2014)
+
+which is *not* the most recent version, and 
+
+
+ - a draft paper, deconstruction.pdf, 
+ in which the foundational material for this paper is introduced. 
+

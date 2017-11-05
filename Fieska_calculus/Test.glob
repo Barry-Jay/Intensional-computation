@@ -1,0 +1,49 @@
+DIGEST ecedd699fd7291cdb031329652c46afd
+FIntensionalLib.Fieska_calculus.Test
+R2247:2251 Coq.Arith.Arith <> <> lib
+def 2360:2363 <> test
+R2380:2382 Coq.Init.Datatypes <> nat ind
+R2385:2385 Coq.Init.Specif <> :type_scope:'{'_x_'}'_'+'_'{'_x_'}' not
+R2392:2396 Coq.Init.Specif <> :type_scope:'{'_x_'}'_'+'_'{'_x_'}' not
+R2402:2402 Coq.Init.Specif <> :type_scope:'{'_x_'}'_'+'_'{'_x_'}' not
+R2387:2390 Coq.Init.Peano <> :nat_scope:x_'<='_x not
+R2386:2386 IntensionalLib.Fieska_calculus.Test <> n var
+R2391:2391 IntensionalLib.Fieska_calculus.Test <> m var
+R2398:2400 Coq.Init.Peano <> :nat_scope:x_'>'_x not
+R2397:2397 IntensionalLib.Fieska_calculus.Test <> n var
+R2401:2401 IntensionalLib.Fieska_calculus.Test <> m var
+def 2573:2577 <> le_lt
+R2594:2596 Coq.Init.Datatypes <> nat ind
+R2605:2608 Coq.Init.Logic <> :type_scope:x_'->'_x not
+R2609:2609 Coq.Init.Specif <> :type_scope:'{'_x_'}'_'+'_'{'_x_'}' not
+R2615:2619 Coq.Init.Specif <> :type_scope:'{'_x_'}'_'+'_'{'_x_'}' not
+R2625:2625 Coq.Init.Specif <> :type_scope:'{'_x_'}'_'+'_'{'_x_'}' not
+R2611:2613 Coq.Init.Peano <> :nat_scope:x_'<'_x not
+R2610:2610 IntensionalLib.Fieska_calculus.Test <> n var
+R2614:2614 IntensionalLib.Fieska_calculus.Test <> m var
+R2621:2623 Coq.Init.Logic <> :type_scope:x_'='_x not
+R2620:2620 IntensionalLib.Fieska_calculus.Test <> n var
+R2624:2624 IntensionalLib.Fieska_calculus.Test <> m var
+R2600:2603 Coq.Init.Peano <> :nat_scope:x_'<='_x not
+R2599:2599 IntensionalLib.Fieska_calculus.Test <> n var
+R2604:2604 IntensionalLib.Fieska_calculus.Test <> m var
+def 2800:2806 <> compare
+R2823:2825 Coq.Init.Datatypes <> nat ind
+R2845:2848 Coq.Init.Specif <> :type_scope:x_'+'_'{'_x_'}' not
+R2854:2854 Coq.Init.Specif <> :type_scope:x_'+'_'{'_x_'}' not
+R2828:2828 Coq.Init.Specif <> :type_scope:'{'_x_'}'_'+'_'{'_x_'}' not
+R2834:2838 Coq.Init.Specif <> :type_scope:'{'_x_'}'_'+'_'{'_x_'}' not
+R2844:2844 Coq.Init.Specif <> :type_scope:'{'_x_'}'_'+'_'{'_x_'}' not
+R2830:2832 Coq.Init.Peano <> :nat_scope:x_'<'_x not
+R2829:2829 IntensionalLib.Fieska_calculus.Test <> n var
+R2833:2833 IntensionalLib.Fieska_calculus.Test <> m var
+R2840:2842 Coq.Init.Logic <> :type_scope:x_'='_x not
+R2839:2839 IntensionalLib.Fieska_calculus.Test <> n var
+R2843:2843 IntensionalLib.Fieska_calculus.Test <> m var
+R2850:2852 Coq.Init.Peano <> :nat_scope:x_'>'_x not
+R2849:2849 IntensionalLib.Fieska_calculus.Test <> n var
+R2853:2853 IntensionalLib.Fieska_calculus.Test <> m var
+R2882:2885 IntensionalLib.Fieska_calculus.Test <> test def
+R2882:2885 IntensionalLib.Fieska_calculus.Test <> test def
+R2922:2926 IntensionalLib.Fieska_calculus.Test <> le_lt def
+R2922:2926 IntensionalLib.Fieska_calculus.Test <> le_lt def

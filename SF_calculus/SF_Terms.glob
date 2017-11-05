@@ -1,0 +1,22 @@
+DIGEST 3346926fce6e2e963f395d96fcd63257
+FIntensionalLib.SF_calculus.SF_Terms
+ind 1695:1702 <> operator
+constr 1709:1711 <> Sop
+constr 1715:1717 <> Fop
+R1712:1712 IntensionalLib.SF_calculus.SF_Terms <> operator ind
+R1718:1718 IntensionalLib.SF_calculus.SF_Terms <> operator ind
+ind 1910:1911 <> SF
+constr 1926:1928 <> Ref
+constr 1954:1955 <> Op
+constr 1982:1984 <> App
+R1935:1938 Coq.Init.Logic <> :type_scope:x_'->'_x not
+R1939:1940 IntensionalLib.SF_calculus.SF_Terms <> SF ind
+R1932:1934 Coq.Init.Datatypes <> nat ind
+R1968:1971 Coq.Init.Logic <> :type_scope:x_'->'_x not
+R1972:1973 IntensionalLib.SF_calculus.SF_Terms <> SF ind
+R1960:1967 IntensionalLib.SF_calculus.SF_Terms <> operator ind
+R1990:1993 Coq.Init.Logic <> :type_scope:x_'->'_x not
+R1996:1999 Coq.Init.Logic <> :type_scope:x_'->'_x not
+R2000:2001 IntensionalLib.SF_calculus.SF_Terms <> SF ind
+R1994:1995 IntensionalLib.SF_calculus.SF_Terms <> SF ind
+R1988:1989 IntensionalLib.SF_calculus.SF_Terms <> SF ind

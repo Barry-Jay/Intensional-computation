@@ -1,0 +1,153 @@
+DIGEST f99612de43642f340d8fccdec0ab4b25
+FIntensionalLib.SF_calculus.SF_Eval
+R1550:1554 Coq.Arith.Arith <> <> lib
+R1556:1558 Coq.Arith.Max <> <> lib
+R1576:1609 IntensionalLib.SF_calculus.General <> <> lib
+R1629:1663 IntensionalLib.SF_calculus.SF_Terms <> <> lib
+R1683:1719 IntensionalLib.SF_calculus.SF_Tactics <> <> lib
+R1739:1777 IntensionalLib.SF_calculus.SF_reduction <> <> lib
+R1797:1832 IntensionalLib.SF_calculus.SF_Normal <> <> lib
+R1852:1887 IntensionalLib.SF_calculus.SF_Closed <> <> lib
+R1907:1945 IntensionalLib.SF_calculus.Substitution <> <> lib
+def 1963:1970 <> eval_app
+R1986:1986 IntensionalLib.SF_calculus.SF_Eval <> M var
+R1996:1998 IntensionalLib.SF_calculus.SF_Terms <> App constr
+R2001:2003 IntensionalLib.SF_calculus.SF_Terms <> App constr
+R2006:2007 IntensionalLib.SF_calculus.SF_Terms <> Op constr
+R2009:2011 IntensionalLib.SF_calculus.SF_Terms <> Sop constr
+R2025:2027 IntensionalLib.SF_calculus.SF_Terms <> App constr
+R2041:2043 IntensionalLib.SF_calculus.SF_Terms <> App constr
+R2048:2048 IntensionalLib.SF_calculus.SF_Eval <> N var
+R2030:2032 IntensionalLib.SF_calculus.SF_Terms <> App constr
+R2037:2037 IntensionalLib.SF_calculus.SF_Eval <> N var
+R2053:2055 IntensionalLib.SF_calculus.SF_Terms <> App constr
+R2058:2060 IntensionalLib.SF_calculus.SF_Terms <> App constr
+R2063:2064 IntensionalLib.SF_calculus.SF_Terms <> Op constr
+R2066:2068 IntensionalLib.SF_calculus.SF_Terms <> Fop constr
+R2072:2073 IntensionalLib.SF_calculus.SF_Terms <> Op constr
+R2096:2098 IntensionalLib.SF_calculus.SF_Terms <> App constr
+R2102:2102 IntensionalLib.SF_calculus.SF_Eval <> N var
+prf 2117:2132 <> eval_app_from_SF
+R2148:2153 IntensionalLib.SF_calculus.SF_reduction <> sf_red def
+R2166:2173 IntensionalLib.SF_calculus.SF_Eval <> eval_app def
+R2177:2177 IntensionalLib.SF_calculus.SF_Eval <> N var
+R2175:2175 IntensionalLib.SF_calculus.SF_Eval <> M var
+R2156:2158 IntensionalLib.SF_calculus.SF_Terms <> App constr
+R2162:2162 IntensionalLib.SF_calculus.SF_Eval <> N var
+R2160:2160 IntensionalLib.SF_calculus.SF_Eval <> M var
+def 2333:2337 <> eval0
+R2343:2344 IntensionalLib.SF_calculus.SF_Terms <> SF ind
+R2356:2356 IntensionalLib.SF_calculus.SF_Eval <> M var
+R2366:2368 IntensionalLib.SF_calculus.SF_Terms <> Ref constr
+R2375:2377 IntensionalLib.SF_calculus.SF_Terms <> Ref constr
+R2384:2385 IntensionalLib.SF_calculus.SF_Terms <> Op constr
+R2392:2393 IntensionalLib.SF_calculus.SF_Terms <> Op constr
+R2399:2401 IntensionalLib.SF_calculus.SF_Terms <> App constr
+R2404:2405 IntensionalLib.SF_calculus.SF_Terms <> Op constr
+R2407:2409 IntensionalLib.SF_calculus.SF_Terms <> Fop constr
+R2419:2421 IntensionalLib.SF_calculus.SF_Terms <> App constr
+R2433:2437 IntensionalLib.SF_calculus.SF_Eval <> eval0 def
+R2424:2425 IntensionalLib.SF_calculus.SF_Terms <> Op constr
+R2427:2429 IntensionalLib.SF_calculus.SF_Terms <> Fop constr
+R2446:2448 IntensionalLib.SF_calculus.SF_Terms <> App constr
+R2460:2467 IntensionalLib.SF_calculus.SF_Eval <> eval_app def
+R2470:2474 IntensionalLib.SF_calculus.SF_Eval <> eval0 def
+prf 2497:2509 <> eval0_from_SF
+R2523:2528 IntensionalLib.SF_calculus.SF_reduction <> sf_red def
+R2533:2537 IntensionalLib.SF_calculus.SF_Eval <> eval0 def
+R2539:2539 IntensionalLib.SF_calculus.SF_Eval <> M var
+R2530:2530 IntensionalLib.SF_calculus.SF_Eval <> M var
+R2582:2595 IntensionalLib.SF_calculus.SF_Tactics <> transitive_red thm
+R2582:2595 IntensionalLib.SF_calculus.SF_Tactics <> transitive_red thm
+R2606:2625 IntensionalLib.SF_calculus.SF_reduction <> preserves_app_sf_red thm
+R2606:2625 IntensionalLib.SF_calculus.SF_reduction <> preserves_app_sf_red thm
+R2656:2669 IntensionalLib.SF_calculus.SF_Tactics <> transitive_red thm
+R2656:2669 IntensionalLib.SF_calculus.SF_Tactics <> transitive_red thm
+R2681:2696 IntensionalLib.SF_calculus.SF_Eval <> eval_app_from_SF thm
+R2748:2767 IntensionalLib.SF_calculus.SF_reduction <> preserves_app_sf_red thm
+R2748:2767 IntensionalLib.SF_calculus.SF_reduction <> preserves_app_sf_red thm
+R2851:2856 IntensionalLib.SF_calculus.SF_reduction <> sf_red def
+R2851:2856 IntensionalLib.SF_calculus.SF_reduction <> sf_red def
+R2886:2895 IntensionalLib.SF_calculus.SF_Tactics <> multi_step ind
+R2897:2903 IntensionalLib.SF_calculus.SF_reduction <> sf_red1 ind
+R2886:2895 IntensionalLib.SF_calculus.SF_Tactics <> multi_step ind
+R2897:2903 IntensionalLib.SF_calculus.SF_reduction <> sf_red1 ind
+R2943:2947 IntensionalLib.SF_calculus.SF_Eval <> eval0 def
+R2922:2935 IntensionalLib.SF_calculus.SF_Tactics <> transitive_red thm
+R2990:2994 IntensionalLib.SF_calculus.SF_Eval <> eval0 def
+R2997:3004 IntensionalLib.SF_calculus.SF_Eval <> eval_app def
+R3015:3019 IntensionalLib.SF_calculus.Substitution <> subst def
+def 3091:3093 <> not
+R3100:3102 IntensionalLib.SF_calculus.SF_Terms <> App constr
+R3128:3131 IntensionalLib.SF_calculus.SF_reduction <> k_op def
+R3105:3107 IntensionalLib.SF_calculus.SF_Terms <> App constr
+R3112:3114 IntensionalLib.SF_calculus.SF_Terms <> App constr
+R3121:3124 IntensionalLib.SF_calculus.SF_reduction <> i_op def
+R3116:3119 IntensionalLib.SF_calculus.SF_reduction <> k_op def
+R3109:3109 IntensionalLib.SF_calculus.SF_Eval <> M var
+prf 3141:3148 <> not_true
+R3152:3157 IntensionalLib.SF_calculus.SF_reduction <> sf_red def
+R3171:3173 IntensionalLib.SF_calculus.SF_Terms <> App constr
+R3180:3183 IntensionalLib.SF_calculus.SF_reduction <> i_op def
+R3175:3178 IntensionalLib.SF_calculus.SF_reduction <> k_op def
+R3160:3162 IntensionalLib.SF_calculus.SF_Eval <> not def
+R3164:3167 IntensionalLib.SF_calculus.SF_reduction <> k_op def
+R3201:3203 IntensionalLib.SF_calculus.SF_Eval <> not def
+prf 3229:3237 <> not_false
+R3241:3246 IntensionalLib.SF_calculus.SF_reduction <> sf_red def
+R3270:3273 IntensionalLib.SF_calculus.SF_reduction <> k_op def
+R3249:3251 IntensionalLib.SF_calculus.SF_Eval <> not def
+R3254:3256 IntensionalLib.SF_calculus.SF_Terms <> App constr
+R3263:3266 IntensionalLib.SF_calculus.SF_reduction <> i_op def
+R3258:3261 IntensionalLib.SF_calculus.SF_reduction <> k_op def
+def 3324:3326 <> iff
+R3335:3337 IntensionalLib.SF_calculus.SF_Terms <> App constr
+R3350:3352 IntensionalLib.SF_calculus.SF_Eval <> not def
+R3354:3354 IntensionalLib.SF_calculus.SF_Eval <> N var
+R3340:3342 IntensionalLib.SF_calculus.SF_Terms <> App constr
+R3346:3346 IntensionalLib.SF_calculus.SF_Eval <> N var
+R3344:3344 IntensionalLib.SF_calculus.SF_Eval <> M var
+prf 3366:3374 <> true_true
+R3378:3383 IntensionalLib.SF_calculus.SF_reduction <> sf_red def
+R3401:3404 IntensionalLib.SF_calculus.SF_reduction <> k_op def
+R3386:3388 IntensionalLib.SF_calculus.SF_Eval <> iff def
+R3395:3398 IntensionalLib.SF_calculus.SF_reduction <> k_op def
+R3390:3393 IntensionalLib.SF_calculus.SF_reduction <> k_op def
+R3422:3424 IntensionalLib.SF_calculus.SF_Eval <> iff def
+R3434:3436 IntensionalLib.SF_calculus.SF_Eval <> not def
+prf 3472:3481 <> true_false
+R3485:3490 IntensionalLib.SF_calculus.SF_reduction <> sf_red def
+R3520:3522 IntensionalLib.SF_calculus.SF_Terms <> App constr
+R3529:3532 IntensionalLib.SF_calculus.SF_reduction <> i_op def
+R3524:3527 IntensionalLib.SF_calculus.SF_reduction <> k_op def
+R3493:3495 IntensionalLib.SF_calculus.SF_Eval <> iff def
+R3503:3505 IntensionalLib.SF_calculus.SF_Terms <> App constr
+R3512:3515 IntensionalLib.SF_calculus.SF_reduction <> i_op def
+R3507:3510 IntensionalLib.SF_calculus.SF_reduction <> k_op def
+R3497:3500 IntensionalLib.SF_calculus.SF_reduction <> k_op def
+R3551:3553 IntensionalLib.SF_calculus.SF_Eval <> iff def
+R3563:3565 IntensionalLib.SF_calculus.SF_Eval <> not def
+prf 3601:3610 <> false_true
+R3614:3619 IntensionalLib.SF_calculus.SF_reduction <> sf_red def
+R3649:3651 IntensionalLib.SF_calculus.SF_Terms <> App constr
+R3658:3661 IntensionalLib.SF_calculus.SF_reduction <> i_op def
+R3653:3656 IntensionalLib.SF_calculus.SF_reduction <> k_op def
+R3622:3624 IntensionalLib.SF_calculus.SF_Eval <> iff def
+R3642:3645 IntensionalLib.SF_calculus.SF_reduction <> k_op def
+R3627:3629 IntensionalLib.SF_calculus.SF_Terms <> App constr
+R3636:3639 IntensionalLib.SF_calculus.SF_reduction <> i_op def
+R3631:3634 IntensionalLib.SF_calculus.SF_reduction <> k_op def
+R3680:3682 IntensionalLib.SF_calculus.SF_Eval <> iff def
+R3692:3694 IntensionalLib.SF_calculus.SF_Eval <> not def
+prf 3760:3770 <> false_false
+R3774:3779 IntensionalLib.SF_calculus.SF_reduction <> sf_red def
+R3819:3822 IntensionalLib.SF_calculus.SF_reduction <> k_op def
+R3782:3784 IntensionalLib.SF_calculus.SF_Eval <> iff def
+R3803:3805 IntensionalLib.SF_calculus.SF_Terms <> App constr
+R3812:3815 IntensionalLib.SF_calculus.SF_reduction <> i_op def
+R3807:3810 IntensionalLib.SF_calculus.SF_reduction <> k_op def
+R3787:3789 IntensionalLib.SF_calculus.SF_Terms <> App constr
+R3796:3799 IntensionalLib.SF_calculus.SF_reduction <> i_op def
+R3791:3794 IntensionalLib.SF_calculus.SF_reduction <> k_op def
+R3840:3842 IntensionalLib.SF_calculus.SF_Eval <> iff def
+R3845:3847 IntensionalLib.SF_calculus.SF_Eval <> not def
