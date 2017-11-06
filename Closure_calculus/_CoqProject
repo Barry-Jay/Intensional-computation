@@ -1,3 +1,0 @@
--R . "ClosureLib"
--top ClosureLib
-cc_test.v
