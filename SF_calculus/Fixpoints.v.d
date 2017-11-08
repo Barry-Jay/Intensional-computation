@@ -1,2 +1,2 @@
-SF_calculus/Fixpoints.vo SF_calculus/Fixpoints.glob SF_calculus/Fixpoints.v.beautified: SF_calculus/Fixpoints.v SF_calculus/Test.vo SF_calculus/General.vo SF_calculus/SF_Terms.vo SF_calculus/SF_Tactics.vo SF_calculus/SF_reduction.vo SF_calculus/SF_Normal.vo SF_calculus/SF_Closed.vo SF_calculus/Substitution.vo SF_calculus/SF_Eval.vo SF_calculus/Star.vo
-SF_calculus/Fixpoints.vio: SF_calculus/Fixpoints.v SF_calculus/Test.vio SF_calculus/General.vio SF_calculus/SF_Terms.vio SF_calculus/SF_Tactics.vio SF_calculus/SF_reduction.vio SF_calculus/SF_Normal.vio SF_calculus/SF_Closed.vio SF_calculus/Substitution.vio SF_calculus/SF_Eval.vio SF_calculus/Star.vio
+Fixpoints.vo Fixpoints.glob Fixpoints.v.beautified: Fixpoints.v
+Fixpoints.vio: Fixpoints.v

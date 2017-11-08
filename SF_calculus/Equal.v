@@ -28,7 +28,7 @@ Require Import IntensionalLib.SF_calculus.SF_Terms.
 Require Import IntensionalLib.SF_calculus.General.  
 Require Import IntensionalLib.SF_calculus.SF_Tactics.  
 Require Import IntensionalLib.SF_calculus.SF_reduction.  
-Require Import IntensionalLib.SF_calculus.bSF_Normal.  
+Require Import IntensionalLib.SF_calculus.SF_Normal.  
 Require Import IntensionalLib.SF_calculus.SF_Closed.  
 Require Import IntensionalLib.SF_calculus.Substitution.  
 Require Import IntensionalLib.SF_calculus.SF_Eval.  

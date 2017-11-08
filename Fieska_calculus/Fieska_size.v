@@ -81,7 +81,7 @@ unfold subst; rewrite subst_rec_closed. 2: cbv; auto.  cbv. auto.
 Qed.
  
 
-Lemma size_add: size add = 3767.
-Proof. cbv; auto. Qed.  
+Lemma size_add: size add = 4295.
+Proof. cbv. auto. Qed.  
 
 

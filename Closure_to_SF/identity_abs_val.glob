@@ -1,4 +1,4 @@
-DIGEST 57ff50a21c10e32afd95a1223bba34f0
+DIGEST 4a794acff372aea90c0b0ff55e320acd
 FIntensionalLib.Closure_to_SF.identity_abs_val
 R1668:1672 Coq.Arith.Arith <> <> lib
 R1674:1678 Coq.omega.Omega <> <> lib
@@ -29,5 +29,4 @@ R2680:2683 IntensionalLib.SF_calculus.SF_size <> size def
 R2686:2697 IntensionalLib.Closure_to_SF.Abstraction_to_Combination <> lambda_to_SF def
 R2700:2702 IntensionalLib.Closure_calculus.Closure_calculus <> Abs constr
 R2732:2751 IntensionalLib.Closure_calculus.Closure_calculus <> Ref constr
-R2710:2729 IntensionalLib.Closure_calculus.Closure_calculus <> Iop constr
-R2706:2708 Coq.Init.Datatypes <> nil constr
+R2704:2723 IntensionalLib.Closure_calculus.Closure_calculus <> Iop constr

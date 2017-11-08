@@ -22,9 +22,9 @@
 (*                                                                    *)
 (**********************************************************************)
 
-(*
+
 Add LoadPath ".." as IntensionalLib.
-*) 
+
 
 Require Import Arith Omega Max Bool List.
 
@@ -52,11 +52,6 @@ Fixpoint ref i := match i with
 | S i1 => App s_op (ref i1)
 end. 
 
-Fixpoint refs js := match js with 
-| nil => s_op (* dummy value *) 
-| j :: js1 => App (App s_op (ref j)) (refs js1)
-end. 
-
 Lemma ref_program: forall i, program (ref i). 
 Proof. 
 induction i; unfold program, ref; fold ref; unfold_op; split_all. 
@@ -64,11 +59,6 @@ inversion IHi. split; auto.
 Qed. 
 
 
-Lemma refs_normal: forall js, normal (refs js). 
-Proof. induction js; split_all. unfold_op; repeat eapply2 nf_compound. auto. 
-unfold_op; apply nf_compound. eapply2 nf_compound.
-eapply2 ref_program. auto. auto. 
- Qed. 
 
 Lemma ref_monotonic: forall i j, ref i = ref j -> i = j. 
 Proof. 
@@ -92,62 +82,98 @@ match t with
 | Tag s t => tag (lambda_to_SF s) (lambda_to_SF t)
 | Closure_calculus.App t u => App (lambda_to_SF t) (lambda_to_SF u) 
 | Closure_calculus.Iop => i_op
-| Add i u sigma => app_comb add (s_op2 (s_op2 (lambda_to_SF sigma) (ref i)) (lambda_to_SF u))
-| Abs j js sigma t => abs (refs js) (s_op2 (lambda_to_SF sigma) (ref j))
-                          (lambda_to_SF t) 
+| Add sigma i u => app_comb (app_comb add (s_op2 (lambda_to_SF sigma) (ref i))) (lambda_to_SF u)
+| Abs sigma j t => abs (lambda_to_SF sigma) (ref j) (lambda_to_SF t) 
 end.
 
+
+
+
+Lemma lambda_to_SF_preserves_normal : forall M, Closure_calculus.normal M -> normal (lambda_to_SF M). 
+Proof. 
+intros M nf; induction nf; unfold lambda_to_SF; fold lambda_to_SF. 
+eapply2 var_normal. eapply2 ref_program. 
+eapply2 tag_normal. nf_out.  
+apply app_comb_normal. apply app_comb_normal. eapply2 add_normal. 
+unfold s_op2. unfold_op. eapply2 nf_compound. eapply ref_program. auto. 
+unfold abs, swap. nf_out.  eapply2 add_normal. auto. auto. apply ref_program. auto. 
+Qed. 
 
 
 Lemma lambda_to_SF_preserves_reduction: 
 forall M N, seq_red1 M N -> sf_red (lambda_to_SF M) (lambda_to_SF N).
 Proof.
 intros M N r; induction r; unfold lambda_to_SF; fold lambda_to_SF.
-(* 19 *) 
-unfold tag. repeat eapply2 preserves_app_sf_red. 
 (* 18 *) 
 unfold tag. repeat eapply2 preserves_app_sf_red. 
 (* 17 *) 
-unfold add, s_op2; unfold_op. repeat eapply2 preserves_app_sf_red. 
+unfold tag. repeat eapply2 preserves_app_sf_red. 
 (* 16 *) 
 unfold add, s_op2; unfold_op. repeat eapply2 preserves_app_sf_red. 
 (* 15 *) 
-unfold abs, s_op2; unfold_op; repeat eapply2 preserves_app_sf_red. 
-(* 14*) 
+unfold add, s_op2; unfold_op. repeat eapply2 preserves_app_sf_red. 
+(* 14 *) 
 unfold abs, s_op2; unfold_op; repeat eapply2 preserves_app_sf_red. 
 (* 13 *) 
-split_all.  repeat eapply2 preserves_app_sf_red. 
+unfold abs, s_op2; unfold_op; repeat eapply2 preserves_app_sf_red. 
 (* 12 *) 
 split_all.  repeat eapply2 preserves_app_sf_red. 
 (* 11 *) 
-split_all. apply var_red. 
+split_all.  repeat eapply2 preserves_app_sf_red. 
 (* 10 *) 
+split_all. apply var_red. 
+(* 9 *) 
 apply tag_red. 
-(* 9 *)
-unfold refs. eapply2 abs_red.
 (* 8 *)
-unfold refs; fold refs. apply abs_many_red. 
-(* 7 *) 
+unfold abs. 
+rewrite swap_val. 
+eapply succ_red. eapply2 s_red. 
+eapply transitive_red. eapply preserves_app_sf_red. 
+eapply2 star_opt_beta. eval_tac.
+unfold subst. rewrite subst_rec_preserves_app_comb.
+unfold lift; rewrite subst_rec_lift_rec; try omega.
+rewrite lift_rec_null. 
+unfold subst_rec. insert_Ref_out. 
+unfold lift; rewrite lift_rec_null. auto.   
+(* 7 *)
 repeat eval_tac. 
 (* 6 *) 
-eapply transitive_red. eapply2 app_comb_red. 
+eapply transitive_red. 
+eapply2 app_comb_red. 
+eapply transitive_red. eapply preserves_app_sf_red. 
+eapply2 app_comb_red. auto.  
 eapply2 add_red_var_equal. 
 (* 5 *) 
-eapply transitive_red. eapply2 app_comb_red. 
+eapply transitive_red. 
+eapply2 app_comb_red. 
+eapply transitive_red. eapply preserves_app_sf_red. 
+eapply2 app_comb_red. auto.  
 eapply2 add_red_var_unequal. 
 intro. eapply2 H. eapply2 ref_monotonic.
 (* 4 *)  
-eapply transitive_red. eapply2 app_comb_red. 
-eapply2 add_red_tag. 
+eapply transitive_red. 
+eapply2 app_comb_red. 
+eapply transitive_red. eapply preserves_app_sf_red. 
+eapply2 app_comb_red. auto.  
+eapply2 add_red_tag.   
 (* 3 *) 
-eapply transitive_red. eapply2 app_comb_red. 
+eapply transitive_red. 
+eapply2 app_comb_red. 
+eapply transitive_red. eapply preserves_app_sf_red. 
+eapply2 app_comb_red. auto.  
 eapply2 add_red_empty. 
 (* 2 *)
-eapply transitive_red. eapply2 app_comb_red. 
+eapply transitive_red. 
+eapply2 app_comb_red. 
+eapply transitive_red. eapply preserves_app_sf_red. 
+eapply2 app_comb_red. auto.  
 eapply2 add_red_add. 
 (* 1 *) 
-eapply transitive_red. eapply2 app_comb_red. 
-eapply2 add_red_abs. 
+eapply transitive_red. 
+eapply2 app_comb_red. 
+eapply transitive_red. eapply preserves_app_sf_red. 
+eapply2 app_comb_red. auto.  
+eapply2 add_red_abs.
 Qed. 
 
 Definition implies_red (red1 : lambda -> lambda -> Prop) (red2: termred) := 
@@ -163,24 +189,6 @@ Qed.
 Lemma lambda_to_SF_preserves_seq_red: forall M N, Closure_calculus.seq_red M N -> sf_red (lambda_to_SF M) (lambda_to_SF N).
 Proof. intros. eapply2 (implies_red_multi_step). red. apply lambda_to_SF_preserves_reduction.
 Qed. 
-
-
-Lemma lambda_to_SF_preserves_normal : forall M, Closure_calculus.normal M -> normal (lambda_to_SF M). 
-Proof. 
-intros M nf; induction nf; unfold lambda_to_SF; fold lambda_to_SF. 
-eapply2 var_normal. eapply2 ref_program. 
-eapply2 tag_normal. nf_out.  
-apply app_comb_normal. eapply2 add_normal. 
-unfold s_op2. unfold_op. eapply2 nf_compound. apply nf_compound. auto. 
-apply nf_compound. apply nf_compound. auto. auto. auto. eapply ref_program. auto. auto. 
-(* 1 *) 
-unfold abs. apply app_comb_normal. apply app_comb_normal. apply app_comb_normal. apply app_comb_normal. 
-auto. 
-2: eapply refs_normal. 2: unfold_op; nf_out; auto.  2: apply ref_program. 2: auto. 
-(* 1 *) 
-apply abs_fn_normal. 
-Qed. 
-
 
 
  

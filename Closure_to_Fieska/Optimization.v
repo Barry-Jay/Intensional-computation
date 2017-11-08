@@ -23,6 +23,9 @@
 (**********************************************************************)
 
 
+
+Add LoadPath ".." as IntensionalLib.
+
 Require Import Arith Omega Max Bool List.
 
 Require Import IntensionalLib.Closure_calculus.Closure_calculus.

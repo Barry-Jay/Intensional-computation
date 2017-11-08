@@ -22,9 +22,8 @@
 (*                                                                    *)
 (**********************************************************************)
 
-(* 
+
 Add LoadPath ".." as IntensionalLib.
-*) 
 
 Require Import Arith Omega Max Bool List.
 
@@ -51,10 +50,6 @@ Fixpoint ref i := match i with
 | S i1 => App s_op (ref i1)
 end. 
 
-Fixpoint refs js := match js with 
-| nil => s_op (* dummy value *) 
-| j :: js1 => App (App s_op (ref j)) (refs js1)
-end. 
 
 Lemma ref_program: forall i, program (ref i). 
 Proof. 
@@ -62,12 +57,6 @@ induction i; unfold program, ref; fold ref; unfold_op; split_all.
 inversion IHi. split; auto. 
 Qed. 
 
-
-Lemma refs_normal: forall js, normal (refs js). 
-Proof. induction js; split_all. unfold_op; repeat eapply2 nf_compound. auto. 
-unfold_op; apply nf_compound. eapply2 nf_compound.
-eapply2 ref_program. auto. auto. 
- Qed. 
 
 Lemma ref_monotonic: forall i j, ref i = ref j -> i = j. 
 Proof. 
@@ -91,9 +80,10 @@ match t with
 | Tag s t => tag (lambda_to_fieska s) (lambda_to_fieska t)
 | Closure_calculus.App t u => App (lambda_to_fieska t) (lambda_to_fieska u) 
 | Closure_calculus.Iop => i_op
-| Add i u sigma => App (App (Op Aop) add) (s_op2 (s_op2 (lambda_to_fieska sigma) (ref i)) (lambda_to_fieska u))
-| Abs j js sigma t => abs (refs js) (s_op2 (lambda_to_fieska sigma) (ref j))
-                          (lambda_to_fieska t) 
+| Add sigma i u => App (App (Op Aop) 
+                            (App (App (Op Aop) add) (s_op2 (lambda_to_fieska  sigma) (ref i))))
+                       (lambda_to_fieska   u)
+| Abs sigma j t => abs (lambda_to_fieska   sigma) (ref j) (lambda_to_fieska   t) 
 end.
 
 
@@ -102,45 +92,43 @@ Lemma lambda_to_Fieska_preserves_reduction:
 forall M N, seq_red1 M N -> sf_red (lambda_to_fieska M) (lambda_to_fieska N).
 Proof.
 intros M N r; induction r; unfold lambda_to_fieska; fold lambda_to_fieska.
-(* 19 *) 
-unfold tag. repeat eapply2 preserves_app_sf_red. 
 (* 18 *) 
 unfold tag. repeat eapply2 preserves_app_sf_red. 
 (* 17 *) 
-unfold add, s_op2; unfold_op. repeat eapply2 preserves_app_sf_red. 
+unfold tag. repeat eapply2 preserves_app_sf_red. 
 (* 16 *) 
 unfold add, s_op2; unfold_op. repeat eapply2 preserves_app_sf_red. 
 (* 15 *) 
+unfold add, s_op2; unfold_op. repeat eapply2 preserves_app_sf_red. 
+(* 14 *) 
 unfold abs, s_op2; unfold_op; repeat eapply2 preserves_app_sf_red. 
-(* 14*) 
+(* 13*) 
 unfold abs, s_op2; unfold_op; repeat eapply2 preserves_app_sf_red. 
-(* 13 *) 
-split_all.  repeat eapply2 preserves_app_sf_red. 
 (* 12 *) 
 split_all.  repeat eapply2 preserves_app_sf_red. 
 (* 11 *) 
-split_all. apply var_red. 
+split_all.  repeat eapply2 preserves_app_sf_red. 
 (* 10 *) 
+split_all. apply var_red. 
+(* 9 *) 
 apply tag_red. 
-(* 9 *)
-unfold refs. eapply2 abs_red.
 (* 8 *)
-unfold refs; fold refs. apply abs_many_red. 
+eapply2 abs_red.
 (* 7 *) 
 repeat eval_tac. 
 (* 6 *) 
-eval_tac. eapply2 add_red_var_equal. 
+eval_tac. eval_tac. eapply2 add_red_var_equal. 
 (* 5 *) 
-eval_tac. eapply2 add_red_var_unequal. 
+eval_tac. eval_tac.  eapply2 add_red_var_unequal. 
 intro. eapply2 H. eapply2 ref_monotonic.
 (* 4 *)  
-eval_tac. eapply2 add_red_tag. 
+eval_tac. eval_tac. eapply2 add_red_tag. 
 (* 3 *) 
-eval_tac. eapply2 add_red_empty. 
+eval_tac. eval_tac. eapply2 add_red_empty. 
 (* 2 *)
-eval_tac. eapply2 add_red_add. 
+eval_tac. eval_tac. eapply2 add_red_add. 
 (* 1 *) 
-eval_tac. eapply2 add_red_abs. 
+eval_tac. eval_tac. eapply2 add_red_abs. 
 Qed. 
 
 Definition implies_red (red1 : lambda -> lambda -> Prop) (red2: termred) := 
@@ -163,26 +151,9 @@ Proof.
 intros M nf; induction nf; unfold lambda_to_fieska; fold lambda_to_fieska. 
 eapply2 var_normal. eapply2 ref_program. 
 eapply2 tag_normal. nf_out.  
-unfold add, s_op2. apply nf_compound. apply nf_compound. auto. 
-apply nf_compound. apply nf_compound. auto. auto. auto. 2: auto. 2: auto. 
-2: nf_out. 2: eapply ref_program. 2: auto. 
-(* 2 *) 
-apply add_fn_normal. 
+nf_out; auto. apply add_normal. unfold s_op2; nf_out; auto.  eapply2 ref_program. 
 (* 1 *) 
-unfold abs. apply nf_compound. apply nf_compound. auto. 
-apply nf_compound. apply nf_compound. auto.
-apply nf_compound. apply nf_compound. auto. 
-apply nf_compound. nf_out2. 2:auto. 2:auto. 2: eapply refs_normal. 2: auto. 2: auto. 
-2: unfold_op; nf_out. 2: apply ref_program. 2: auto. 2: auto. 2: auto. 2:auto. 
-(* 1 *) 
-unfold abs_fn. 
-rewrite 2? star_opt_occurs_true. 2: cbv; auto. 2: discriminate. 
-2: cbv; auto. 2: discriminate.
-rewrite (star_opt_occurs_true (App (App (Op Aop) _) _)). 
-2: cbv; auto. 2: discriminate.
-unfold_op; nf_out2. 
-unfold add. nf_out2; eapply2 add_fn_normal. 
-unfold add. nf_out2; eapply2 add_fn_normal. 
+unfold abs, swap, s_op2. nf_out. apply add_normal. eapply2 ref_program.  
 Qed. 
 
 

@@ -23,9 +23,8 @@
 (**********************************************************************)
 
 
-(* 
+
 Add LoadPath ".." as IntensionalLib.
-*) 
 
 Require Import Arith Omega Max Bool List.
 
@@ -53,5 +52,5 @@ Require Import IntensionalLib.Closure_to_Fieska.Abstraction_to_Combination.
 
 
 Lemma size_identity_abs: 
-size (lambda_to_fieska (Abs 0 nil Closure_calculus.Iop (Closure_calculus.Ref 0))) = 8030%bigN.
+size (lambda_to_fieska (Abs Closure_calculus.Iop 0%nat (Closure_calculus.Ref 0%nat))) = 4436%bigN.
 Proof. cbv. auto. Qed. 
