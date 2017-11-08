@@ -39,8 +39,9 @@ Require Import IntensionalLib.SF_calculus.Star.
 Require Import IntensionalLib.SF_calculus.Fixpoints.  
 Require Import IntensionalLib.SF_calculus.Equal.  
 Require Import IntensionalLib.SF_calculus.Extensions.  
-Require Import IntensionalLib.SF_calculus.Tagging.  
-Require Import IntensionalLib.SF_calculus.Adding.  
+
+Require Import IntensionalLib.Closure_to_SF.Tagging.  
+Require Import IntensionalLib.Closure_to_SF.Adding.  
 
 From Bignums Require Import BigN. 
 
