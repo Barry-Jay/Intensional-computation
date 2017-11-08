@@ -37,6 +37,7 @@ Require Import IntensionalLib.SF_calculus.Substitution.
 Require Import IntensionalLib.SF_calculus.SF_Eval.  
 Require Import IntensionalLib.SF_calculus.Star.  
 Require Import IntensionalLib.SF_calculus.Fixpoints.  
+Require Import IntensionalLib.SF_calculus.Equal.  
 Require Import IntensionalLib.SF_calculus.Extensions.  
 Require Import IntensionalLib.SF_calculus.Tagging.  
 Require Import IntensionalLib.SF_calculus.Adding.  
@@ -65,15 +66,8 @@ Proof. cbv. auto.  Qed.
 Lemma size_var_fn : size var_fn = 1079. 
 Proof. cbv. auto. Qed. 
 
-Lemma size_add: size add = 47391.
-Proof. cbv; auto. Qed. 
+Lemma size_add: size add = 56680.
+Proof. cbv. auto. Qed. 
 
-Lemma size_abs_fn: size abs_fn = 95603. 
-Proof. cbv; auto. Qed. 
-
-
-Lemma size_add_fn : size add_fn = 46759. 
-Proof. 
-cbv; auto. Qed. 
 
 

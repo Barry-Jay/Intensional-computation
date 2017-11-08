@@ -23,9 +23,9 @@
 (**********************************************************************)
 
 
-(* 
+
 Add LoadPath ".." as IntensionalLib.
-*) 
+
 
 Require Import Arith Omega Max Bool List.
 
@@ -64,6 +64,7 @@ Qed.
 
 Lemma optimise_A: forall M N,  sf_red (App (App (Op Aop) M) N) (App M N). 
 Proof. intros. eapply2 optimise_eta. unfold lift, lift_rec; fold lift_rec.  red; one_step. Qed. 
+coqc -R "." "IntensionalLib" Closure_to_Fieska/Eta.v
 
 
 Lemma optimise_star: forall M N, sf_red M N -> sf_red (star_opt M) (star_opt N). 
@@ -89,44 +90,15 @@ rewrite lift_rec_closed. auto. apply var_fix_closed.
 Qed. 
 
 Theorem identity_abstraction_optimised: 
-sf_red (lambda_to_fieska (Abs 0 nil Closure_calculus.Iop (Closure_calculus.Ref 0))) i_op. 
+sf_red (lambda_to_fieska (Abs Closure_calculus.Iop 0 (Closure_calculus.Ref 0))) i_op. 
 Proof. 
-unfold lambda_to_fieska. unfold refs, abs; unfold_op. 
-eapply transitive_red. eapply2 optimise_A.  eval_tac. eval_tac. eval_tac. 
-eapply transitive_red. eapply2 (Y4_fix).  
-unfold abs_fn. 
-eapply transitive_red. eapply preserves_app_sf_red. eapply preserves_app_sf_red. 
-eapply preserves_app_sf_red. eapply star_opt_beta. auto. auto. auto. 
-unfold subst. rewrite subst_rec_preserves_extension. 
-eapply transitive_red. eapply preserves_app_sf_red. eapply preserves_app_sf_red. 
-eapply2 extensions_by_matchfail. auto. auto. 
-unfold_op; rewrite subst_rec_app. rewrite subst_rec_op.  
-rewrite ! subst_rec_preserves_star_opt. 
-eapply transitive_red. eapply preserves_app_sf_red. eapply preserves_app_sf_red. 
-eapply succ_red. eapply2 k_red. auto. auto. auto. 
-eapply transitive_red. eapply2 star_opt_beta2.  
-unfold_op; unfold subst. rewrite ! subst_rec_preserves_star_opt. 
-subst_tac. rewrite ! (subst_rec_closed add). 
-2: cbv; auto. 
-unfold subst_rec; fold subst_rec. insert_Ref_out. 
-unfold subst_rec; fold subst_rec. insert_Ref_out. unfold lift. 
-rewrite lift_rec_lift_rec; try omega. unfold plus.   
-rewrite ! subst_rec_lift_rec; try omega.
-rewrite lift_rec_preserves_var. 
-unfold lift_rec; fold lift_rec. 
-(* 1 *)
-replace (Op Iop) with (star_opt (Ref 0)) by auto. 
+unfold lambda_to_fieska. 
+replace i_op with (star_opt (Ref 0)) at 2 by auto. 
 eapply2 optimise_star2.
-unfold lift. rewrite lift_rec_preserves_star_opt.
-unfold lift_rec; fold lift_rec.
-rewrite !  lift_rec_closed. 2: split_all. 2: split_all. 2: cbv; auto. 
-relocate_lt. 
-eapply transitive_red. eapply2 star_opt_beta.
-unfold star_opt, subst, subst_rec; fold subst_rec.
-insert_Ref_out. unfold lift; rewrite lift_rec_null.
-rewrite ! subst_rec_closed.  2:split_all. 2: cbv; omega. 
-eval_tac. eapply transitive_red. eapply2 add_red_var_equal. unfold program, var; split_all.
- auto. 
+unfold lift. rewrite lift_rec_closed. 
+2: cbv; auto. 
+eapply transitive_red. eapply2 abs_red. eval_tac. eval_tac. 
+eapply2 add_red_var_equal. unfold program, var; split_all.
 Qed.
 
 (* restore 

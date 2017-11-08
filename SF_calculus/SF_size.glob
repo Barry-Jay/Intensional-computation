@@ -1,4 +1,4 @@
-DIGEST 330788e7d78d032077d7789c41f87caf
+DIGEST d212efbb2d96f0b7594597c180f69f61
 FIntensionalLib.SF_calculus.SF_size
 R1669:1673 Coq.Arith.Arith <> <> lib
 R1675:1679 Coq.omega.Omega <> <> lib
@@ -15,44 +15,37 @@ R2042:2080 IntensionalLib.SF_calculus.Substitution <> <> lib
 R2100:2133 IntensionalLib.SF_calculus.SF_Eval <> <> lib
 R2153:2183 IntensionalLib.SF_calculus.Star <> <> lib
 R2203:2238 IntensionalLib.SF_calculus.Fixpoints <> <> lib
-R2258:2294 IntensionalLib.SF_calculus.Extensions <> <> lib
-R2314:2347 IntensionalLib.SF_calculus.Tagging <> <> lib
-R2367:2399 IntensionalLib.SF_calculus.Adding <> <> lib
-R2433:2436 Bignums.BigN.BigN <> <> lib
-def 2518:2521 <> size
-R2535:2535 IntensionalLib.SF_calculus.SF_size <> M var
-R2545:2547 IntensionalLib.SF_calculus.SF_Terms <> Ref constr
-R2559:2560 IntensionalLib.SF_calculus.SF_Terms <> Op constr
-R2571:2573 IntensionalLib.SF_calculus.SF_Terms <> App constr
-R2584:2584 Bignums.BigN.BigN <> :bigN_scope:x_'+'_x not
-R2592:2596 Bignums.BigN.BigN <> :bigN_scope:x_'+'_x not
-R2604:2604 Bignums.BigN.BigN <> :bigN_scope:x_'+'_x not
-R2585:2588 IntensionalLib.SF_calculus.SF_size <> size def
-R2597:2600 IntensionalLib.SF_calculus.SF_size <> size def
-prf 2620:2627 <> tag_size
-R2650:2652 Coq.Init.Logic <> :type_scope:x_'='_x not
-R2630:2633 IntensionalLib.SF_calculus.SF_size <> size def
-R2636:2638 IntensionalLib.SF_calculus.Tagging <> tag def
-R2645:2648 IntensionalLib.SF_calculus.SF_reduction <> s_op def
-R2640:2643 IntensionalLib.SF_calculus.SF_reduction <> s_op def
-prf 2691:2698 <> var_size
-R2716:2718 Coq.Init.Logic <> :type_scope:x_'='_x not
-R2701:2704 IntensionalLib.SF_calculus.SF_size <> size def
-R2707:2709 IntensionalLib.SF_calculus.Tagging <> var def
-R2711:2714 IntensionalLib.SF_calculus.SF_reduction <> s_op def
-prf 2758:2768 <> size_var_fn
-R2783:2785 Coq.Init.Logic <> :type_scope:x_'='_x not
-R2772:2775 IntensionalLib.SF_calculus.SF_size <> size def
-R2777:2782 IntensionalLib.SF_calculus.Tagging <> var_fn def
-prf 2824:2831 <> size_add
-R2842:2844 Coq.Init.Logic <> :type_scope:x_'='_x not
-R2834:2837 IntensionalLib.SF_calculus.SF_size <> size def
-R2839:2841 IntensionalLib.SF_calculus.Adding <> add def
-prf 2883:2893 <> size_abs_fn
-R2907:2909 Coq.Init.Logic <> :type_scope:x_'='_x not
-R2896:2899 IntensionalLib.SF_calculus.SF_size <> size def
-R2901:2906 IntensionalLib.SF_calculus.Adding <> abs_fn def
-prf 2950:2960 <> size_add_fn
-R2975:2977 Coq.Init.Logic <> :type_scope:x_'='_x not
-R2964:2967 IntensionalLib.SF_calculus.SF_size <> size def
-R2969:2974 IntensionalLib.SF_calculus.Adding <> add_fn def
+R2258:2289 IntensionalLib.SF_calculus.Equal <> <> lib
+R2309:2345 IntensionalLib.SF_calculus.Extensions <> <> lib
+R2365:2398 IntensionalLib.SF_calculus.Tagging <> <> lib
+R2418:2450 IntensionalLib.SF_calculus.Adding <> <> lib
+R2484:2487 Bignums.BigN.BigN <> <> lib
+def 2569:2572 <> size
+R2586:2586 IntensionalLib.SF_calculus.SF_size <> M var
+R2596:2598 IntensionalLib.SF_calculus.SF_Terms <> Ref constr
+R2610:2611 IntensionalLib.SF_calculus.SF_Terms <> Op constr
+R2622:2624 IntensionalLib.SF_calculus.SF_Terms <> App constr
+R2635:2635 Bignums.BigN.BigN <> :bigN_scope:x_'+'_x not
+R2643:2647 Bignums.BigN.BigN <> :bigN_scope:x_'+'_x not
+R2655:2655 Bignums.BigN.BigN <> :bigN_scope:x_'+'_x not
+R2636:2639 IntensionalLib.SF_calculus.SF_size <> size def
+R2648:2651 IntensionalLib.SF_calculus.SF_size <> size def
+prf 2671:2678 <> tag_size
+R2701:2703 Coq.Init.Logic <> :type_scope:x_'='_x not
+R2681:2684 IntensionalLib.SF_calculus.SF_size <> size def
+R2687:2689 IntensionalLib.SF_calculus.Tagging <> tag def
+R2696:2699 IntensionalLib.SF_calculus.SF_reduction <> s_op def
+R2691:2694 IntensionalLib.SF_calculus.SF_reduction <> s_op def
+prf 2742:2749 <> var_size
+R2767:2769 Coq.Init.Logic <> :type_scope:x_'='_x not
+R2752:2755 IntensionalLib.SF_calculus.SF_size <> size def
+R2758:2760 IntensionalLib.SF_calculus.Tagging <> var def
+R2762:2765 IntensionalLib.SF_calculus.SF_reduction <> s_op def
+prf 2809:2819 <> size_var_fn
+R2834:2836 Coq.Init.Logic <> :type_scope:x_'='_x not
+R2823:2826 IntensionalLib.SF_calculus.SF_size <> size def
+R2828:2833 IntensionalLib.SF_calculus.Tagging <> var_fn def
+prf 2875:2882 <> size_add
+R2893:2895 Coq.Init.Logic <> :type_scope:x_'='_x not
+R2885:2888 IntensionalLib.SF_calculus.SF_size <> size def
+R2890:2892 IntensionalLib.SF_calculus.Adding <> add def

@@ -10,7 +10,6 @@ coqc -R "." "IntensionalLib" SF_calculus/Substitution.v
 coqc -R "." "IntensionalLib" SF_calculus/SF_Eval.v 
 coqc -R "." "IntensionalLib" SF_calculus/Star.v 
 coqc -R "." "IntensionalLib" SF_calculus/Fixpoints.v 
-coqc -R "." "IntensionalLib" SF_calculus/Equal.v 
 coqc -R "." "IntensionalLib" SF_calculus/Extensions.v 
 coqc -R "." "IntensionalLib" SF_calculus/Tagging.v 
 coqc -R "." "IntensionalLib" SF_calculus/Adding.v 

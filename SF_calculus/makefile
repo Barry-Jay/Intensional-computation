@@ -43,7 +43,7 @@ CAMLFLAGS         := $(COQMF_CAMLFLAGS)
 HASNATDYNLINK     := $(COQMF_HASNATDYNLINK)
 
 makefile.conf: 
-	coq_makefile -o makefile Abstraction_to_Combination.v Adding.v Closure_calculus.v Equal.v Eta.v Extensions.v Fixpoints.v General.v SF_Closed.v SF_Eval.v SF_Normal.v SF_Tactics.v SF_Terms.v SF_reduction.v SF_size.v Star.v Substitution.v Tagging.v Test.v identity_abs_val.v
+	coq_makefile -o makefile Adding.v Equal.v Extensions.v Fixpoints.v General.v SF_Closed.v SF_Eval.v SF_Normal.v SF_Tactics.v SF_Terms.v SF_reduction.v SF_size.v Star.v Substitution.v Tagging.v Test.v
 
 # This file can be created by the user to hook into double colon rules or
 # add any other Makefile code he may need

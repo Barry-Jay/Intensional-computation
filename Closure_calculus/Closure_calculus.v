@@ -62,8 +62,8 @@ Inductive lambda:  Set :=
 | Tag : lambda -> lambda -> lambda 
 | App : lambda -> lambda -> lambda 
 | Iop : lambda 
-| Add : nat -> lambda -> lambda -> lambda 
-| Abs : nat -> list nat -> lambda -> lambda -> lambda 
+| Add : lambda -> nat -> lambda -> lambda (* Add sigma x u *) 
+| Abs : lambda -> nat -> lambda -> lambda  (* Abs sigma x t *) 
           .
 
 Hint Constructors lambda.
@@ -181,34 +181,32 @@ Inductive seq_red1 : lambda -> lambda -> Prop :=
   | appl_seq_red :  forall M M' N, seq_red1 M M' -> seq_red1 (App M N) (App M' N)
   | appr_seq_red :  forall M N N', seq_red1 N N' -> seq_red1 (App M N) (App M N')
   | addl_seq_red :  forall i M M' sigma, seq_red1 M M' -> 
-      seq_red1 (Add i M sigma) (Add i M' sigma)
+      seq_red1 (Add sigma i M) (Add sigma i M')
   | addr_seq_red :  forall i M sigma sigma', seq_red1 sigma sigma' ->
-      seq_red1 (Add i M sigma) (Add i M sigma')
-  | absl_seq_red :  forall sigma sigma' i is M, seq_red1 sigma sigma' -> 
-      seq_red1 (Abs i is sigma M) (Abs i is sigma' M) 
-  | absr_seq_red :  forall sigma i is M M', seq_red1 M M' -> 
-      seq_red1 (Abs i is sigma M) (Abs i is sigma M') 
+      seq_red1 (Add sigma i M) (Add sigma' i M)
+  | absl_seq_red :  forall sigma sigma' i M, seq_red1 sigma sigma' -> 
+      seq_red1 (Abs sigma i M) (Abs sigma' i M) 
+  | absr_seq_red :  forall sigma i M M', seq_red1 M M' -> 
+      seq_red1 (Abs sigma i M) (Abs sigma i M') 
   | app_ref_seq_red : forall i M, seq_red1 (App (Ref i) M) (Tag (Ref i) M)
   | app_tag_seq_red : forall M N P, seq_red1 (App (Tag M N) P) (Tag (Tag M N) P)
-  | beta1_seq_red : forall sigma j M N, 
-      seq_red1 (App (Abs j nil sigma M) N) (App (Add j N sigma) M)
-  | beta2_seq_red : forall sigma j j2 js M N, 
-      seq_red1 (App (Abs j (cons j2 js) sigma M) N) (Abs j2 js (Add j N sigma) M)
+  | beta_seq_red : forall sigma j M N, 
+      seq_red1 (App (Abs sigma j M) N) (App (Add sigma j N) M)
   | nil_seq_red : forall M, seq_red1 (App Iop M) M
-  | subst_eq_seq_red : forall j sigma N, seq_red1 (App (Add j N sigma) (Ref j)) N
+  | subst_eq_seq_red : forall j sigma N, seq_red1 (App (Add sigma j N) (Ref j)) N
   | subst_uneq_seq_red : forall sigma i j N, i<> j -> 
-      seq_red1 (App (Add i N sigma) (Ref j)) (App sigma (Ref j))
+      seq_red1 (App (Add sigma i N) (Ref j)) (App sigma (Ref j))
   | subst_tag_seq_red : forall j U sigma M N,
       seq_red1 (App (Add j U sigma) (Tag M N)) 
                (App (App (Add j U sigma) M) (App (Add j U sigma) N))  
   | subst_nil_seq_red : forall j U sigma,  
-      seq_red1 (App (Add j U sigma) Iop) (App sigma Iop) 
+      seq_red1 (App (Add sigma j U) Iop) (App sigma Iop) 
   | subst_add_seq_red : forall j N sigma j2 P sigma2,  
-      seq_red1 (App (Add j N sigma) (Add j2 P sigma2)) 
-               (Add j2 (App (Add j N sigma) P) (App (Add j N sigma) sigma2))
-  | subst_abs_seq_red : forall j N sigma j2 js sigma2 M,
-      seq_red1 (App (Add j N sigma) (Abs j2 js sigma2 M))
-               (Abs j2 js (App (Add j N sigma) sigma2) M) (* no action on M! *) 
+      seq_red1 (App (Add sigma j N) (Add sigma2 j2 P)) 
+               (Add  (App (Add sigma j N) sigma2) j2 (App (Add sigma j N) P))
+  | subst_abs_seq_red : forall j N sigma j2 sigma2 M,
+      seq_red1 (App (Add sigma j N) (Abs sigma2 j2 M))
+               (Abs (App (Add sigma j N) sigma2) j2 M) (* no action on M! *) 
  .
 
 Hint Constructors seq_red1 .
@@ -257,36 +255,36 @@ forall M M' N N', red M M' -> red N N' -> red (App M N) (App M' N').
 
 
 Definition preserves_adl (red : termred) := 
-forall i M M' N, red M M' -> red (Add i M N) (Add i M' N).
+forall i M M' N, red M M' -> red (Add M i N) (Add M' i N).
 
 Definition preserves_adr (red : termred) := 
-forall i M sigma sigma', red sigma sigma' -> red (Add i M sigma) (Add i M sigma').
+forall i M sigma sigma', red sigma sigma' -> red (Add M i sigma) (Add M i sigma').
 
 Lemma preserves_adl_multi_step : forall (red: termred), preserves_adl red -> preserves_adl (multi_step red). 
-Proof. red. induction 2; split_all. apply succ_red with (Add i N0 N); auto. Qed. 
+Proof. red. induction 2; split_all. apply succ_red with (Add N0 i N); auto. Qed. 
 
 Lemma preserves_adr_multi_step : forall (red: termred), preserves_adr red -> preserves_adr (multi_step red). 
-Proof. red. induction 2; split_all. apply succ_red with (Add i M N); auto. Qed. 
+Proof. red. induction 2; split_all. apply succ_red with (Add M i N); auto. Qed. 
 
 
 Definition preserves_add (red : termred) := 
-forall M M' N N' i, red M M' -> red N N' -> red (Add i M N) (Add i M' N').
+forall M M' N N' i, red M M' -> red N N' -> red (Add M i N) (Add M' i N').
 
 Definition preserves_absl (red : termred) := 
-forall sigma sigma' j js M, red sigma sigma' -> red (Abs j js sigma M) (Abs j js sigma' M).
+forall sigma sigma' j M, red sigma sigma' -> red (Abs sigma j M) (Abs sigma' j M).
 
 Definition preserves_absr (red : termred) := 
-forall sigma j js M M', red M M' -> red (Abs j js sigma M) (Abs j js sigma M').
+forall sigma j M M', red M M' -> red (Abs j sigma M) (Abs j sigma M').
 
 Lemma preserves_absl_multi_step : forall (red: termred), preserves_absl red -> preserves_absl (multi_step red). 
-Proof. red. induction 2; split_all. apply succ_red with (Abs j js N M); auto. Qed. 
+Proof. red. induction 2; split_all. apply succ_red with (Abs N j M); auto. Qed. 
 
 Lemma preserves_absr_multi_step : forall (red: termred), preserves_absr red -> preserves_absr (multi_step red). 
-Proof. red. induction 2; split_all. apply succ_red with (Abs j js sigma N); auto. Qed. 
+Proof. red. induction 2; split_all. apply succ_red with (Abs j sigma N); auto. Qed. 
 
 
 Definition preserves_abs (red : termred) := 
-forall sigma sigma' j js M N, red sigma sigma' -> red M N -> red (Abs j js sigma M) (Abs j js sigma' N).
+forall sigma sigma' j M N, red sigma sigma' -> red M N -> red (Abs sigma j M) (Abs sigma' j N).
 
 Lemma preserves_tagl_seq_red: preserves_tagl seq_red. 
 Proof. eapply2 preserves_tagl_multi_step. red; split_all.  Qed.
@@ -333,7 +331,7 @@ Hint Resolve preserves_adr_seq_red.
 Lemma preserves_add_seq_red: preserves_add seq_red. 
 Proof. 
 red; split_all. 
-apply transitive_red with (Add i M' N); split_all. 
+apply transitive_red with (Add M' i N); split_all. 
 eapply2 preserves_adl_seq_red. 
 eapply2 preserves_adr_seq_red. 
 Qed. 
@@ -350,7 +348,7 @@ Hint Resolve preserves_absr_seq_red.
 Lemma preserves_abs_seq_red: preserves_abs seq_red. 
 Proof. 
 red; split_all. 
-apply transitive_red with (Abs j js sigma' M); split_all. 
+apply transitive_red with (Abs sigma' j M); split_all. 
 eapply2 preserves_absl_seq_red. 
 eapply2 preserves_absr_seq_red. 
 Qed. 
@@ -369,41 +367,42 @@ Inductive dl_red1: termred :=
   | Iop_red : dl_red1 Iop Iop 
   | add_red : forall M M' ,
       dl_red1 M M' ->
-      forall sigma sigma', dl_red1 sigma sigma' -> forall i,  dl_red1 (Add i M sigma) (Add i M' sigma')
+      forall sigma sigma', dl_red1 sigma sigma' -> 
+        forall i,  dl_red1 (Add sigma i M) (Add sigma' i M')
   | abs_red :
-      forall sigma sigma' j js M M', dl_red1 sigma sigma' -> dl_red1 M M' ->
-                                  dl_red1 (Abs j js sigma M) (Abs j js sigma' M')
-   | app_ref_red : forall i M M' , dl_red1 M M' -> 
+      forall sigma sigma' j M M', dl_red1 sigma sigma' -> dl_red1 M M' ->
+                                  dl_red1 (Abs sigma j M) (Abs sigma' j M')
+  | app_ref_red : forall i M M' , dl_red1 M M' -> 
                                   dl_red1 (App (Ref i) M) (Tag (Ref i) M')
   | app_tag_red : forall M M' N N' P P', dl_red1 M M' -> dl_red1 N N' -> dl_red1 P P' ->
                                   dl_red1 (App (Tag M N) P) (Tag (Tag M' N') P')
 (* beta and subst *) 
-  | beta1_red : forall sigma sigma' j M M' N N', 
+  | beta_red : forall sigma sigma' j M M' N N', 
                   dl_red1 sigma sigma' -> dl_red1 M M' -> dl_red1 N N' ->
-                      dl_red1 (App (Abs j nil sigma M) N)
-                              (App (Add j N' sigma') M')
-  | beta2_red : forall sigma sigma' j j2 js  M M' N N', 
-                  dl_red1 sigma sigma' -> dl_red1 M M' -> dl_red1 N N' ->
-                      dl_red1 (App (Abs j (cons j2 js) sigma M) N)
-                              (Abs j2 js (Add j N' sigma') M')
+                      dl_red1 (App (Abs sigma j M) N)
+                              (App (Add sigma' j N') M')
   | nil_red : forall M M', dl_red1 M M' -> dl_red1 (App Iop M) M'
-   | subst_eq_red : forall j sigma N N', dl_red1 N N' -> dl_red1 (App (Add j N sigma) (Ref j)) N'
+  | subst_eq_red : forall j sigma N N', dl_red1 N N' -> dl_red1 (App (Add sigma j N) (Ref j)) N'
   | subst_uneq_red : forall sigma sigma' i j N, i<> j -> dl_red1 sigma sigma' -> 
-                                  dl_red1 (App (Add i N sigma) (Ref j)) (App sigma' (Ref j))
+                                  dl_red1 (App (Add sigma i N) (Ref j)) (App sigma' (Ref j))
   | subst_tag_red : forall j U U' sigma sigma' M M' N N',
                        dl_red1 U U'  -> dl_red1 sigma sigma' -> dl_red1 M M' -> dl_red1 N N' ->
-                                    dl_red1 (App (Add j U sigma) (Tag M N)) 
-                                        (App (App (Add j U' sigma') M') (App (Add j U' sigma') N'))  
+                                    dl_red1 (App (Add sigma j U) (Tag M N)) 
+                                        (App (App (Add sigma' j U') M') 
+                                             (App (Add sigma' j U') N'))  
   | subst_nil_red : forall j U sigma sigma',  dl_red1 sigma sigma' -> 
-                                              dl_red1 (App (Add j U sigma) Iop) (App sigma' Iop) 
+                                              dl_red1 (App (Add sigma j U) Iop) (App sigma' Iop) 
   | subst_add_red : forall j N N' sigma sigma' j2 P P' sigma2 sigma2' , 
                   dl_red1 sigma sigma' -> dl_red1 P P' -> dl_red1 N N' ->dl_red1 sigma2 sigma2' -> 
-                          dl_red1 (App (Add j N sigma) (Add j2 P sigma2)) 
-                                  (Add j2 (App (Add j N' sigma') P') (App (Add j N' sigma') sigma2'))
-  | subst_abs_red : forall j N N' sigma sigma' j2 js M M' sigma2 sigma2' , 
-                  dl_red1 sigma sigma' -> dl_red1 M M' -> dl_red1 N N' ->dl_red1 sigma2 sigma2' -> 
-                      dl_red1 (App (Add j N sigma) (Abs j2 js sigma2 M))
-                               (Abs j2 js (App (Add j N' sigma') sigma2') M') (* no action on M*) 
+                          dl_red1 (App (Add sigma j N) (Add sigma2 j2 P)) 
+                                  (Add (App (Add sigma' j N') sigma2') j2 
+                                       (App (Add sigma' j N') P') 
+)
+  | subst_abs_red : forall j N N' sigma sigma' j2 M M' sigma2 sigma2' , 
+                  dl_red1 sigma sigma' -> dl_red1 M M' -> dl_red1 N N' ->
+                  dl_red1 sigma2 sigma2' -> 
+                      dl_red1 (App (Add sigma j N) (Abs sigma2 j2 M))
+                               (Abs (App (Add sigma' j N') sigma2') j2 M') (* no action on M*) 
 .
 
 
@@ -421,7 +420,7 @@ match goal with
 | H: dl_red1 (Tag _ _) _ |- _ => inversion H; clear H; subst; inv_dl_red
 | H: dl_red1 Iop _ |- _ => inversion H; clear H; subst; inv_dl_red
 | H: dl_red1 (Add _ _ _) _ |- _ => inversion H; clear H; subst; inv_dl_red
-| H: dl_red1 (Abs _ _ _ _) _ |- _ => inversion H; clear H; subst; inv_dl_red
+| H: dl_red1 (Abs _ _ _) _ |- _ => inversion H; clear H; subst; inv_dl_red
 | _ => invsub; eauto
 end.
 
@@ -433,109 +432,97 @@ red. induction M; intros N P r1 r2; inv_dl_red.
 elim(IHM1 M' M'0); split_all. elim(IHM2 N' N'0); split_all.  eauto. 
 (* 3 *) 
 inversion r1; inversion r2; subst; inv_dl_red; eauto.
-(* 35 *)
+(* 32 *)
 elim(IHM1 M' M'0); split_all. elim(IHM2 N' N'0); split_all.  eauto. 
-(* 34 *)
+(* 31 *)
 elim(IHM2 N' M'0); split_all; eauto. 
-(* 33 *) 
+(* 30 *) 
 elim(IHM1 (Tag M'0 N'0) (Tag M'1 N'1)); elim(IHM2 N' P'); split_all; eauto. 
 inv_dl_red. exist (Tag (Tag M' N'2) x). 
-(* 32 *) 
-elim(IHM1 (Abs j nil sigma' M'0) (Abs j nil sigma'0 M'1)); split_all. 
-elim(IHM2 N' N'0); split_all. 
-inv_dl_red. exist (App (Add j x0 sigma'1) M'). 
-(* 31 *) 
-elim(IHM1 (Abs j (j2 ::js) sigma' M'0) (Abs j (j2 ::js) sigma'0 M'1)); split_all. 
-elim(IHM2 N' N'0); split_all. 
-inv_dl_red. exist (Abs j2 js (Add j x0 sigma'1) M'). 
-(* 30 *)
-elim(IHM2 N' P); split_all; eauto.  
 (* 29 *) 
-elim(IHM1 (Add j P sigma) (Add j M'0 sigma)); split_all. 
-inv_dl_red. 
+elim(IHM1 (Abs sigma' j M'0) (Abs sigma'0 j M'1)); split_all. 
+elim(IHM2 N' N'0); split_all. 
+inv_dl_red. exist (App (Add sigma'1 j x0) M'). 
 (* 28 *) 
-elim(IHM1 (Add i N1 sigma') (Add i N1 sigma'0)); split_all. 
-inv_dl_red. 
+elim(IHM2 N' P); split_all; eauto.  
 (* 27 *) 
-elim(IHM1 (Add j U' sigma') (Add j M'2 sigma'0)); split_all. 
-elim(IHM2 (Tag M'0 N'0) (Tag M'1 N'1)); split_all. inv_dl_red. 
-exist(App (App (Add j M'3 sigma'1) M') (App (Add j M'3 sigma'1) N')) . 
+elim(IHM1 (Add sigma j P) (Add sigma j M'0)); split_all. 
+inv_dl_red. 
 (* 26 *) 
-elim(IHM1 (Add j U sigma') (Add j U sigma'0)); split_all. inv_dl_red.
+elim(IHM1 (Add sigma' i N1) (Add sigma'0 i N1)); split_all. 
+inv_dl_red. 
 (* 25 *) 
-elim(IHM1 (Add j N'0 sigma') (Add j M'1 sigma'1)); split_all. 
-elim(IHM2 (Add j2 P' sigma2')(Add j2 M'0 sigma'0)); split_all. inv_dl_red. 
-exist(Add j2 (App (Add j M'2 sigma'3) M') (App (Add j M'2 sigma'3) sigma'2)).
+elim(IHM1 (Add sigma' j U') (Add sigma'0 j M'2)); split_all. 
+elim(IHM2 (Tag M'0 N'0) (Tag M'1 N'1)); split_all. inv_dl_red. 
+exist(App (App (Add sigma'1 j M'3) M') (App (Add sigma'1 j M'3) N')) . 
 (* 24 *) 
-elim(IHM1 (Add j N'0 sigma') (Add j M'1 sigma'0)); split_all. 
-elim(IHM2 (Abs j2  js sigma2' M'0)(Abs j2 js sigma'1 M')); split_all. inv_dl_red. 
-exist(Abs j2 js (App (Add j M'2 sigma'2) sigma'3) M'3).
+elim(IHM1 (Add sigma' j U) (Add sigma'0 j U)); split_all. inv_dl_red.
 (* 23 *) 
-elim(IHM2 M' N'); split_all; eauto. 
+elim(IHM1 (Add sigma' j N'0) (Add sigma'1 j M'1)); split_all. 
+elim(IHM2 (Add sigma2' j2 P')(Add sigma'0 j2 M'0)); split_all. inv_dl_red. 
+exist(Add (App (Add sigma'3 j M'2) sigma'2) j2 (App (Add sigma'3 j M'2) M')).
 (* 22 *) 
-elim(IHM2 M' M'0); split_all; eauto. 
+elim(IHM1 (Add sigma' j N'0) (Add sigma'0 j M'1)); split_all. 
+elim(IHM2 (Abs sigma2' j2 M'0)(Abs sigma'1 j2 M')); split_all. inv_dl_red. 
+exist(Abs (App (Add sigma'2 j M'2) sigma'3) j2 M'3).
 (* 21 *) 
+elim(IHM2 M' N'); split_all; eauto. 
+(* 20 *) 
+elim(IHM2 M' M'0); split_all; eauto. 
+(* 19 *) 
 elim(IHM1 (Tag M' N') (Tag M'1 N'1)); elim(IHM2 P' N'0); split_all.
 inv_dl_red. exist(Tag (Tag M'0 N'2) x).
-(* 20 *) 
+(* 18 *) 
 elim(IHM1 (Tag M' N') (Tag M'0 N'0)); elim(IHM2 P' P'0); split_all.
 inv_dl_red. exist(Tag (Tag M'1 N'1) x).
-(* 19 *)
-elim(IHM1 (Abs j nil sigma' M') (Abs j nil sigma'0 M'1));  split_all. 
-elim(IHM2 N' N'0); split_all. 
-inv_dl_red. exist (App (Add j x0 sigma'1) M'0). 
-(* 18 *)
-elim(IHM1 (Abs j nil sigma' M') (Abs j  nil sigma'0 M'0));  split_all. 
-elim(IHM2 N' N'0); split_all. 
-inv_dl_red. exist (App (Add j x0 sigma'1) M'1).
 (* 17 *)
-elim(IHM1 (Abs j (j2::js) sigma' M') (Abs j (j2:: js) sigma'0 M'1));  split_all. 
+elim(IHM1 (Abs sigma' j M') (Abs sigma'0 j M'1));  split_all. 
 elim(IHM2 N' N'0); split_all. 
-inv_dl_red. exist (Abs j2 js (Add j x0 sigma'1) M'0). 
-(* 16 *) 
-elim(IHM1 (Abs j (j2::js) sigma' M') (Abs j (j2:: js) sigma'0 M'0));  split_all. 
+inv_dl_red. exist (App (Add sigma'1 j x0) M'0). 
+(* 16 *)
+elim(IHM1 (Abs sigma' j M') (Abs sigma'0 j M'0));  split_all. 
 elim(IHM2 N' N'0); split_all. 
-inv_dl_red. exist (Abs j2 js (Add j x0 sigma'1) M'1). 
-(* 15 *) 
+inv_dl_red. exist (App (Add sigma'1 j x0) M'1).
+(* 15 *)
 elim(IHM2 N N'); split_all; eauto. 
 (* 14 *) 
-elim(IHM1 (Add j N sigma)(Add j M'0 sigma)); split_all; inv_dl_red; eauto. 
+elim(IHM1 (Add sigma j N)(Add sigma j M'0)); split_all; inv_dl_red; eauto. 
 (* 13 *) 
-elim(IHM1 (Add j N sigma)(Add j P sigma)); split_all; inv_dl_red; eauto. 
+elim(IHM1 (Add sigma j N)(Add sigma j P)); split_all; inv_dl_red; eauto. 
 (* 12 *) 
-elim(IHM1 (Add i N0 sigma')(Add i N0 sigma'0)); split_all; inv_dl_red; eauto. 
+elim(IHM1 (Add sigma' i N0)(Add sigma'0 i N0)); split_all; inv_dl_red; eauto. 
 (* 11 *) 
-elim(IHM1 (Add i N0 sigma')(Add i N0 sigma'0)); split_all; inv_dl_red; eauto. 
+elim(IHM1 (Add sigma' i N0)(Add sigma'0 i N0)); split_all; inv_dl_red; eauto. 
 (* 10 *) 
-elim(IHM1 (Add j U' sigma')(Add j M'2 sigma'0)); split_all.
+elim(IHM1 (Add sigma' j U')(Add sigma'0 j M'2)); split_all.
 elim(IHM2 (Tag M' N') (Tag M'1 N'1)); split_all.  inv_dl_red; eauto. 
-exist(App (App (Add j M'3 sigma'1) M'0) (App (Add j M'3 sigma'1) N'0)) . 
+exist(App (App (Add sigma'1 j M'3) M'0) (App (Add sigma'1 j M'3) N'0)) . 
 (* 9 *) 
-elim(IHM1 (Add j U' sigma')(Add j U'0 sigma'0)); split_all.
+elim(IHM1 (Add sigma' j U')(Add sigma'0 j U'0)); split_all.
 elim(IHM2 (Tag M' N') (Tag M'0 N'0)); split_all.  inv_dl_red; eauto. 
-exist(App (App (Add j M'2 sigma'1) M'1) (App (Add j M'2 sigma'1) N'1)) . 
+exist(App (App (Add sigma'1 j M'2) M'1) (App (Add sigma'1 j M'2) N'1)) . 
 (* 8 *) 
-elim(IHM1 (Add j U sigma') (Add j U sigma'0)); split_all. inv_dl_red.
+elim(IHM1 (Add sigma' j U) (Add sigma'0 j U)); split_all. inv_dl_red.
 (* 7 *) 
-elim(IHM1 (Add j U sigma') (Add j U sigma'0)); split_all. inv_dl_red.
+elim(IHM1 (Add sigma' j U) (Add sigma'0 j U)); split_all. inv_dl_red.
 (* 6 *) 
-elim(IHM1 (Add j N' sigma')(Add j M'1 sigma'1)); split_all.
-elim(IHM2 (Add j2 P' sigma2') (Add j2 M'0 sigma'0)); split_all.  inv_dl_red; eauto. 
-exist(Add j2 (App (Add j M'2 sigma'3) M') (App (Add j M'2 sigma'3) sigma'2)). 
+elim(IHM1 (Add sigma' j N')(Add sigma'1 j M'1)); split_all.
+elim(IHM2 (Add sigma2' j2 P') (Add sigma'0 j2 M'0)); split_all.  inv_dl_red; eauto. 
+exist(Add (App (Add sigma'3 j M'2) sigma'2) j2 (App (Add sigma'3 j M'2) M')). 
 (* 5 *) 
-elim(IHM1 (Add j N' sigma')(Add j N'0 sigma'0)); split_all.
-elim(IHM2 (Add j2 P' sigma2') (Add j2 P'0 sigma2'0)); split_all.  inv_dl_red; eauto. 
-exist(Add j2 (App (Add j M'0 sigma'2) M') (App (Add j M'0 sigma'2) sigma'1)) . 
+elim(IHM1 (Add sigma' j N')(Add sigma'0 j N'0)); split_all.
+elim(IHM2 (Add sigma2' j2 P') (Add sigma2'0 j2 P'0)); split_all.  inv_dl_red; eauto. 
+exist(Add (App (Add sigma'2 j M'0) sigma'1) j2 (App (Add sigma'2 j M'0) M')) . 
 (* 4 *) 
-elim(IHM2 (Abs j2 js sigma2' M')(Abs j2 js sigma'1 M'0)); split_all.  
-elim(IHM1 (Add j N' sigma') (Add j M'1 sigma'0)); split_all. 
-inv_dl_red. exist (Abs j2 js (App (Add j M'2 sigma'2) sigma'3) M'3).
+elim(IHM2 (Abs sigma2' j2 M')(Abs sigma'1 j2 M'0)); split_all.  
+elim(IHM1 (Add sigma' j N') (Add sigma'0 j M'1)); split_all. 
+inv_dl_red. exist (Abs (App (Add sigma'2 j M'2) sigma'3) j2 M'3).
 (* 3 *) 
-elim(IHM2 (Abs j2 js sigma2' M')(Abs j2 js sigma2'0 M'0)); split_all.  
-elim(IHM1 (Add j N' sigma') (Add j N'0 sigma'0)); split_all. 
-inv_dl_red. exist (Abs j2 js (App (Add j M'1 sigma'1) sigma'2) M'2).
+elim(IHM2 (Abs sigma2' j2 M')(Abs sigma2'0 j2 M'0)); split_all.  
+elim(IHM1 (Add sigma' j N') (Add sigma'0 j N'0)); split_all. 
+inv_dl_red. exist (Abs (App (Add sigma'1 j M'1) sigma'2) j2 M'2).
 (* 2 *) 
-elim(IHM1 M' M'0); split_all. elim(IHM2 sigma' sigma'0); split_all.  eauto. 
+elim(IHM2 M' M'0); split_all. elim(IHM1 sigma' sigma'0); split_all.  eauto. 
 (* 1 *) 
 elim(IHM1 sigma' sigma'0); split_all. elim(IHM2 M' M'0); split_all.  eauto. 
 Qed. 
@@ -616,8 +603,8 @@ Inductive normal : lambda -> Prop :=
 | nf_ref: forall i, normal (Ref i)
 | nf_tag: forall s u,  normal s -> normal u -> normal (Tag s u)
 | nf_nil: normal Iop
-| nf_add: forall s j u,  normal s -> normal u -> normal (Add j u s)
-| nf_abs : forall sigma j js M, normal sigma -> normal M -> normal (Abs j js sigma M)
+| nf_add: forall s j u,  normal s -> normal u -> normal (Add s j u)
+| nf_abs : forall sigma j M, normal sigma -> normal M -> normal (Abs sigma j M)
 .
 
 Hint Constructors normal. 
@@ -643,7 +630,6 @@ inversion IHM1; inversion IHM2; split_all; try (right; eauto; fail).
 inversion IHM1; inversion IHM2; split_all;  eauto.
 inversion H; subst; eauto.  inversion H0; subst; eauto. 
 right; assert(i=j \/ i<>j) by decide equality. inversion H3; subst; eauto. 
-right; case js; eauto. 
 (* 2 *) 
 inversion IHM1; inversion IHM2; split_all;  eauto.
 (* 1 *) 
@@ -674,20 +660,38 @@ Qed.
 (* Recursion *) 
 
 
-Definition omega := Abs 1 (0::nil) Iop (Tag (Ref 0) (Tag (Tag (Ref 1) (Ref 1)) (Ref 0))).
-Definition Ycomb := Abs 0 nil (Add 1 omega Iop)  (Tag (Ref 0) (Tag (Tag (Ref 1) (Ref 1)) (Ref 0))). 
+Definition omega := Abs Iop 1 (Abs (Add Iop 1 (Ref 1)) 0 (Tag (Ref 0) (Tag (Tag (Ref 1) (Ref 1)) (Ref 0)))).
+Definition Ycomb := Abs (Add Iop 1 omega)  0 (Tag (Ref 0) (Tag (Tag (Ref 1) (Ref 1)) (Ref 0))). 
 
 
 
 Lemma fixpoint_property: 
 forall f, seq_red (App Ycomb f) (App f (App Ycomb f)).
-Proof. intros; unfold Ycomb at 1; unfold omega; subst. repeat eapply2 succ_red.  Qed. 
+Proof. 
+intros; unfold Ycomb  at 1.  
+repeat (eapply2 succ_red; eapply2 succ_red). 
+repeat eapply2 preserves_app_seq_red. 
+unfold omega at 1, Ycomb. repeat eapply2 succ_red. 
+Qed. 
 
 
-Definition omega2 := (* \wfx. f(xxf)x *)
-  Abs 1 (0::2::nil) Iop (Tag (Tag (Ref 0) (Tag (Tag (Ref 1) (Ref 1)) (Ref 0))) (Ref 2))
+Definition omega2 := (* \wfx. f(wwf)x *)
+  Abs Iop 1 (Abs (Add Iop 1 (Ref 1)) 0 (Abs (Add (Add Iop 0 (Ref 0)) 1 (Ref 1)) 2
+    (Tag (Tag (Ref 0) (Tag (Tag (Ref 1) (Ref 1)) (Ref 0))) (Ref 2))))
  .
-Definition Y2 := App omega2 omega2. 
+Definition Y2 :=  App omega2 omega2. 
+
+Lemma Y2_normalisable: forall f, normal f -> exists N, seq_red (App Y2 f) N /\ normal N. 
+Proof. 
+intros. 
+exist 
+(Abs (Add (Add Iop 0 f) 1 omega2) 2
+   (Tag (Tag (Ref 0) (Tag (Tag (Ref 1) (Ref 1)) (Ref 0))) (Ref 2))).
+unfold Y2, omega2 at 1. repeat eapply2 succ_red.
+eapply2 nf_abs.  eapply2 nf_add. 
+ unfold omega2; auto. 
+repeat eapply2 nf_abs. 
+Qed. 
 
 Lemma fixpoint2_property: 
 forall f N, seq_red (App (App Y2 f) N) (App (App f (App Y2 f)) N).
@@ -695,11 +699,53 @@ Proof.
 intros; unfold Y2 at 1. unfold omega2 at 1. 
 eapply2 succ_red. eapply2 succ_red. eapply2 succ_red. eapply2 succ_red. eapply2 succ_red.  
 eapply2 succ_red. eapply2 succ_red. eapply2 succ_red. eapply2 succ_red. eapply2 succ_red.  
-eapply2 succ_red. eapply2 succ_red.
+eapply2 succ_red. eapply2 succ_red. eapply2 succ_red. eapply2 succ_red. eapply2 succ_red.  
+eapply2 succ_red. eapply2 succ_red. eapply2 succ_red. 
 eapply2 preserves_app_seq_red. eapply2 preserves_app_seq_red. 
+repeat eapply2 succ_red. repeat eapply2 succ_red. 
+Qed. 
+
+
+Definition omega3 := (* \wfxy. f(wwf)xy *)
+  Abs Iop 1 (Abs (Add Iop 1 (Ref 1)) 0 (Abs (Add (Add Iop 0 (Ref 0)) 1 (Ref 1)) 2
+    (Abs (Add (Add (Add Iop 0 (Ref 0)) 1 (Ref 1)) 2 (Ref 2)) 3
+       (Tag (Tag (Tag (Ref 0) (Tag (Tag (Ref 1) (Ref 1)) (Ref 0))) (Ref 2)) (Ref 3)))))
+ .
+Definition Y3 := App omega3 omega3. 
+
+Lemma fixpoint3_property: 
+forall f N P, seq_red  (App(App (App Y3 f) N) P) (App (App (App f (App Y3 f)) N) P).
+Proof. 
+intros; unfold Y3 at 1. unfold omega3 at 1. 
+eapply2 succ_red. eapply2 succ_red. eapply2 succ_red. eapply2 succ_red. eapply2 succ_red.  
+eapply2 succ_red. eapply2 succ_red. eapply2 succ_red. eapply2 succ_red. eapply2 succ_red.  
+eapply2 succ_red. eapply2 succ_red. eapply2 succ_red. eapply2 succ_red. eapply2 succ_red.  
+eapply2 succ_red. eapply2 succ_red. eapply2 succ_red. eapply2 succ_red. eapply2 succ_red.  
+eapply2 succ_red. eapply2 succ_red. eapply2 succ_red. eapply2 succ_red. eapply2 succ_red.  
+eapply2 succ_red. eapply2 succ_red. eapply2 succ_red. 
+eapply2 preserves_app_seq_red. eapply2 preserves_app_seq_red. eapply2 preserves_app_seq_red. 
 repeat eapply2 succ_red. 
 Qed. 
 
+Lemma Y3_normalisable: 
+forall f M, normal f -> normal M -> exists N, seq_red (App (App Y3 f) M) N /\ normal N. 
+Proof. 
+intros. 
+exist  (Abs 
+     (Add (Add (Add Iop 0 f) 1 omega3) 2 M) 3
+     (Tag (Tag (Tag (Ref 0) (Tag (Tag (Ref 1) (Ref 1)) (Ref 0))) (Ref 2)) (Ref 3))). 
+unfold Y3, omega3 at 1. 
+eapply2 succ_red. eapply2 succ_red. eapply2 succ_red. eapply2 succ_red. eapply2 succ_red.  
+eapply2 succ_red. eapply2 succ_red. eapply2 succ_red. eapply2 succ_red. eapply2 succ_red.  
+eapply2 succ_red. eapply2 succ_red. eapply2 succ_red. eapply2 succ_red. eapply2 succ_red.  
+eapply2 succ_red. eapply2 succ_red. 
+eapply2 preserves_abs_seq_red. repeat eapply2 preserves_add_seq_red.
+repeat eapply2 succ_red. repeat eapply2 succ_red. 
+
+eapply2 nf_abs.  repeat eapply2 nf_add.  2: repeat eapply2 nf_tag. 
+ unfold omega3; auto. 
+repeat eapply2 nf_abs. repeat eapply2 nf_tag. 
+Qed. 
 
 
 (* primitive recursion 
@@ -707,84 +753,75 @@ Qed.
  *)
 
 
-Definition abs j js := Abs j js Iop.
-
-Definition tt := abs 1 (0::nil) (Ref 1).
-Definition ff := abs 1 (0::nil) (Ref 0).
+Definition tt := Abs Iop 1 (Abs (Add Iop 1 (Ref 1)) 0 (Ref 1)). 
+Definition ff := Abs Iop 1 (Abs Iop 0 (Ref 0)). 
 
 Lemma if_true : forall m n, seq_red (App (App tt m) n) m.
-Proof. split_all; subst; unfold tt, abs.  eapply2 succ_red. Qed. 
+Proof. split_all; subst; unfold tt.  repeat eapply2 succ_red. Qed. 
 
 Lemma if_false : forall m n, seq_red (App (App ff m) n) n.
-Proof. split_all; subst; unfold ff, abs.  eapply2 succ_red. Qed. 
+Proof. split_all; subst; unfold ff.  eapply2 succ_red. Qed. 
 
 
 
 (* Scott numerals *) 
 
 Definition zero:= tt. (* \xy. x *) 
-Definition succ := abs 2 (1::0::nil) (Tag (Ref 0) (Ref 2)). (* \nxy.yn *) 
-Definition case := abs 2 (1::0::nil) (Tag (Tag (Ref 2) (Ref 1)) (Ref 0)).
+Definition succ := Abs Iop 2 (Abs (Add Iop 2 (Ref 2)) 1 
+                    (Abs (Add (Add Iop 1 (Ref 1)) 2 (Ref 2)) 0 
+                    (Tag (Ref 0) (Ref 2)))). (* \nxy.yn *) 
+(* not used ? 
+Definition case := Abs Iop 2 (Abs (Add Iop 2 (Ref 2)) (Abs (Add Iop 1 (Ref 1)) 0
+                    (Tag (Tag (Ref 2) (Ref 1)) (Ref 0)))).
                    (* \naf. naf *) 
-
+*) 
 Fixpoint scott n :=
   match n with
     | 0 => tt
-    | S n => Abs  1 (0::nil) (Add 2 (scott n) Iop) (Tag (Ref 0) (Ref 2))
+    | S n => Abs (Add Iop 2 (scott n)) 1 
+              (Abs (Add (Add Iop 1 (Ref 1)) 2 (Ref 2)) 0 (Tag (Ref 0) (Ref 2)))
   end.
 
 Lemma scott_numerals_are_normal: forall n, normal (scott n). 
 Proof.  
-induction n; unfold scott; fold scott; unfold zero, abs, value; split_all. unfold tt, abs; auto. 
+induction n; unfold scott; fold scott; unfold zero, value; split_all. unfold tt; auto. 
 Qed. 
 
 Hint Resolve scott_numerals_are_normal. 
 
 Lemma succ_scott: forall n, seq_red (App succ (scott n)) (scott (S n)).
-Proof. intro; unfold succ, abs.  eapply2 succ_red. Qed. 
+Proof. intro; unfold succ.  repeat eapply2 succ_red.   Qed. 
 
 
 Definition is_zero := 
-Abs 2 nil (Add 0 (abs 0 nil ff) (Add 1 tt Iop))
+Abs (Add (Add Iop 0 (Abs Iop 0 ff)) 1 tt) 2
     (Tag (Tag (Ref 2) (Ref 1)) (Ref 0)) . 
 
 Lemma is_zero_zero: seq_red (App is_zero zero) tt .
-Proof. unfold is_zero, zero, tt, abs; split_all. repeat eapply2 succ_red. Qed.
+Proof. unfold is_zero, zero, tt; split_all. repeat eapply2 succ_red. Qed.
 
 Lemma is_zero_succ: forall n, seq_red (App is_zero (scott (S n))) ff .
-Proof.
-intros. unfold is_zero, abs. eapply2 succ_red. eapply2 succ_red. 
-eapply2 succ_red. eapply2 succ_red. eapply2 succ_red. eapply2 succ_red. 
-eapply2 succ_red. eapply2 succ_red. eapply2 succ_red. 
-unfold scott; fold scott. eapply2 succ_red. eapply2 succ_red. eapply2 succ_red. 
-eapply2 succ_red. eapply2 succ_red. eapply2 succ_red. eapply2 succ_red. eapply2 succ_red. 
-unfold ff, abs; split_all.  repeat eapply2 succ_red. 
-Qed. 
+Proof. intros. unfold is_zero, scott, ff. repeat eapply2 succ_red. Qed. 
 
 
 Definition my_pred :=
- abs 0 nil (Tag (Tag (Ref 0) zero) (abs 0 nil (Ref 0))).
+ Abs Iop 0 (Tag (Tag (Ref 0) zero) (Abs Iop 0 (Ref 0))).
   (* λn.n zero (\x.x) *) 
 
 Lemma pred_zero: seq_red (App my_pred zero) zero. 
-Proof. 
-unfold my_pred, zero, abs. eapply2 succ_red.  eapply2 succ_red.  eapply2 succ_red. 
-eapply2 succ_red.  eapply2 succ_red.  eapply2 succ_red. 
-eapply2 succ_red.  eapply transitive_red. 
-eapply2 if_true. unfold tt, abs; split_all.  eapply2 succ_red. 
-Qed. 
+Proof. unfold my_pred, zero, tt. repeat eapply2 succ_red. Qed. 
 
 Lemma pred_succ: forall n, seq_red (App my_pred (scott (S n))) (scott n).
 Proof. 
-intro n; case n; unfold my_pred, abs; split_all; repeat eapply2 succ_red. 
+intro n; case n; unfold my_pred; split_all; repeat eapply2 succ_red. 
 Qed. 
 
-Definition my_plus_aux := 
-abs 3 (2::nil) (Tag (Tag (Ref 2) (abs 0 nil (Ref 0)))
-(Abs 1 (0::nil) (Add 3 (Ref 3) Iop) 
-     (App succ (Tag (Tag (Ref 3) (Ref 1)) (Ref 0))))). 
-Definition my_plus := App Y2 my_plus_aux. 
-  (* Y2 (\fm.m(\n.n) ((\fxn. succ (fxn))f)) *) 
+Definition my_plus_aux :=  
+Abs Iop 3 (Abs (Add Iop 3 (Ref 3))  2 (Tag (Tag (Ref 2) (Abs Iop 0 (Ref 0)))
+(Abs (Add Iop 3 (Ref 3)) 1 (Abs (Add (Add Iop 1 (Ref 1)) 3 (Ref 3)) 0 
+     (App succ (Tag (Tag (Ref 3) (Ref 1)) (Ref 0))))))). 
+Definition my_plus := App Y3 my_plus_aux. 
+  (* Y3 (\fm.m(\n.n) ((\fxn. succ (fxn))f)) *) 
 
 
 Lemma my_plus_scott: 
@@ -792,31 +829,25 @@ forall m n, seq_red (App (App my_plus (scott m)) (scott n)) (scott (m+n)).
 Proof.
   induction m; intros. 
   (* 2 *) 
-  split_all. unfold my_plus, zero, abs; split_all.
-  eapply transitive_red. eapply preserves_app_seq_red. 
-  eapply2 fixpoint2_property.   auto. 
-  unfold my_plus_aux, abs. eapply2 succ_red. eapply2 succ_red. eapply2 succ_red. eapply2 succ_red. 
+  split_all. unfold my_plus, zero; split_all.
+  eapply transitive_red. 
+  eapply2 fixpoint3_property.  
+  unfold my_plus_aux. eapply2 succ_red. eapply2 succ_red. eapply2 succ_red. eapply2 succ_red. 
   eapply2 succ_red. eapply2 succ_red. eapply2 succ_red. eapply2 succ_red. 
-  eapply2 succ_red. eapply2 succ_red. eapply2 succ_red. eapply2 succ_red. 
-  eapply2 succ_red. eapply2 succ_red.
+  eapply2 succ_red. eapply2 succ_red. eapply2 succ_red. 
   eapply transitive_red. eapply preserves_app_seq_red. eapply2 if_true. auto. 
   eapply2 succ_red. 
   (* 1 *) 
-  simpl. unfold my_plus, abs. 
-  eapply transitive_red. eapply preserves_app_seq_red. 
-  eapply2 fixpoint2_property. auto. 
-replace (App Y2 my_plus_aux) with my_plus by auto. 
-  unfold my_plus_aux, abs. 
-  eapply2 succ_red; repeat (eapply2 succ_red; eapply2 succ_red).
+  simpl. unfold my_plus. 
   eapply transitive_red. 
-  unfold succ, abs. eapply2 succ_red.
-  eapply transitive_red.  eapply succ_red. eapply subst_abs_seq_red. auto. 
-  eapply2 preserves_abs_seq_red. eapply2 succ_red. 
-  eapply2 preserves_add_seq_red. eapply2 succ_red. eapply2 succ_red. eapply2 succ_red. 
-  eapply2 succ_red. eapply2 succ_red. eapply2 succ_red. eapply2 succ_red. eapply2 succ_red. 
-  eapply2 succ_red. eapply2 succ_red. eapply2 IHm. 
-(* 1 *) 
-eapply2 succ_red. 
+  eapply2 fixpoint3_property.
+replace (App Y3 my_plus_aux) with my_plus by auto. 
+  unfold my_plus_aux, succ. 
+  repeat (eapply2 succ_red; eapply2 succ_red). 
+eapply2 preserves_abs_seq_red. eapply2 preserves_add_seq_red.  
+  unfold succ.  eapply2 succ_red; repeat (eapply2 succ_red; eapply2 succ_red).
+ eapply2 succ_red; repeat (eapply2 succ_red; eapply2 succ_red).
+eapply2 IHm. 
 Qed. 
 
 (* restore ! 

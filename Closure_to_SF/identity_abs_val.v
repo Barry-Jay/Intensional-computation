@@ -53,5 +53,5 @@ Require Import IntensionalLib.Closure_to_SF.Abstraction_to_Combination.
 
 
 Lemma size_identity_abs: 
-size (lambda_to_SF (Abs 0 nil Closure_calculus.Iop (Closure_calculus.Ref 0))) = 98140%bigN.
+size (lambda_to_SF (Abs Closure_calculus.Iop 0%nat (Closure_calculus.Ref 0))) = 58444%bigN.
 Proof. cbv. auto. Qed. 
