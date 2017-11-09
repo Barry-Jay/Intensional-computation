@@ -1,0 +1,30 @@
+DIGEST 02d37e37c14e147dd46a477281d4017f
+FIntensionalLib.Abstraction_calculus.Abstraction_Terms
+ind 1620:1627 <> operator
+constr 1664:1666 <> Sop
+constr 1671:1673 <> Kop
+constr 1678:1680 <> Iop
+constr 1748:1750 <> Eop
+constr 1793:1795 <> Tag
+constr 1800:1802 <> Var
+constr 1806:1808 <> Add
+constr 1813:1815 <> Abs
+R1667:1667 IntensionalLib.Abstraction_calculus.Abstraction_Terms <> operator ind
+R1674:1674 IntensionalLib.Abstraction_calculus.Abstraction_Terms <> operator ind
+R1681:1681 IntensionalLib.Abstraction_calculus.Abstraction_Terms <> operator ind
+R1751:1751 IntensionalLib.Abstraction_calculus.Abstraction_Terms <> operator ind
+R1796:1796 IntensionalLib.Abstraction_calculus.Abstraction_Terms <> operator ind
+R1803:1803 IntensionalLib.Abstraction_calculus.Abstraction_Terms <> operator ind
+R1809:1809 IntensionalLib.Abstraction_calculus.Abstraction_Terms <> operator ind
+R1816:1816 IntensionalLib.Abstraction_calculus.Abstraction_Terms <> operator ind
+ind 1830:1833 <> Term
+constr 1848:1849 <> Op
+constr 1876:1878 <> App
+R1862:1865 Coq.Init.Logic <> :type_scope:x_'->'_x not
+R1866:1869 IntensionalLib.Abstraction_calculus.Abstraction_Terms <> Term ind
+R1854:1861 IntensionalLib.Abstraction_calculus.Abstraction_Terms <> operator ind
+R1886:1889 Coq.Init.Logic <> :type_scope:x_'->'_x not
+R1894:1897 Coq.Init.Logic <> :type_scope:x_'->'_x not
+R1898:1901 IntensionalLib.Abstraction_calculus.Abstraction_Terms <> Term ind
+R1890:1893 IntensionalLib.Abstraction_calculus.Abstraction_Terms <> Term ind
+R1882:1885 IntensionalLib.Abstraction_calculus.Abstraction_Terms <> Term ind

@@ -1,0 +1,32 @@
+DIGEST ae1c13ccc316b7291a980895d60614d6
+FTerms
+R2283:2287 Coq.Arith.Arith <> <> lib
+R2305:2311 General <> <> lib
+R2329:2332 Test <> <> lib
+ind 2389:2396 <> operator
+constr 2433:2435 <> Sop
+constr 2440:2442 <> Kop
+constr 2447:2449 <> Iop
+constr 2523:2525 <> Eop
+constr 2568:2570 <> Fop
+constr 2574:2576 <> Tag
+constr 2581:2583 <> Var
+constr 2587:2589 <> Add
+constr 2594:2596 <> Abs
+R2436:2436 Terms <> operator ind
+R2443:2443 Terms <> operator ind
+R2450:2450 Terms <> operator ind
+R2526:2526 Terms <> operator ind
+R2571:2571 Terms <> operator ind
+R2577:2577 Terms <> operator ind
+R2584:2584 Terms <> operator ind
+R2590:2590 Terms <> operator ind
+R2597:2597 Terms <> operator ind
+ind 2611:2614 <> Term
+constr 2629:2630 <> Op
+constr 2657:2659 <> App
+R2647:2650 Terms <> Term ind
+R2635:2642 Terms <> operator ind
+R2679:2682 Terms <> Term ind
+R2671:2674 Terms <> Term ind
+R2663:2666 Terms <> Term ind

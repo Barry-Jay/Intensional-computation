@@ -31,16 +31,21 @@ coqc -R "." "IntensionalLib" Fieska_calculus/Fieska_Eval.v
 coqc -R "." "IntensionalLib" Fieska_calculus/Star.v 
 coqc -R "." "IntensionalLib" Fieska_calculus/Fixpoints.v 
 coqc -R "." "IntensionalLib" Fieska_calculus/Extensions.v 
-coqc -R "." "IntensionalLib" Fieska_calculus/Tagging.v 
-coqc -R "." "IntensionalLib" Fieska_calculus/Adding.v 
-coqc -R "." "IntensionalLib" Fieska_calculus/Fieska_size.v 
-coqc -R "." "IntensionalLib" Fieska_calculus/Optimization.v 
 
+coqc -R "." "IntensionalLib" Closure_to_Fieska/Tagging.v 
+coqc -R "." "IntensionalLib" Closure_to_Fieska/Adding.v 
+coqc -R "." "IntensionalLib" Closure_to_Fieska/Fieska_size.v 
 coqc -R "." "IntensionalLib" Closure_to_Fieska/Abstraction_to_Combination.v
 coqc -R "." "IntensionalLib" Closure_to_Fieska/Eta.v
 coqc -R "." "IntensionalLib" Closure_to_Fieska/identity_abs_val.v
 coqc -R "." "IntensionalLib" Closure_to_Fieska/Optimization.v
 
+coqc -R "." "IntensionalLib" Abstraction_calculus/Abstraction_Terms.v 
+coqc -R "." "IntensionalLib" Abstraction_calculus/Abstraction_Tactics.v 
+coqc -R "." "IntensionalLib" Abstraction_calculus/Abstraction_Reduction.v 
+coqc -R "." "IntensionalLib" Abstraction_calculus/Abstraction_Normal.v 
+coqc -R "." "IntensionalLib" Abstraction_calculus/Abstraction_Equal.v 
+coqc -R "." "IntensionalLib" Abstraction_calculus/Closure_to_Abstraction.v 
 
 Using the _CoqProject file, run 
 
