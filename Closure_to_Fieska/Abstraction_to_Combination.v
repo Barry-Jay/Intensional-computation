@@ -41,8 +41,8 @@ Require Import IntensionalLib.Fieska_calculus.Fieska_Eval.
 Require Import IntensionalLib.Fieska_calculus.Star.
 Require Import IntensionalLib.Fieska_calculus.Fixpoints.
 Require Import IntensionalLib.Fieska_calculus.Extensions.
-Require Import IntensionalLib.Fieska_calculus.Tagging.
-Require Import IntensionalLib.Fieska_calculus.Adding.
+Require Import IntensionalLib.Closure_to_Fieska.Tagging.
+Require Import IntensionalLib.Closure_to_Fieska.Adding.
 
 
 Fixpoint ref i := match i with 

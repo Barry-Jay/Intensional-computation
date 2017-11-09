@@ -35,7 +35,7 @@ Require Import IntensionalLib.Fieska_calculus.Fieska_Eval.
 Require Import IntensionalLib.Fieska_calculus.Star.
 Require Import IntensionalLib.Fieska_calculus.Fixpoints.
 Require Import IntensionalLib.Fieska_calculus.Extensions.
-Require Import IntensionalLib.Fieska_calculus.Tagging.
+Require Import IntensionalLib.Closure_to_Fieska.Tagging.
 
 Definition s_op2 g f := App (App s_op g) f .
 

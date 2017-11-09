@@ -43,8 +43,8 @@ Require Import IntensionalLib.Fieska_calculus.Fieska_Eval.
 Require Import IntensionalLib.Fieska_calculus.Star.
 Require Import IntensionalLib.Fieska_calculus.Fixpoints.
 Require Import IntensionalLib.Fieska_calculus.Extensions.
-Require Import IntensionalLib.Fieska_calculus.Tagging.
-Require Import IntensionalLib.Fieska_calculus.Adding.
+Require Import IntensionalLib.Closure_to_Fieska.Tagging.
+Require Import IntensionalLib.Closure_to_Fieska.Adding.
 Require Import IntensionalLib.Closure_to_Fieska.Abstraction_to_Combination.
 
 
@@ -64,7 +64,6 @@ Qed.
 
 Lemma optimise_A: forall M N,  sf_red (App (App (Op Aop) M) N) (App M N). 
 Proof. intros. eapply2 optimise_eta. unfold lift, lift_rec; fold lift_rec.  red; one_step. Qed. 
-coqc -R "." "IntensionalLib" Closure_to_Fieska/Eta.v
 
 
 Lemma optimise_star: forall M N, sf_red M N -> sf_red (star_opt M) (star_opt N). 

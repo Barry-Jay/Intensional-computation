@@ -12,12 +12,11 @@ coqc -R "." "IntensionalLib" SF_calculus/Star.v
 coqc -R "." "IntensionalLib" SF_calculus/Fixpoints.v 
 coqc -R "." "IntensionalLib" SF_calculus/Equal.v 
 coqc -R "." "IntensionalLib" SF_calculus/Extensions.v 
-coqc -R "." "IntensionalLib" SF_calculus/Tagging.v 
-coqc -R "." "IntensionalLib" SF_calculus/Adding.v 
-coqc -R "." "IntensionalLib" SF_calculus/SF_size.v 
 
+coqc -R "." "IntensionalLib" Closure_to_SF/Tagging.v 
+coqc -R "." "IntensionalLib" Closure_to_SF/Adding.v 
+coqc -R "." "IntensionalLib" Closure_to_SF/SF_size.v 
 coqc -R "." "IntensionalLib" Closure_to_SF/Abstraction_to_Combination.v
-coqc -R "." "IntensionalLib" Closure_to_SF/Eta.v
 coqc -R "." "IntensionalLib" Closure_to_SF/identity_abs_val.v
 
 coqc -R "." "IntensionalLib" Fieska_calculus/Test.v 
