@@ -1,6 +1,7 @@
 -R . IntensionalLib
 
 Closure_calculus/Closure_calculus.v
+
 SF_calculus/Test.v 
 SF_calculus/General.v 
 SF_calculus/SF_Terms.v 
@@ -42,5 +43,10 @@ Closure_to_Fieska/Eta.v
 Closure_to_Fieska/identity_abs_val.v
 Closure_to_Fieska/Optimization.v
 
-
+Abstraction_calculus/Abstraction_Terms.v 
+Abstraction_calculus/Abstraction_Tactics.v
+Abstraction_calculus/Abstraction_Reduction.v
+Abstraction_calculus/Abstraction_Normal.v
+Abstraction_calculus/Abstraction_Equal.v
+Abstraction_calculus/Closure_to_Abstraction.v
 

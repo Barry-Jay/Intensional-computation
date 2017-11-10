@@ -592,7 +592,7 @@ exist x; eapply2 dl_red_to_seq_red.
 Qed. 
 
 
-Theorem simple_confluence: confluence lambda seq_red. 
+Theorem closure_confluence: confluence lambda seq_red. 
 Proof. red. split_all. eapply2 diamond_seq_red. Qed.
 
 
@@ -620,7 +620,7 @@ Proof.
 Qed. 
 
 
-Theorem simple_progress : 
+Theorem closure_progress : 
 forall (M : lambda),  (normal M) \/ (exists N, seq_red1 M N) .
 Proof. 
 induction M; try (inversion IHM); subst; split_all; eauto.  
@@ -639,7 +639,7 @@ Qed.
 Lemma irreducible_is_normal: 
 forall M, irreducible M seq_red1 -> normal M. 
 Proof. 
-split_all. elim(simple_progress M); split_all. assert False by eapply2 H.  inversion H0. 
+split_all. elim(closure_progress M); split_all. assert False by eapply2 H.  inversion H0. 
 Qed. 
 
 Theorem irreducible_iff_normal:

@@ -76,22 +76,22 @@ Hint Resolve ref_program var_ref_program.
 
 
 
-Fixpoint lambda_to_SF (t: lambda) := 
+Fixpoint closure_to_SF (t: lambda) := 
 match t with 
 | Closure_calculus.Ref i => var (ref i)
-| Tag s t => tag (lambda_to_SF s) (lambda_to_SF t)
-| Closure_calculus.App t u => App (lambda_to_SF t) (lambda_to_SF u) 
+| Tag s t => tag (closure_to_SF s) (closure_to_SF t)
+| Closure_calculus.App t u => App (closure_to_SF t) (closure_to_SF u) 
 | Closure_calculus.Iop => i_op
-| Add sigma i u => app_comb (app_comb add (s_op2 (lambda_to_SF sigma) (ref i))) (lambda_to_SF u)
-| Abs sigma j t => abs (lambda_to_SF sigma) (ref j) (lambda_to_SF t) 
+| Add sigma i u => app_comb (app_comb add (s_op2 (closure_to_SF sigma) (ref i))) (closure_to_SF u)
+| Abs sigma j t => abs (closure_to_SF sigma) (ref j) (closure_to_SF t) 
 end.
 
 
 
 
-Lemma lambda_to_SF_preserves_normal : forall M, Closure_calculus.normal M -> normal (lambda_to_SF M). 
+Theorem closure_to_SF_preserves_normal : forall M, Closure_calculus.normal M -> normal (closure_to_SF M). 
 Proof. 
-intros M nf; induction nf; unfold lambda_to_SF; fold lambda_to_SF. 
+intros M nf; induction nf; unfold closure_to_SF; fold closure_to_SF. 
 eapply2 var_normal. eapply2 ref_program. 
 eapply2 tag_normal. nf_out.  
 apply app_comb_normal. apply app_comb_normal. eapply2 add_normal. 
@@ -100,10 +100,10 @@ unfold abs, swap. nf_out.  eapply2 add_normal. auto. auto. apply ref_program. au
 Qed. 
 
 
-Lemma lambda_to_SF_preserves_reduction: 
-forall M N, seq_red1 M N -> sf_red (lambda_to_SF M) (lambda_to_SF N).
+Lemma closure_to_SF_preserves_red1: 
+forall M N, seq_red1 M N -> sf_red (closure_to_SF M) (closure_to_SF N).
 Proof.
-intros M N r; induction r; unfold lambda_to_SF; fold lambda_to_SF.
+intros M N r; induction r; unfold closure_to_SF; fold closure_to_SF.
 (* 18 *) 
 unfold tag. repeat eapply2 preserves_app_sf_red. 
 (* 17 *) 
@@ -177,17 +177,17 @@ eapply2 add_red_abs.
 Qed. 
 
 Definition implies_red (red1 : lambda -> lambda -> Prop) (red2: termred) := 
-forall M N, red1 M N -> red2(lambda_to_SF M) (lambda_to_SF N). 
+forall M N, red1 M N -> red2(closure_to_SF M) (closure_to_SF N). 
 
 Lemma implies_red_multi_step: forall red1 red2, implies_red red1  (multi_step red2) -> 
                                                 implies_red (Closure_calculus.multi_step red1) (multi_step red2).
 Proof. red. 
 intros red1 red2 IR M N R; induction R; split_all. 
-apply transitive_red with (lambda_to_SF N); auto. 
+apply transitive_red with (closure_to_SF N); auto. 
 Qed. 
 
-Lemma lambda_to_SF_preserves_seq_red: forall M N, Closure_calculus.seq_red M N -> sf_red (lambda_to_SF M) (lambda_to_SF N).
-Proof. intros. eapply2 (implies_red_multi_step). red. apply lambda_to_SF_preserves_reduction.
+Theorem closure_to_SF_preserves_reduction: forall M N, Closure_calculus.seq_red M N -> sf_red (closure_to_SF M) (closure_to_SF N).
+Proof. intros. eapply2 (implies_red_multi_step). red. apply closure_to_SF_preserves_red1.
 Qed. 
 
 
