@@ -62,7 +62,7 @@ Qed.
 The basic progress result, that all irreducible terms are normal.
  *) 
 
-Theorem c_progress : forall (M : Term), normal M \/ (exists N,c_red1 M N) .
+Theorem abstraction_progress : forall (M : Term), normal M \/ (exists N,c_red1 M N) .
 Proof. 
 induction M; try (inversion IHM); subst; split_all; eauto.
 (* 1 *)

@@ -1,0 +1,2 @@
+Abstraction_Reduction.vo Abstraction_Reduction.glob Abstraction_Reduction.v.beautified: Abstraction_Reduction.v
+Abstraction_Reduction.vio: Abstraction_Reduction.v

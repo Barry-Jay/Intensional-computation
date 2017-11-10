@@ -804,5 +804,5 @@ Definition confluence (A : Set) (R : A -> A -> Prop) :=
   forall x y : A,
   R x y -> forall z : A, R x z -> exists u : A, R y u /\ R z u.
 
-Theorem confluence_c_red: confluence Term c_red. 
+Theorem abstraction_confluence: confluence Term c_red. 
 Proof. red; split_all; eapply2 diamond_c_red. Qed. 

@@ -1,4 +1,4 @@
-DIGEST f489b019e4cb48975f58efdf153c11d8
+DIGEST f2b3eecf816b88faf9d2316eb886dd53
 FIntensionalLib.Abstraction_calculus.Abstraction_Reduction
 R1661:1665 Coq.Arith.Arith <> <> lib
 R1683:1716 IntensionalLib.SF_calculus.General <> <> lib
@@ -2921,8 +2921,8 @@ R33378:33378 IntensionalLib.Abstraction_calculus.Abstraction_Reduction <> x var
 R33353:33353 IntensionalLib.Abstraction_calculus.Abstraction_Reduction <> R var
 R33357:33357 IntensionalLib.Abstraction_calculus.Abstraction_Reduction <> y var
 R33355:33355 IntensionalLib.Abstraction_calculus.Abstraction_Reduction <> x var
-prf 33424:33439 <> confluence_c_red
-R33442:33451 IntensionalLib.Abstraction_calculus.Abstraction_Reduction <> confluence def
-R33458:33462 IntensionalLib.Abstraction_calculus.Abstraction_Reduction <> c_red def
-R33453:33456 IntensionalLib.Abstraction_calculus.Abstraction_Terms <> Term ind
-R33497:33509 IntensionalLib.Abstraction_calculus.Abstraction_Reduction <> diamond_c_red thm
+prf 33424:33445 <> abstraction_confluence
+R33448:33457 IntensionalLib.Abstraction_calculus.Abstraction_Reduction <> confluence def
+R33464:33468 IntensionalLib.Abstraction_calculus.Abstraction_Reduction <> c_red def
+R33459:33462 IntensionalLib.Abstraction_calculus.Abstraction_Terms <> Term ind
+R33503:33515 IntensionalLib.Abstraction_calculus.Abstraction_Reduction <> diamond_c_red thm
