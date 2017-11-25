@@ -45,7 +45,6 @@ Require Import IntensionalLib.SF_calculus.Extensions.
 Require Import IntensionalLib.Closure_to_SF.Tagging.
 Require Import IntensionalLib.Closure_to_SF.Adding.
 
-Set Printing Depth 10000.
 
 Fixpoint ref i := match i with 
 | 0 => s_op 
@@ -66,21 +65,21 @@ induction i; split_all; gen_case H j; split_all; try discriminate.
 inversion H; subst. assert (i = n) by eapply2 IHi. auto. 
 Qed.
 
-Lemma var_ref_program: forall i, program (var (ref i)). 
+Lemma tag_ref_program: forall i, program (tag (ref i)). 
 Proof. 
-intros; split. unfold var. nf_out. eapply2 omega3_program. eapply2 omega3_program.
-eapply2 var_fn_program. eapply2 ref_program. 
-rewrite var_maxvar. eapply2 ref_program. 
+intros; split. unfold tag. nf_out. eapply2 omega3_program. 
+eapply2 omega3_program. eapply2 tag_fn_normal. eapply2 ref_program. 
+rewrite tag_maxvar. eapply2 ref_program. 
 Qed.
 
-Hint Resolve ref_program var_ref_program. 
+Hint Resolve ref_program tag_ref_program. 
 
 
 
 Fixpoint closure_to_SF (t: lambda) := 
 match t with 
-| Closure_calculus.Ref i => var (ref i)
-| Tag s t => tag (closure_to_SF s) (closure_to_SF t)
+| Closure_calculus.Ref i => tag (ref i)
+| Tag s t => tag (app_comb (closure_to_SF s) (closure_to_SF t))
 | Closure_calculus.App t u => App (closure_to_SF t) (closure_to_SF u) 
 | Closure_calculus.Iop => i_op
 | Add sigma i u => add (pair (pair (closure_to_SF sigma) (ref i)) (closure_to_SF u))
@@ -93,30 +92,23 @@ end.
 Theorem closure_to_SF_preserves_normal : forall M, Closure_calculus.normal M -> normal (closure_to_SF M). 
 Proof. 
 intros M nf; induction nf; unfold closure_to_SF; fold closure_to_SF. 
-eapply2 var_normal. eapply2 ref_program. 
-unfold tag. eapply2 var_normal. nf_out; auto.   nf_out. eapply2 add_normal.
-unfold pair; nf_out; auto.  eapply ref_program. 
-unfold abs, star_opt_app_comb. 
+eapply2 tag_ref_program. 
+eapply2 tag_normal. nf_out. auto. auto. nf_out. 
+unfold pair; eapply2 add_normal. nf_out; auto.  eapply2 ref_program.
+unfold abs, star_opt_app_comb, pair. 
 apply nf_compound. 2: nf_out; auto. 2: auto. 
-apply nf_compound. auto. 2: auto. 
+apply nf_compound. auto. 2: auto.
 apply nf_compound. 2: nf_out; auto. 2: auto. 
+apply nf_compound. auto. 2: auto.
 apply nf_compound. auto. 2: auto. 
+apply nf_compound. apply nf_compound. auto. 2: auto. 3: auto. 
+apply nf_compound. auto. 
+apply nf_compound. auto. 2: auto. 2: auto. 
 apply nf_compound. auto. 2: auto. 
-apply nf_compound. 2: unfold pair; nf_out; auto. 2: apply ref_program. 2: auto. 
-apply nf_compound. auto. 2: auto. 
-apply nf_compound. auto. 2: auto. 
-apply nf_compound. auto. 2: auto. 
-apply nf_compound. auto. 2: auto. 
-apply app_comb_normal. apply app_comb_normal. apply omega3_program.  apply omega3_program. 
-apply add_fn_normal.
-Qed. 
-
-Lemma matchfail_k_var : forall M N, matchfail (App k_op M) (var N). 
-Proof.
-intros; unfold var, app_comb; unfold_op.  
-eapply2 matchfail_compound_l. 
-eapply2 matchfail_compound_l. 
-eapply2 matchfail_op. left; eauto. discriminate. 
+apply app_comb_normal. apply app_comb_normal. eapply2 omega3_program. 
+eapply2 omega3_program. eapply2 add_fn_normal. 
+apply nf_compound. 2: nf_out; auto. 
+2: eapply2 ref_program. 2: auto. nf_out; auto. 
 Qed. 
 
 
@@ -125,60 +117,90 @@ forall M N, seq_red1 M N -> sf_red (closure_to_SF M) (closure_to_SF N).
 Proof.
 intros M N r; induction r; unfold closure_to_SF; fold closure_to_SF.
 (* 18 *) 
-unfold tag. repeat eapply2 preserves_app_sf_red. 
+unfold tag; repeat eapply2 preserves_app_sf_red. 
+unfold tag; repeat eapply2 preserves_app_sf_red. 
+repeat eapply2 preserves_app_sf_red. 
+repeat eapply2 preserves_app_sf_red. 
+unfold add, pair; repeat eapply2 preserves_app_sf_red. 
+unfold add, pair; repeat eapply2 preserves_app_sf_red. 
+unfold abs, star_opt_app_comb; repeat eapply2 preserves_app_sf_red. 
+unfold abs, star_opt_app_comb; repeat eapply2 preserves_app_sf_red. 
+(* 10 *) 
+Check tag_red. 
+
+eapply2 tag_red. 
+repeat eapply2 preserves_app_sf_red. 
+repeat eapply2 preserves_app_sf_red. 
+repeat eapply2 preserves_app_sf_red. 
+repeat eapply2 preserves_app_sf_red. 
 (* 17 *) 
 unfold tag. repeat eapply2 preserves_app_sf_red. 
 (* 16 *) 
-unfold add, pair; unfold_op. repeat eapply2 preserves_app_sf_red. 
+repeat eapply2 preserves_app_sf_red. 
 (* 15 *) 
 repeat eapply2 preserves_app_sf_red. 
 (* 14 *) 
-unfold add, pair; repeat eapply2 preserves_app_sf_red. 
+unfold abs, s_op2; unfold_op; repeat eapply2 preserves_app_sf_red. 
 (* 13 *) 
-unfold add, pair; repeat eapply2 preserves_app_sf_red. 
+unfold abs, s_op2; unfold_op; repeat eapply2 preserves_app_sf_red. 
 (* 12 *) 
-unfold abs; repeat eapply2 preserves_app_sf_red. 
+split_all.  repeat eapply2 preserves_app_sf_red. 
 (* 11 *) 
-unfold abs; repeat eapply2 preserves_app_sf_red. 
+split_all.  repeat eapply2 preserves_app_sf_red. 
 (* 10 *) 
-apply var_red. 
+split_all. apply var_red. 
 (* 9 *) 
 apply tag_red. 
 (* 8 *)
-apply abs_red. 
-(* 7 *) 
-eval_tac. eval_tac. 
+unfold abs. 
+rewrite swap_val. 
+eapply succ_red. eapply2 s_red. 
+eapply transitive_red. eapply preserves_app_sf_red. 
+eapply2 star_opt_beta. eval_tac.
+unfold subst. rewrite subst_rec_preserves_app_comb.
+unfold lift; rewrite subst_rec_lift_rec; try omega.
+rewrite lift_rec_null. 
+unfold subst_rec. insert_Ref_out. 
+unfold lift; rewrite lift_rec_null. auto.   
+(* 7 *)
+repeat eval_tac. 
 (* 6 *) 
-apply add_red_var_equal. 
-eapply2 ref_program. 
-unfold app_comb; case j; unfold_op; split_all; unfold_op. 
-eapply2 matchfail_compound_op. 
-eapply2 matchfail_compound_l. 
-case j; unfold_op; split_all; unfold_op. 
-eapply2 matchfail_compound_op. 
-eapply2 matchfail_compound_l. 
+eapply transitive_red. 
+eapply2 app_comb_red. 
+eapply transitive_red. eapply preserves_app_sf_red. 
+eapply2 app_comb_red. auto.  
+eapply2 add_red_var_equal. 
 (* 5 *) 
-apply add_red_var_unequal. 
-eapply2 ref_program. 
-eapply2 ref_program. 
+eapply transitive_red. 
+eapply2 app_comb_red. 
+eapply transitive_red. eapply preserves_app_sf_red. 
+eapply2 app_comb_red. auto.  
+eapply2 add_red_var_unequal. 
 intro. eapply2 H. eapply2 ref_monotonic.
-unfold app_comb; case j; unfold_op; split_all; unfold_op. 
-eapply2 matchfail_compound_op. 
-eapply2 matchfail_compound_l. 
-case j; unfold_op; split_all; unfold_op. 
-eapply2 matchfail_compound_op. 
-eapply2 matchfail_compound_l.
-(* 4 *) 
-apply add_red_tag. 
+(* 4 *)  
+eapply transitive_red. 
+eapply2 app_comb_red. 
+eapply transitive_red. eapply preserves_app_sf_red. 
+eapply2 app_comb_red. auto.  
+eapply2 add_red_tag.   
 (* 3 *) 
-eapply transitive_red. apply add_red_empty.
-eapply2 preserves_app_sf_red. 
-eapply transitive_red. eapply fst_preserves_sf_red. 
-eapply2 fst_red.  eapply2 fst_red.   
-(* 2 *) 
-apply add_red_add. 
+eapply transitive_red. 
+eapply2 app_comb_red. 
+eapply transitive_red. eapply preserves_app_sf_red. 
+eapply2 app_comb_red. auto.  
+eapply2 add_red_empty. 
+(* 2 *)
+eapply transitive_red. 
+eapply2 app_comb_red. 
+eapply transitive_red. eapply preserves_app_sf_red. 
+eapply2 app_comb_red. auto.  
+eapply2 add_red_add. 
 (* 1 *) 
-apply add_red_abs. 
+eapply transitive_red. 
+eapply2 app_comb_red. 
+eapply transitive_red. eapply preserves_app_sf_red. 
+eapply2 app_comb_red. auto.  
+eapply2 add_red_abs.
 Qed. 
 
 Definition implies_red (red1 : lambda -> lambda -> Prop) (red2: termred) := 

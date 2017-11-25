@@ -50,12 +50,12 @@ Fixpoint ref i := match i with
 | S i1 => App s_op (ref i1)
 end. 
 
-
 Lemma ref_program: forall i, program (ref i). 
 Proof. 
 induction i; unfold program, ref; fold ref; unfold_op; split_all. 
 inversion IHi. split; auto. 
 Qed. 
+
 
 
 Lemma ref_monotonic: forall i j, ref i = ref j -> i = j. 
@@ -66,7 +66,8 @@ Qed.
 
 Lemma var_ref_program: forall i, program (var (ref i)). 
 Proof. 
-intros; split. unfold var. nf_out. eapply2 ref_program. 
+intros; split. unfold var, app_comb. nf_out. eapply2 omega3_program. eapply2 omega3_program.
+eapply2 var_fn_program. eapply2 ref_program. 
 rewrite var_maxvar. eapply2 ref_program. 
 Qed.
 
@@ -74,88 +75,118 @@ Hint Resolve ref_program var_ref_program.
 
 
 
-Fixpoint lambda_to_fieska (t: lambda) := 
+Fixpoint closure_to_fieska (t: lambda) := 
 match t with 
 | Closure_calculus.Ref i => var (ref i)
-| Tag s t => tag (lambda_to_fieska s) (lambda_to_fieska t)
-| Closure_calculus.App t u => App (lambda_to_fieska t) (lambda_to_fieska u) 
+| Tag s t => tag (closure_to_fieska s) (closure_to_fieska t)
+| Closure_calculus.App t u => App (closure_to_fieska t) (closure_to_fieska u) 
 | Closure_calculus.Iop => i_op
-| Add sigma i u => App (App (Op Aop) 
-                            (App (App (Op Aop) add) (s_op2 (lambda_to_fieska  sigma) (ref i))))
-                       (lambda_to_fieska   u)
-| Abs sigma j t => abs (lambda_to_fieska   sigma) (ref j) (lambda_to_fieska   t) 
+| Add sigma i u => add (pair (pair (closure_to_fieska sigma) (ref i)) (closure_to_fieska u))
+| Abs sigma j t => abs (closure_to_fieska sigma) (ref j) (closure_to_fieska t) 
 end.
 
 
 
-Lemma lambda_to_Fieska_preserves_reduction: 
-forall M N, seq_red1 M N -> sf_red (lambda_to_fieska M) (lambda_to_fieska N).
+
+Theorem closure_to_fieska_preserves_normal : forall M, Closure_calculus.normal M -> normal (closure_to_fieska M). 
+Proof. 
+intros M nf; induction nf; unfold closure_to_fieska; fold closure_to_fieska. 
+eapply2 var_normal. eapply2 ref_program. 
+unfold tag, app_comb. eapply2 var_normal. nf_out; auto.   nf_out. eapply2 add_normal.
+unfold pair; nf_out; auto.  eapply ref_program. 
+unfold abs, star_opt_app_comb, app_comb. 
+apply nf_compound. 2: nf_out; auto. 2: auto. 
+apply nf_compound. auto. 2: auto. 
+apply nf_compound. 2: nf_out; auto. 2:  apply ref_program. 2: auto. 
+apply nf_compound. auto. 2: auto. 
+apply nf_compound. auto. 2: auto. 
+apply nf_compound. auto. 2: auto.
+apply nf_compound. 2: apply add_fn_normal. 2: auto. 
+apply nf_compound.  auto.  2: auto. 
+apply nf_compound. apply nf_compound. auto. apply omega3_program. auto. 
+  apply omega3_program. auto.  
+Qed. 
+
+Lemma matchfail_k_var : forall M N, matchfail (App k_op M) (var N). 
 Proof.
-intros M N r; induction r; unfold lambda_to_fieska; fold lambda_to_fieska.
+intros; unfold var, app_comb; unfold_op.  
+eapply2 matchfail_compound_l. 
+eapply2 matchfail_op. right; eauto. discriminate. 
+Qed. 
+
+
+Lemma closure_to_fieska_preserves_red1: 
+forall M N, seq_red1 M N -> sf_red (closure_to_fieska M) (closure_to_fieska N).
+Proof.
+intros M N r; induction r; unfold closure_to_fieska; fold closure_to_fieska.
 (* 18 *) 
 unfold tag. repeat eapply2 preserves_app_sf_red. 
 (* 17 *) 
 unfold tag. repeat eapply2 preserves_app_sf_red. 
 (* 16 *) 
-unfold add, s_op2; unfold_op. repeat eapply2 preserves_app_sf_red. 
+unfold add, pair; unfold_op. repeat eapply2 preserves_app_sf_red. 
 (* 15 *) 
-unfold add, s_op2; unfold_op. repeat eapply2 preserves_app_sf_red. 
+repeat eapply2 preserves_app_sf_red. 
 (* 14 *) 
-unfold abs, s_op2; unfold_op; repeat eapply2 preserves_app_sf_red. 
-(* 13*) 
-unfold abs, s_op2; unfold_op; repeat eapply2 preserves_app_sf_red. 
+unfold add, pair; repeat eapply2 preserves_app_sf_red. 
+(* 13 *) 
+unfold add, pair; repeat eapply2 preserves_app_sf_red. 
 (* 12 *) 
-split_all.  repeat eapply2 preserves_app_sf_red. 
+unfold abs; repeat eapply2 preserves_app_sf_red. 
 (* 11 *) 
-split_all.  repeat eapply2 preserves_app_sf_red. 
+unfold abs; repeat eapply2 preserves_app_sf_red. 
 (* 10 *) 
-split_all. apply var_red. 
+apply var_red. 
 (* 9 *) 
 apply tag_red. 
 (* 8 *)
-eapply2 abs_red.
+apply abs_red. 
 (* 7 *) 
-repeat eval_tac. 
+eval_tac. 
 (* 6 *) 
-eval_tac. eval_tac. eapply2 add_red_var_equal. 
+apply add_red_var_equal. 
+eapply2 ref_program. 
+unfold app_comb; case j; unfold_op; split_all; unfold_op. 
+eapply2 matchfail_compound_op. 
+eapply2 matchfail_compound_l. 
+case j; unfold_op; split_all; unfold_op. 
+eapply2 matchfail_compound_op. 
+eapply2 matchfail_compound_l.
 (* 5 *) 
-eval_tac. eval_tac.  eapply2 add_red_var_unequal. 
+apply add_red_var_unequal. 
+eapply2 ref_program. 
+eapply2 ref_program. 
 intro. eapply2 H. eapply2 ref_monotonic.
-(* 4 *)  
-eval_tac. eval_tac. eapply2 add_red_tag. 
+unfold app_comb; case j; unfold_op; split_all; unfold_op. 
+eapply2 matchfail_compound_op. 
+eapply2 matchfail_compound_l. 
+case j; unfold_op; split_all; unfold_op. 
+eapply2 matchfail_compound_op. 
+eapply2 matchfail_compound_l.
+(* 4 *) 
+apply add_red_tag. 
 (* 3 *) 
-eval_tac. eval_tac. eapply2 add_red_empty. 
-(* 2 *)
-eval_tac. eval_tac. eapply2 add_red_add. 
+eapply transitive_red. apply add_red_empty.
+eapply2 preserves_app_sf_red. 
+eapply transitive_red. eapply fst_preserves_sf_red. 
+eapply2 fst_red.  eapply2 fst_red.   
+(* 2 *) 
+apply add_red_add. 
 (* 1 *) 
-eval_tac. eval_tac. eapply2 add_red_abs. 
+apply add_red_abs. 
 Qed. 
 
 Definition implies_red (red1 : lambda -> lambda -> Prop) (red2: termred) := 
-forall M N, red1 M N -> red2(lambda_to_fieska M) (lambda_to_fieska N). 
+forall M N, red1 M N -> red2(closure_to_fieska M) (closure_to_fieska N). 
 
 Lemma implies_red_multi_step: forall red1 red2, implies_red red1  (multi_step red2) -> 
                                                 implies_red (Closure_calculus.multi_step red1) (multi_step red2).
 Proof. red. 
 intros red1 red2 IR M N R; induction R; split_all. 
-apply transitive_red with (lambda_to_fieska N); auto. 
+apply transitive_red with (closure_to_fieska N); auto. 
 Qed. 
 
-Lemma lambda_to_fieska_preserves_seq_red: forall M N, Closure_calculus.seq_red M N -> sf_red (lambda_to_fieska M) (lambda_to_fieska N).
-Proof. intros. eapply2 (implies_red_multi_step). red. apply lambda_to_Fieska_preserves_reduction.
+Theorem closure_to_fieska_preserves_reduction: forall M N, Closure_calculus.seq_red M N -> sf_red (closure_to_fieska M) (closure_to_fieska N).
+Proof. intros. eapply2 (implies_red_multi_step). red. apply closure_to_fieska_preserves_red1.
 Qed. 
 
-
-Lemma lambda_to_fieska_preserves_normal : forall M, Closure_calculus.normal M -> normal (lambda_to_fieska M). 
-Proof. 
-intros M nf; induction nf; unfold lambda_to_fieska; fold lambda_to_fieska. 
-eapply2 var_normal. eapply2 ref_program. 
-eapply2 tag_normal. nf_out.  
-nf_out; auto. apply add_normal. unfold s_op2; nf_out; auto.  eapply2 ref_program. 
-(* 1 *) 
-unfold abs, swap, s_op2. nf_out. apply add_normal. eapply2 ref_program.  
-Qed. 
-
-
-
- 

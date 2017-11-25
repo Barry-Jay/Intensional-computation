@@ -37,42 +37,33 @@ Require Import IntensionalLib.Fieska_calculus.Fixpoints.
 Require Import IntensionalLib.Fieska_calculus.Extensions.
 Require Import IntensionalLib.Closure_to_Fieska.Tagging.
 
-Definition s_op2 g f := App (App s_op g) f .
 
-Ltac unfold_op := unfold s_op2, a_op, i_op, id, k_op, f_op, s_op. 
+Ltac unfold_op := unfold pair, a_op, i_op, id, k_op, f_op, s_op. 
 
 
-Lemma s_op2_normal: forall M N, normal M -> normal N -> normal (App (App (Op Sop) M) N).
-Proof. intros; nf_out. Qed. 
+Lemma pair_normal: forall M N, normal M -> normal N -> normal (pair M N). 
+Proof. intros; unfold_op; nf_out. Qed. 
 
-Lemma k_op_normal: forall M, normal M -> normal (App (Op Kop) M).
-Proof. intros;  nf_out. Qed. 
+Lemma k_op_normal: forall M, normal M -> normal (App (App (Op Fop) (Op Fop)) M).
+Proof. intros;  unfold_op; nf_out. Qed. 
 
 Ltac nf_out2 := 
 match goal with 
-| |- normal (App (App (Op Sop) _) _) => apply s_op2_normal; nf_out2
-| |- normal (App (Op Kop) _) => apply k_op_normal; nf_out2
+| |- normal (pair _ _) => apply pair_normal; nf_out2
+| |- normal (App (App (Op Fop) (Op Fop)) _) => apply k_op_normal; nf_out2
 | _ => nf_out
 end. 
 
 
-Lemma A_k_compound2: forall k M, compound (App (A_k k) M).
-Proof.
-induction k; split_all. 
-unfold a_op. case k; split_all. case n; split_all. 
-Qed. 
-
-Hint Resolve A_k_compound2. 
-
 
 (* pairing *) 
 
-Definition left_projection M := App (App (App (Op Fop) M) M) (Op Kop). 
-Definition right_projection M := App (App (App (Op Fop) M) M) (App (Op Kop) (Op Iop)). 
+Definition left_projection M := App (App (App (Op Fop) M) M) k_op. 
+Definition right_projection M := App (App (App (Op Fop) M) M) (App k_op i_op). 
 Definition fst_projection M := right_projection(left_projection M). 
 Definition snd_projection M := right_projection M.  
 
-Lemma fst_out : forall M N, sf_red (fst_projection (s_op2 M N)) M. 
+Lemma fst_red : forall M N, sf_red (fst_projection (pair M N)) M. 
 Proof. 
 intros; unfold fst_projection, left_projection, right_projection.  unfold_op. 
 eapply transitive_red. eapply preserves_app_sf_red. eapply preserves_app_sf_red. 
@@ -82,10 +73,10 @@ eapply2 f_compound_red. eval_tac. auto. eapply succ_red.
 eapply2 f_compound_red. eval_tac. 
 Qed. 
 
-Lemma snd_out : forall M N, sf_red (snd_projection (s_op2 M N)) N. 
+Lemma snd_red : forall M N, sf_red (snd_projection (pair M N)) N. 
 Proof. 
 intros; unfold snd_projection, left_projection, right_projection.  unfold_op. 
-eapply succ_red. eapply2 f_compound_red. eval_tac.
+eapply succ_red. eapply2 f_compound_red. eval_tac. 
 Qed. 
 
 Lemma fst_preserves_sf_red: 
@@ -124,292 +115,398 @@ Qed.
 
 
 
-(* substitutions 
-
-[| Add x u sigma |] = A add (S (S sigma x) u) -- the order simplifies beta-reduction
-add sigma t traverses t, looking for variables.
-add sigma i traverses sigma, looking for i. 
-
-*) 
-
-
-Definition swap M N := App (App (Op Sop) (App (Op Aop) M)) (App (Op Kop) N).
-
-
-Definition add_fn := star_opt (star_opt (star_opt 
-(* recursion argument, (sigma,x) u  *) 
-(* tag *) 
-(extension (App (App (Op Aop)(App (App (Op Aop)(App (App (Op Aop) (Y_k 3)) (Ref 2))) (Ref 1))) (Ref 0)) 
-        (App (App (App (App (Op Aop) (App (App (Op Aop) (Ref 5)) (Ref 4))) (Ref 3)) (Ref 1))
-             (App (App (App (Op Aop) (App (App (Op Aop) (Ref 5)) (Ref 4)) )(Ref 3)) (Ref 0)))
-(* var *) 
-(extension (App (App (Op Aop) (App (App (Op Aop)(Y_k 3)) (Ref 1))) (Ref 0))  (* var y *) 
-                     (App (App (App (App (Op Eop) (Ref 0)) 
-                                     (snd_projection (Ref 3))) (* y = x *) 
-                               (Ref 2))  (* u *) 
-                          (App (fst_projection (Ref 3)) 
-                               (App (App (Op Aop) (App (App (Op Aop)(Y_k 3)) (Ref 1)) )(Ref 0))))
-                                          (* sigma (var y) *) 
-(* add  *) 
-(* | Add i u sigma => App (App (Op Aop) add) (s_op2 (s_op2 (lambda_to_fieska sigma) (ref i)) (lambda_to_fieska u))
-*) 
-(extension (App (App (Op Aop) (App (App (Op Aop) (App (App (Op Aop) (Y_k 4)) 
-                                                      (Ref 2)))
-                                   (Ref 1)))
-           (Ref 0))
-  (* add (sigma2, x2) u *) 
-   (App (App (Op Aop) (App (App (Op Aop) (App (App (Op Aop) (Y_k 4)) (Ref 2)))
-     (s_op2 (App (App (App (Op Aop) (App (App (Op Aop) (Ref 5)) 
-                                         (Ref 4))) 
-                      (Ref 3)) 
-                 (fst_projection (Ref 1)))
-        (snd_projection (Ref 1)))))
-     (App (App (App (Op Aop) (App (App (Op Aop) (Ref 5)) (Ref 4))) (Ref 3)) (Ref 0)))
-(* abs = swap (App (App (Op Aop) add (s_op2 sigma x)) t *) 
-(extension (swap (App (App (Op Aop) (Ref 3)) (App (App (Op Sop) (Ref 2)) (Ref 1))) (Ref 0))
-           (swap (App (App (Op Aop) (Ref 3)) (App (App (Op Sop) 
-                                             (App (App (App (Op Aop) 
-                                                            (App (App (Op Aop) (Ref 6))
-                                                                 (Ref 5)))
-                                                       (Ref 4)) 
-                                                  (Ref 2)))
-                                                  (Ref 1)))
-                 (Ref 0))
-(* dummy case *) 
-(fst_projection (Ref 1))
-)))))). 
-
-Definition add :=  App (App (Op Aop) (Y_k 4)) add_fn.
-
-
-Definition abs sigma x t := swap (App (App (Op Aop) add) (s_op2 sigma x)) t .
+Lemma pattern_size_app_comb: 
+forall M N, pattern_size(app_comb M N) = pattern_size M + pattern_size N. 
+Proof. intros; unfold app_comb. unfold_op; unfold  pattern_size; fold pattern_size; omega.  Qed. 
 
 
 
-Lemma abs_red : 
-forall sigma x t u, sf_red (App (abs sigma x t) u) 
-                           (App (App (App (Op Aop) (App (App (Op Aop) add) (s_op2 sigma x)))
-                                      u) t). 
+Definition star_opt_app_comb M N := 
+App (App (Op Sop) (App (Op Kop) (App (Op Aop) M))) N.
+
+
+Lemma star_opt_app_comb_red: 
+forall M N P, sf_red (App (star_opt_app_comb M N) P) (app_comb M (App N P)).
 Proof.
-intros; unfold abs, swap; unfold_op. eval_tac. 
-eapply2 preserves_app_sf_red. eval_tac. 
+intros; unfold star_opt_app_comb, app_comb. eval_tac.  eval_tac. 
 Qed. 
 
 
-Lemma add_closed: maxvar add = 0.
+
+Definition add_fn := star_opt (star_opt
+(* recursion argument, ((sigma,x),u)  *) 
+(extension (app_comb (Ref 1) (Ref 0)) 
+(* tag *) 
+        (App (extension (app_comb (Ref 1) (Ref 0)) 
+                        (App (App (App (Ref 5) (Ref 4)) (Ref 1))
+                             (App (App (Ref 5) (Ref 4)) (Ref 0)))
+(* add *) 
+             (extension (App (App (Op Fop) (App (App (Op Fop) (Ref 2)) (Ref 1))) (Ref 0)) 
+                        (app_comb (Ref 4) 
+                                  (App (App (Op Fop) (App (App (Op Fop) 
+                                                               (App (App (Ref 6) (Ref 5)) (Ref 2)))
+                                                     (Ref 1)))
+                                       (App (App (Ref 6) (Ref 5)) (Ref 0))))
+(* var *) 
+             (App k_op (App (App (App (App (Op Eop) (Ref 0)) 
+                                     (snd_projection (fst_projection (Ref 2)))) (* y = x *) 
+                               (snd_projection (Ref 2)))  (* u *) 
+                          (App (fst_projection (fst_projection (Ref 2)))
+                               (app_comb (Ref 1) (Ref 0)))))
+                                          (* sigma (var y) *) 
+
+
+ )) (Ref 0))
+
+(* abs *) 
+(extension (App (App (Op Sop) (star_opt_app_comb (Ref 3)
+                         (App (Op Fop) (pair (Ref 2) (Ref 1))))) (App k_op (Ref 0)))
+           (App (App (Op Sop) (star_opt_app_comb (Ref 3)
+                         (App (Op Fop) (pair (App (App (Ref 5) (Ref 4)) (Ref 2)) (Ref 1))))) (App k_op (Ref 0)))
+(* Iop  *) 
+(fst_projection (fst_projection (Ref 0))))
+)).
+
+Definition add M :=  app_comb (app_comb (app_comb omega3 omega3) add_fn) M.
+
+Definition abs sigma x t := 
+App (App (Op Sop)  (star_opt_app_comb (app_comb (app_comb omega3 omega3) add_fn) 
+                         (App (Op Fop) (pair sigma x)))) 
+    (App k_op t) .
+
+Lemma Y3_to_add: forall sigma, sf_red (App (Y3 add_fn) sigma) (add sigma). 
+Proof. 
+intros. unfold Y3, app_comb. 
+eapply transitive_red.  eapply2 star_opt_beta. 
+unfold subst; rewrite ! subst_rec_app. 
+rewrite ! (subst_rec_closed omega3). 2: unfold omega3; cbv; auto. 
+unfold lift; rewrite subst_rec_lift_rec; try omega.  
+unfold subst_rec; fold subst_rec. insert_Ref_out.
+unfold lift; rewrite ! lift_rec_null.
+unfold add; eapply2 zero_red. 
+Qed.
+
+
+Lemma maxvar_add: forall M, maxvar (add M) = maxvar M.
 Proof.
-unfold add. unfold maxvar; fold maxvar. rewrite Y_k_closed. unfold max. 
+unfold add, app_comb. intros. unfold maxvar; fold maxvar. 
+replace (maxvar omega3) with 0 by (unfold omega3; cbv; auto). 
+replace (maxvar add_fn) with 0. simpl; omega. 
 unfold add_fn. rewrite ! maxvar_star_opt. 
+repeat (rewrite maxvar_extension; rewrite ? maxvar_app; rewrite ? maxvar_app_comb).
 cbv.  auto. 
 Qed. 
 
 
+Lemma abs_red : 
+forall sigma x t u, sf_red (App (abs sigma x t) u) 
+                           (App (add (pair (pair sigma x) u)) t). 
+Proof.
+intros; unfold abs, app_comb. eval_tac.  
+eapply transitive_red. eapply preserves_app_sf_red. eapply2 star_opt_app_comb_red. eval_tac.  
+eapply2 preserves_app_sf_red. 
+Qed. 
+
+Lemma lift_rec_preserves_Y3: forall M n k, lift_rec (Y3 M) n k = Y3 (lift_rec M n k).
+Proof. 
+intros. unfold Y3, app_comb.  rewrite lift_rec_preserves_star_opt. 
+unfold lift, lift_rec; fold lift_rec; rewrite lift_lift_rec; try omega.
+rewrite ! (lift_rec_closed omega3).  unfold  lift_rec; fold lift_rec. relocate_lt.  auto. 
+unfold omega3; cbv; auto.
+Qed.   
 
 
 Lemma add_red_tag: 
-forall sigma_x u M N, sf_red (App (App (App add sigma_x) u) (tag M N)) 
-                         (App (App (App (App (Op Aop) (App (App (Op Aop) add) sigma_x)) u) M)
-                              (App (App (App (Op Aop) (App (App (Op Aop) add) sigma_x)) u) N)).
+forall sigma M N, sf_red (App (add sigma) (tag M N)) 
+                         (App (App (add sigma) M)
+                              (App (add sigma) N)).
 Proof.
-intros. unfold add at 1. eval_tac. 
-eapply transitive_red. eapply2 Y4_fix. 
-replace (App (App (Op Aop) (Y_k 4)) add_fn) with add by auto. 
-unfold add_fn.
-eapply transitive_red. 
-eapply preserves_app_sf_red. 
-eapply2 star_opt_beta3.  auto. 
+intros. unfold add at 1, app_comb. eval_tac. eval_tac. eval_tac. 
+eapply transitive_red. eapply preserves_app_sf_red.  eapply2 omega3_omega3. auto. 
+(* 1 *) 
+unfold add_fn, app_comb. 
+eapply transitive_red. eapply  preserves_app_sf_red.
+eapply2 star_opt_beta2. auto.  
 unfold subst; rewrite ! subst_rec_preserves_extension. 
+(* an app_comb *) 
 eapply transitive_red. 
  eapply2 extensions_by_matching.
-unfold tag, tag_fix.  unfold_op. 
-eapply2 match_app. eapply2 match_app.  
-eapply2 match_app. eapply2 match_app. 
-eapply2 match_app. eapply2 program_matching. 
-unfold program; auto. 
+unfold tag, var, app_comb.  
+eapply2 match_app.  
 (* 1 *)  
 unfold map, app, length, fold_left, subst.
-unfold pattern_size; fold pattern_size.
-rewrite ! (pattern_size_closed (Y_k _)). 
-2: apply Y_k_closed. 
- unfold plus; fold plus. 
-repeat (unfold subst_rec; fold subst_rec; insert_Ref_out). 
-unfold lift. rewrite ! lift_rec_lift_rec; try omega. unfold plus. 
-repeat (rewrite subst_rec_ref; insert_Ref_out; unfold pred). 
-unfold lift. 
-rewrite ! subst_rec_lift_rec; try omega.
-rewrite ! lift_rec_null. auto. 
+unfold subst_rec; fold subst_rec. 
+rewrite ! subst_rec_preserves_extension.
+rewrite ! subst_rec_app. 
+(* an app_comb *) 
+eapply transitive_red. 
+ eapply2 extensions_by_matching.
+repeat (rewrite ? subst_rec_ref; insert_Ref_out). 
+unfold lift; rewrite ! lift_rec_null.
+rewrite subst_rec_lift_rec; try omega. 
+rewrite ! lift_rec_null. 
+eapply2 match_app.  
+(* 1 *)  
+unfold map, app, length, fold_left, subst.
+rewrite ! subst_rec_app. 
+unfold pattern_size; fold pattern_size. unfold plus. 
+do 6 (rewrite subst_rec_ref at 1; insert_Ref_out; unfold pred). 
+unfold lift; rewrite 4? subst_rec_lift_rec; try omega. 
+rewrite lift_rec_preserves_Y3. 
+(* tidying up *) 
+rewrite ! lift_rec_lift_rec; try omega. unfold plus. 
+rewrite ! subst_rec_lift_rec; try omega. 
+unfold lift; rewrite ! lift_rec_null. 
+(* 1 *) 
+do 3 (rewrite subst_rec_ref; insert_Ref_out). 
+do 7 (rewrite subst_rec_ref at 1; insert_Ref_out). 
+(rewrite subst_rec_ref at 1; insert_Ref_out). 
+unfold lift; rewrite ! lift_rec_lift_rec; try omega. unfold plus. 
+rewrite ! subst_rec_lift_rec; try omega. 
+unfold lift; rewrite ! lift_rec_null. 
+unfold subst_rec; fold subst_rec. 
+(* 1 *) 
+replace (star_opt (star_opt
+(* recursion argument, ((sigma,x),u)  *) 
+(extension (App (App (Op Aop) (Ref 1)) (Ref 0)) 
+(* tag *) 
+        (App (extension (App (App (Op Aop) (Ref 1)) (Ref 0)) 
+                        (App (App (App (Ref 5) (Ref 4)) (Ref 1))
+                             (App (App (Ref 5) (Ref 4)) (Ref 0)))
+(* add *) 
+             (extension (App (App (Op Fop) (App (App (Op Fop) (Ref 2)) (Ref 1))) (Ref 0)) 
+                        (App (App (Op Aop) (Ref 4))
+                                  (App (App (Op Fop) (App (App (Op Fop) 
+                                                               (App (App (Ref 6) (Ref 5)) (Ref 2)))
+                                                     (Ref 1)))
+                                       (App (App (Ref 6) (Ref 5)) (Ref 0))))
+(* var *) 
+             (App k_op (App (App (App (App (Op Eop) (Ref 0)) 
+                                     (snd_projection (fst_projection (Ref 2)))) (* y = x *) 
+                               (snd_projection (Ref 2)))  (* u *) 
+                          (App (fst_projection (fst_projection (Ref 2)))
+                               (App (App (Op Aop) (Ref 1)) (Ref 0)))))
+                                          (* sigma (var y) *) 
+
+
+ )) (Ref 0))
+
+(* abs *) 
+(extension (App (App (Op Sop) (star_opt_app_comb (Ref 3)
+                         (App (Op Fop) (pair (Ref 2) (Ref 1))))) (App k_op (Ref 0)))
+           (App (App (Op Sop) (star_opt_app_comb (Ref 3)
+                         (App (Op Fop) (pair (App (App (Ref 5) (Ref 4)) (Ref 2)) (Ref 1))))) (App k_op (Ref 0)))
+(* Iop  *) 
+(fst_projection (fst_projection (Ref 0))))
+)))
+with add_fn by auto. 
+apply preserves_app_sf_red;
+apply preserves_app_sf_red; 
+try (eapply2 zero_red; fail);  
+apply Y3_to_add. 
 Qed. 
-  
+
+
 
 
 Lemma add_red_var_unequal: 
 forall i u sigma j, program i -> program j -> i <> j -> 
-sf_red (App (App (App add (s_op2 sigma i)) u) (var j)) (App sigma (var j)).       
+matchfail (app_comb (Ref 1) (Ref 0)) j -> 
+matchfail  (App (App (Op Fop) (App (App (Op Fop) (Ref 2)) (Ref 1))) (Ref 0)) j -> 
+sf_red (App (add (pair (pair sigma i) u)) (var j)) (App sigma (var j)).       
 Proof.
-intros. unfold_op;  unfold add at 1. eval_tac. 
-eapply transitive_red. eapply2 Y4_fix. 
-replace (App (App (Op Aop) (Y_k 4)) add_fn) with add by auto. 
-unfold add_fn.
+intros. unfold_op;  unfold add at 1, app_comb. eval_tac. eval_tac. eval_tac.  
+eapply transitive_red. eapply preserves_app_sf_red. eapply2 omega3_omega3. auto. 
+(* 1 *)
+unfold add_fn, app_comb.
 eapply transitive_red. 
-eapply preserves_app_sf_red. 
-eapply2 star_opt_beta3.  auto. 
+eapply preserves_app_sf_red.  eapply2 star_opt_beta2. auto. 
 unfold subst; rewrite ! subst_rec_preserves_extension. 
-eapply transitive_red. eapply2 extensions_by_matchfail.
-unfold var, var_fix, var_fn; unfold_op. 
-eapply2 matchfail_compound_l. eapply2 matchfail_compound_r. 
-eapply2 matchfail_compound_l. eapply2 matchfail_compound_r.
-eapply2 matchfail_compound_l. 
-eapply2 matchfail_compound_r. unfold_op; auto. 
- eapply2 matchfail_compound_l. 
-eapply2 matchfail_compound_l. 
-unfold_op.  
-eapply2 matchfail_op. unfold factorable. left; eauto. discriminate.
-(* 1 *)  
 eapply transitive_red. eapply2 extensions_by_matching.
-unfold var, var_fix; unfold_op. 
-eapply2 match_app. eapply2 match_app. eapply2 match_app. 
-apply program_matching. 
-unfold program; split. nf_out.  auto. 
+unfold var, var_fn, app_comb; unfold_op. 
+ eapply2 match_app.   
+(* 1 *)  
+unfold map, app, length, fold_left, subst.
+unfold subst_rec; fold subst_rec. 
+rewrite ! subst_rec_preserves_extension.
+rewrite ! subst_rec_app. 
+(* not an app_comb *) 
+eapply transitive_red. 
+ eapply2 extensions_by_matchfail.
+repeat (rewrite ? subst_rec_ref; insert_Ref_out). 
+unfold lift; rewrite ! lift_rec_null.
+rewrite subst_rec_lift_rec; try omega. 
+rewrite ! lift_rec_null. auto. 
+(* not a pair *) 
+eapply transitive_red. 
+ eapply2 extensions_by_matchfail.
+repeat (rewrite ? subst_rec_ref; insert_Ref_out). 
+unfold lift; rewrite ! lift_rec_null.
+rewrite subst_rec_lift_rec; try omega. 
+rewrite ! lift_rec_null. auto. 
 (* 1 *) 
-unfold map, app, length, fold_left, subst. 
-unfold pattern_size; fold pattern_size.
-rewrite ! pattern_size_closed; auto.  unfold plus; fold plus. 
-rewrite ! subst_rec_app. rewrite ! subst_rec_op.  
+rewrite ! (subst_rec_closed k_op); unfold_op; auto.
+rewrite ! (subst_rec_closed (Op Eop)); auto. 
+unfold pattern_size; fold pattern_size. unfold plus. 
+do 3 (rewrite subst_rec_ref at 1; insert_Ref_out; unfold pred). 
+unfold lift; rewrite lift_rec_null;
+rewrite 4? subst_rec_lift_rec; try omega. 
+rewrite ! lift_rec_null. 
 rewrite ! subst_rec_preserves_snd_projection. 
 rewrite ! subst_rec_preserves_fst_projection. 
-unfold lift. rewrite ! lift_rec_null.
-repeat (rewrite subst_rec_ref at 1; insert_Ref_out). 
+do 3 (rewrite subst_rec_ref at 1; insert_Ref_out). 
 unfold lift; rewrite ! lift_rec_lift_rec; try omega. unfold plus. 
 rewrite ! subst_rec_lift_rec; try omega.
-rewrite ! lift_rec_null.
-unfold subst_rec; fold subst_rec. 
-rewrite ! (subst_rec_closed (Y_k _)); try (rewrite Y_k_closed; omega). 
+rewrite ! lift_rec_null. eval_tac. 
+(* 1 *) 
 eapply transitive_red. eapply preserves_app_sf_red. eapply preserves_app_sf_red. 
-eapply preserves_app_sf_red. auto. 
-eapply2 snd_out. auto.   
-eapply transitive_red. eapply preserves_app_sf_red. eapply2 fst_out. auto. auto. 
-eapply transitive_red. eapply preserves_app_sf_red. eapply preserves_app_sf_red.
-eapply2 unequal_programs. auto. auto. 
-eval_tac. 
-Qed.
+eapply preserves_app_sf_red. auto.
+eapply snd_preserves_sf_red. eapply2 fst_red. eapply2 snd_red. 
+eapply preserves_app_sf_red.
+eapply transitive_red. 
+eapply fst_preserves_sf_red. eapply2 fst_red. eapply2 fst_red. auto. 
+(* 1 *) 
+eapply transitive_red. eapply preserves_app_sf_red. eapply preserves_app_sf_red. 
+eapply preserves_app_sf_red. eapply2 zero_red. eapply2 snd_red. auto. eapply2 zero_red. 
+(* 1 *)  
+eapply transitive_red. eapply preserves_app_sf_red. eapply preserves_app_sf_red. 
+eapply2 unequal_programs. auto. eapply2 zero_red.  eval_tac.
+apply preserves_app_sf_red. auto.  
+insert_Ref_out. 
+unfold lift; rewrite ! lift_rec_null. 
+rewrite ! subst_rec_lift_rec; try omega. 
+rewrite ! lift_rec_null. eapply2 zero_red. 
+Qed. 
+
 
 Lemma add_red_var_equal: 
 forall i u sigma, program i -> 
-sf_red (App (App (App add (s_op2 sigma i)) u) (var i)) u.       
+matchfail (app_comb (Ref 1) (Ref 0)) i -> 
+matchfail  (App (App (Op Fop) (App (App (Op Fop) (Ref 2)) (Ref 1))) (Ref 0)) i -> 
+sf_red (App (add (pair (pair sigma i) u)) (var i)) u.    
 Proof.
-intros. unfold_op;  unfold add at 1. eval_tac. 
-eapply transitive_red. eapply2 Y4_fix. 
-replace (App (App (Op Aop) (Y_k 4)) add_fn) with add by auto. 
-unfold add_fn.
+intros. unfold_op;  unfold add at 1, app_comb. eval_tac. eval_tac. eval_tac. 
+eapply transitive_red. eapply preserves_app_sf_red. eapply2 omega3_omega3. auto. 
+(* 1 *)
+unfold add_fn, app_comb.
 eapply transitive_red. 
-eapply preserves_app_sf_red. 
-eapply2 star_opt_beta3.  auto. 
+eapply preserves_app_sf_red.  eapply2 star_opt_beta2. auto. 
 unfold subst; rewrite ! subst_rec_preserves_extension. 
-eapply transitive_red. eapply2 extensions_by_matchfail.
-unfold var, var_fix, var_fn; unfold_op. 
-eapply2 matchfail_compound_l. eapply2 matchfail_compound_r. 
-eapply2 matchfail_compound_l. eapply2 matchfail_compound_r.
-eapply2 matchfail_compound_l. 
-eapply2 matchfail_compound_r. unfold_op; auto. 
- eapply2 matchfail_compound_l. 
-eapply2 matchfail_compound_l. 
-unfold_op.  
-eapply2 matchfail_op. unfold factorable. left; eauto. discriminate.
-(* 1 *)  
 eapply transitive_red. eapply2 extensions_by_matching.
-unfold var, var_fix; unfold_op. 
-eapply2 match_app. eapply2 match_app. eapply2 match_app. 
-apply program_matching. 
-unfold program; split. nf_out.  auto. 
+unfold var, var_fn, app_comb; unfold_op. 
+ eapply2 match_app.  
+(* 1 *)  
+unfold map, app, length, fold_left, subst.
+unfold subst_rec; fold subst_rec. 
+rewrite ! subst_rec_preserves_extension.
+rewrite ! subst_rec_app. 
+(* not an app_comb *) 
+eapply transitive_red. 
+ eapply2 extensions_by_matchfail.
+repeat (rewrite ? subst_rec_ref; insert_Ref_out). 
+unfold lift; rewrite ! lift_rec_null.
+rewrite subst_rec_lift_rec; try omega. 
+rewrite ! lift_rec_null. auto. 
+(* not a pair *) 
+eapply transitive_red. 
+ eapply2 extensions_by_matchfail.
+repeat (rewrite ? subst_rec_ref; insert_Ref_out). 
+unfold lift; rewrite ! lift_rec_null.
+rewrite subst_rec_lift_rec; try omega. 
+rewrite ! lift_rec_null. auto. 
 (* 1 *) 
-unfold map, app, length, fold_left, subst. 
-unfold pattern_size; fold pattern_size.
-rewrite ! pattern_size_closed; auto.  unfold plus; fold plus. 
-rewrite ! subst_rec_app. rewrite ! subst_rec_op.  
+rewrite ! (subst_rec_closed k_op); unfold_op; auto. 
+unfold pattern_size; fold pattern_size. unfold plus. 
+do 3 (rewrite subst_rec_ref at 1; insert_Ref_out; unfold pred). 
+unfold lift; rewrite lift_rec_null;
+rewrite 4? subst_rec_lift_rec; try omega. 
+rewrite ! lift_rec_null. 
+rewrite subst_rec_lift_rec; try omega. 
+rewrite ! lift_rec_null. 
 rewrite ! subst_rec_preserves_snd_projection. 
 rewrite ! subst_rec_preserves_fst_projection. 
-unfold lift. rewrite ! lift_rec_null.
-repeat (rewrite subst_rec_ref at 1; insert_Ref_out). 
+do 3 (rewrite subst_rec_ref at 1; insert_Ref_out). 
 unfold lift; rewrite ! lift_rec_lift_rec; try omega. unfold plus. 
 rewrite ! subst_rec_lift_rec; try omega.
 rewrite ! lift_rec_null.
-unfold subst_rec; fold subst_rec. 
-rewrite ! (subst_rec_closed (Y_k _)); try (rewrite Y_k_closed; omega). 
+unfold subst_rec; fold subst_rec. eval_tac.  
+(* 1 *) 
 eapply transitive_red. eapply preserves_app_sf_red. eapply preserves_app_sf_red. 
-eapply preserves_app_sf_red. auto. 
-eapply2 snd_out. auto.   
-eapply transitive_red. eapply preserves_app_sf_red. eapply2 fst_out. auto. auto. 
-eapply transitive_red. eapply preserves_app_sf_red. eapply preserves_app_sf_red.
-eapply2 equal_programs. auto. auto. 
-eval_tac. 
-Qed.
+eapply preserves_app_sf_red. eapply2 zero_red. 
+eapply snd_preserves_sf_red. eapply2 fst_red. eapply2 snd_red. 
+eapply preserves_app_sf_red.
+eapply transitive_red. 
+eapply fst_preserves_sf_red. eapply2 fst_red. eapply2 fst_red. auto. 
+(* 1 *) 
+eapply transitive_red. eapply preserves_app_sf_red. eapply preserves_app_sf_red. 
+eapply preserves_app_sf_red. eapply2 zero_red. eapply2 snd_red. auto. eapply2 zero_red. 
+(* 1 *) 
+eapply transitive_red. eapply preserves_app_sf_red. eapply preserves_app_sf_red. 
+eapply2 equal_programs. auto. eapply2 zero_red.  eval_tac. 
+Qed. 
 
 
-Lemma subst_rec_preserves_swap: 
-forall M N P k, subst_rec (swap M N) P k = swap (subst_rec M P k) (subst_rec N P k).
-Proof. intros; unfold swap, subst_rec; auto. Qed. 
-
-Lemma pattern_size_swap: 
-forall M N, pattern_size(swap M N) = pattern_size M + pattern_size N. 
-Proof. intros; unfold swap, pattern_size; fold pattern_size; omega.  Qed. 
 
 
 Lemma add_red_abs : 
-forall sigma x t sigma_y u, 
-  sf_red (App (App (App add sigma_y) u) (abs sigma x t))
-         (abs (App (App (App (Op Aop) (App (App (Op Aop) add) sigma_y)) u) sigma) x t). 
+forall sigma x t sigma2, 
+  sf_red (App (add sigma2) (abs sigma x t))
+         (abs (App (add sigma2) sigma) x t). 
 Proof.
-intros. unfold add at 1. eval_tac. 
-eapply transitive_red. eapply2 Y4_fix. 
-replace (App (App (Op Aop) (Y_k 4)) add_fn) with add by auto. 
-unfold add_fn.
+intros. unfold add at 1, app_comb. eval_tac. eval_tac. eval_tac. 
+eapply transitive_red. eapply preserves_app_sf_red. eapply2 omega3_omega3. auto. 
+(* 1 *)
+unfold add_fn, app_comb.
 eapply transitive_red. 
-eapply preserves_app_sf_red. 
-eapply2 star_opt_beta3.  auto. 
+eapply preserves_app_sf_red.  eapply2 star_opt_beta2. auto. 
 unfold subst; rewrite ! subst_rec_preserves_extension. 
 eapply transitive_red. eapply2 extensions_by_matchfail.
-unfold abs, swap; unfold_op; auto. 
-eapply2 matchfail_compound_l. 
-eapply2 matchfail_compound_l. 
-eapply2 matchfail_op. 
-unfold factorable; eauto. discriminate. 
-(* 1 *) 
-eapply  transitive_red. 
-eapply2 extensions_by_matchfail.
-unfold abs, swap; unfold_op; auto. 
-eapply2 matchfail_compound_l. 
-eapply2 matchfail_compound_l. 
-eapply2 matchfail_op. 
-unfold factorable; eauto. discriminate. 
-(* 1 *) 
-eapply  transitive_red. 
-eapply2 extensions_by_matchfail.
-unfold abs, swap; unfold_op; auto. 
-eapply2 matchfail_compound_l. 
-eapply2 matchfail_compound_l. 
-eapply2 matchfail_op. 
-unfold factorable; eauto. discriminate. 
-(* 1 *) 
-eapply  transitive_red. 
-eapply2 extensions_by_matching.
-unfold abs, swap; unfold_op; auto. 
-do 20 eapply2 match_app. 
+(* abs not an app_comb *) 
+unfold abs, star_opt_app_comb, app_comb; unfold_op. 
+eapply2 matchfail_compound_l.   
+eapply2 matchfail_compound_l.
+eapply2 matchfail_op. unfold factorable; eauto. discriminate. 
+(* an abs *) 
+eapply transitive_red. eapply2 extensions_by_matching. 
+unfold abs, star_opt_app_comb, pair; unfold_op. 
+eapply2 match_app.  eapply2 match_app.  
+eapply2 match_app. eapply2 match_app. 
+eapply2 match_app.  
 unfold map, app, length, fold_left, subst.  
 (* 1 *) 
- unfold abs. rewrite ! subst_rec_preserves_swap. 
-rewrite ! pattern_size_swap. 
-unfold pattern_size; fold pattern_size. 
-unfold lift; rewrite ! lift_rec_null. unfold plus. 
-rewrite ! lift_rec_lift_rec; try omega. unfold plus; fold plus. 
-repeat (unfold subst_rec; fold subst_rec; insert_Ref_out). 
+unfold star_opt_app_comb. 
+unfold_op; unfold pattern_size; fold pattern_size. unfold plus; fold plus. 
+rewrite !  subst_rec_app. rewrite !  subst_rec_op.
 unfold lift; rewrite ! lift_rec_null. 
-rewrite ! lift_rec_lift_rec; try omega. unfold plus. 
+do 12 (rewrite subst_rec_ref at 1; insert_Ref_out). 
+unfold lift; rewrite ! lift_rec_lift_rec; try omega. 
+unfold plus. 
 rewrite ! subst_rec_lift_rec; try omega. 
 rewrite ! lift_rec_null. 
+repeat (rewrite subst_rec_ref at 1; insert_Ref_out). 
+unfold lift; rewrite ! lift_rec_lift_rec; try omega. 
+unfold plus. 
+rewrite ! subst_rec_lift_rec; try omega. 
+rewrite ! lift_rec_null. 
+unfold abs, app_comb. 
 auto. 
 Qed.   
 
 
+
+
+
+Ltac nf_out :=
+  unfold_op;
+  match goal with
+    | |- normal ?M =>
+      match M with
+         | App (App (Op _) _) _ => apply nf_compound; [| |auto]; nf_out
+          | App (Op _) _ => apply nf_compound; [| |auto]; nf_out
+          | _ => try apply nf_op
+      end
+    | _ => auto
+        end.
 
 
 
@@ -422,127 +519,144 @@ cbv; nf_out; repeat (eapply2 nf_active; nf_out); auto.
 Qed. 
 
   
-Lemma add_normal: normal add. 
+
+
+  
+Lemma add_normal: forall f, normal f -> normal (add f). 
 Proof. 
-unfold add. nf_out. apply add_fn_normal. 
+unfold add, app_comb. intros. 
+apply nf_compound. 2: auto. 2: auto. 
+apply nf_compound. auto. 2: auto. 
+apply nf_compound. 2: eapply2 add_fn_normal. 2: auto. 
+apply nf_compound. auto. 2: auto. 
+apply nf_compound. 
+apply nf_compound. auto. 2: auto. 
+eapply2 omega3_program. eapply2 omega3_program. auto.  
 Qed. 
 
 Lemma abs_normal: 
 forall sigma x t, normal sigma -> normal x -> normal t -> normal (abs sigma x t).  
 Proof. 
-intros. unfold abs, swap. nf_out. 
-eapply2 add_normal. auto. auto. auto.  unfold_op; auto. 
+intros. unfold abs, star_opt_app_comb, app_comb. unfold_op. 
+apply nf_compound. 2: nf_out; auto. 2: auto. 
+apply nf_compound. auto. 2: auto. 
+apply nf_compound. 2: nf_out; auto. 2: auto. 
+apply nf_compound. auto. 2: auto. 
+apply nf_compound. auto. 2: auto. 
+apply nf_compound. auto. 2: auto. 
+apply nf_compound. 2: eapply2 add_fn_normal. 2: auto. 
+apply nf_compound. auto. 2: auto. 
+apply nf_compound. 
+apply nf_compound. auto. 2: auto. 
+eapply2 omega3_program. eapply2 omega3_program. auto. 
 Qed. 
 
+
+
 Lemma add_red_add: 
-forall sigma_x u sigma2 y v, 
-sf_red (App (App (App add sigma_x) u) (App (App (Op Aop) 
-(App (App (Op Aop) add) (s_op2 sigma2 y))) v))  
-        (App (App (Op Aop) (App (App (Op Aop) add) 
-(s_op2 (App (App (App (Op Aop) (App (App (Op Aop) add) sigma_x)) u) sigma2) y)))
-        (App (App (App (Op Aop) (App (App (Op Aop) add) sigma_x)) u) v)). 
+forall sigma sigma2 y v, 
+sf_red (App (add sigma) (add (pair (pair sigma2 y) v)))  
+        (add (pair (pair (App (add sigma) sigma2) y) 
+                   (App (add sigma) v))). 
 Proof.
-intros. unfold_op;  unfold add at 1. eval_tac. 
-eapply transitive_red. eapply2 Y4_fix. 
-replace (App (App (Op Aop) (Y_k 4)) add_fn) with add by auto. 
-unfold add_fn.
-eapply transitive_red. 
-eapply preserves_app_sf_red. 
-eapply2 star_opt_beta3.  auto. 
+intros. unfold add at 1, app_comb. eval_tac. eval_tac. eval_tac. 
+eapply transitive_red. eapply preserves_app_sf_red.  eapply2 omega3_omega3. auto. 
+(* 1 *) 
+unfold add_fn, app_comb. 
+eapply transitive_red. eapply  preserves_app_sf_red.
+eapply2 star_opt_beta2. auto.  
 unfold subst; rewrite ! subst_rec_preserves_extension. 
+(* an app_comb *) 
+eapply transitive_red. 
+ eapply2 extensions_by_matching.
+unfold add.  
+unfold app_comb; unfold_op. eapply2 match_app.  
+(* 1 *)  
+unfold map, app, length, fold_left, subst.
+unfold subst_rec; fold subst_rec. 
+rewrite ! subst_rec_preserves_extension.
+rewrite ! subst_rec_app. 
+insert_Ref_out. 
 (* not a tag *) 
 eapply transitive_red. apply extensions_by_matchfail.
-unfold add, add_fn; unfold_op; auto. 
+repeat (rewrite subst_rec_ref; insert_Ref_out).  
+unfold lift; rewrite ! lift_rec_null.
+rewrite subst_rec_lift_rec; try omega. 
+rewrite lift_rec_null. 
+unfold app_comb. unfold_op.  
 eapply2 matchfail_compound_l. 
-eapply2 matchfail_compound_r. 
 eapply2 matchfail_compound_l. 
-eapply2 matchfail_compound_r. 
-eapply2 matchfail_compound_l. 
-eapply2 matchfail_compound_r. 
-eapply2 matchfail_compound_l.
-eapply2 matchfail_compound_r. unfold_op; auto. 
-unfold_op. eapply2 matchfail_compound_l. 
-eapply2 matchfail_compound_r.
-eapply2 matchfail_compound_r. 
-eapply2 matchfail_compound_r. 
-eapply2 matchfail_compound_r. 
-eapply2 matchfail_op.  unfold factorable. right; auto.  discriminate. 
+eapply2 matchfail_op. left; eauto. discriminate. 
 (* 1  not a var *) 
-eapply transitive_red. eapply2 extensions_by_matchfail.
-unfold add; unfold_op; auto. 
-eapply2 matchfail_compound_l. 
-eapply2 matchfail_compound_r. 
-eapply2 matchfail_compound_l. 
-eapply2 matchfail_compound_r. 
-eapply2 matchfail_compound_l. 
-eapply2 matchfail_compound_r; unfold_op. auto.   
-eapply2 matchfail_compound_l.
-eapply2 matchfail_compound_l. unfold_op. 
-eapply2 matchfail_op. unfold factorable. left; eauto. discriminate. 
-(* 1 *) 
-(* 1 add vs add *) 
-eapply transitive_red. eapply2 extensions_by_matching.
-eapply2 match_app. eapply2 match_app. eapply2 match_app.
-eapply2 match_app.  eapply2 match_app.
-eapply2 program_matching.  split; auto. 
-(* 1 *) 
-rewrite ! app_nil_r. 
-replace (length nil) with 0 by auto. 
-rewrite ! map_lift0. 
-unfold map; fold map. 
-unfold fold_left; fold fold_left. 
-unfold app; fold app. 
-unfold_op; unfold pattern_size; fold pattern_size. unfold plus; fold plus.
-rewrite ! pattern_size_closed; try (rewrite Y_k_closed; omega). 
-unfold plus; fold plus.   
-unfold length; fold length. 
-rewrite ! subst_rec_app. rewrite ! subst_rec_op. 
-rewrite ! (subst_rec_closed (Y_k _)); try (rewrite Y_k_closed; omega).
-unfold subst; rewrite ! subst_rec_app.  rewrite ! subst_rec_op. 
-rewrite ! (subst_rec_closed (Y_k _)); try (rewrite Y_k_closed; omega).
-repeat (rewrite subst_rec_ref; insert_Ref_out). 
- unfold lift; rewrite ! lift_rec_lift_rec; try omega. unfold plus. 
+unfold pattern_size; fold pattern_size. unfold plus; fold plus. 
+do 12 (rewrite subst_rec_ref at 1; insert_Ref_out). 
+unfold lift; rewrite ! lift_rec_null. 
+eapply transitive_red. eapply extensions_by_matching.
+repeat (rewrite subst_rec_ref at 1; insert_Ref_out). 
+unfold lift; rewrite lift_rec_null. rewrite subst_rec_lift_rec; try omega. 
+rewrite lift_rec_null. 
+repeat eapply2 match_app. 
+unfold map, app, length, fold_left, subst.
+(* 1 *)  
+unfold subst_rec; fold subst_rec. 
+rewrite ! lift_rec_lift_rec; try omega.  unfold plus. 
 rewrite ! subst_rec_lift_rec; try omega. 
 rewrite ! lift_rec_null. 
-rewrite ! subst_rec_preserves_snd_projection. 
-rewrite ! subst_rec_preserves_fst_projection. 
-repeat (unfold subst_rec; fold subst_rec; insert_Ref_out). 
- unfold lift; rewrite ! lift_rec_lift_rec; try omega. unfold plus. 
+unfold add. apply preserves_app_sf_red. 
+eapply2 zero_red. 
+unfold lift; rewrite ! lift_rec_lift_rec; try omega. unfold plus. 
+ apply preserves_app_sf_red.  apply preserves_app_sf_red.  auto. 
+(* 2 *) 
+ apply preserves_app_sf_red.  apply preserves_app_sf_red.  auto. 
+repeat (rewrite subst_rec_ref at 1; insert_Ref_out). 
+rewrite ! lift_rec_null.  insert_Ref_out. 
+repeat (rewrite subst_rec_ref at 1; insert_Ref_out). 
+unfold lift; rewrite lift_rec_null. 
+eapply2 zero_red. 
+ insert_Ref_out. 
+repeat (rewrite subst_rec_ref at 1; insert_Ref_out). 
+unfold lift; rewrite lift_rec_null. 
+rewrite subst_rec_lift_rec; try omega. rewrite lift_rec_null; auto. 
+(* 1 *)
+ insert_Ref_out. 
+ apply preserves_app_sf_red.  apply preserves_app_sf_red.  
+unfold lift; rewrite lift_rec_null. 
+(rewrite subst_rec_ref at 1; insert_Ref_out). 
+unfold lift; rewrite ! subst_rec_lift_rec; try omega. 
+rewrite lift_rec_null. 
+eapply2 zero_red. 
+unfold lift; rewrite ! lift_rec_lift_rec; try omega. unfold plus. 
 rewrite ! subst_rec_lift_rec; try omega. 
-rewrite ! lift_rec_null.
-(* 1 *) 
-eapply2 preserves_app_sf_red. unfold_op. 
-eapply2 preserves_app_sf_red. eapply2 preserves_app_sf_red. 
-eapply2 preserves_app_sf_red. eapply2 preserves_app_sf_red. 
-eapply2 preserves_app_sf_red. unfold_op. eapply2 fst_out. eapply2 snd_out. 
+rewrite ! lift_rec_null.  auto. 
+repeat (rewrite subst_rec_ref at 1; insert_Ref_out). 
+unfold lift; rewrite ! lift_rec_lift_rec; try omega.  unfold plus. 
+rewrite ! subst_rec_lift_rec; try omega. 
+rewrite lift_rec_null. auto.  
 Qed. 
+
+
 
 
 Lemma add_red_empty: 
-forall sigma x u, 
-sf_red (App (App (App add (s_op2 sigma x)) u) i_op) (App sigma i_op) .
+forall sigma, 
+sf_red (App (add sigma) i_op) (App (fst_projection (fst_projection sigma)) i_op) .
 Proof.
-intros. unfold_op;  unfold add at 1. eval_tac. 
-eapply transitive_red. eapply2 Y4_fix. 
-replace (App (App (Op Aop) (Y_k 4)) add_fn) with add by auto. 
-unfold add_fn.
+intros. unfold add at 1, app_comb. eval_tac. eval_tac. eval_tac. 
+eapply transitive_red. eapply preserves_app_sf_red. eapply2 omega3_omega3. auto. 
+(* 1 *)
+unfold add_fn, app_comb.
 eapply transitive_red. 
-eapply preserves_app_sf_red. 
-eapply2 star_opt_beta3.  auto. 
+eapply preserves_app_sf_red.  eapply2 star_opt_beta2. auto. 
 unfold subst; rewrite ! subst_rec_preserves_extension. 
 eapply transitive_red. eapply2 extensions_by_matchfail.
-eapply transitive_red. eapply2 extensions_by_matchfail.
-eapply transitive_red. eapply2 extensions_by_matchfail.
-eapply transitive_red. eapply2 extensions_by_matchfail.
-unfold swap; auto. 
+eapply transitive_red. eapply2 extensions_by_matchfail. 
+(* 1 *) 
 rewrite ! subst_rec_preserves_fst_projection. 
-repeat (unfold subst_rec; fold subst_rec; insert_Ref_out).
-unfold lift. rewrite ! lift_rec_lift_rec; try omega. unfold plus. 
-rewrite ! subst_rec_lift_rec; try omega.  
-rewrite ! lift_rec_null. 
-eapply transitive_red. eapply preserves_app_sf_red. 
-eapply2 fst_out. auto. auto.  
+ repeat (unfold subst_rec; fold subst_rec; insert_Ref_out).  
+unfold lift; rewrite ! lift_rec_lift_rec; try omega. unfold plus. 
+rewrite ! subst_rec_lift_rec; try omega. rewrite ! lift_rec_null.  auto. 
 Qed. 
+
 
 
 

@@ -1,4 +1,4 @@
-DIGEST d03c2cea5fea21381f022ac71a8f28f6
+DIGEST 524b3947432cf2b3f27a0641979fc4d4
 FIntensionalLib.Closure_to_SF.SF_size
 R1669:1673 Coq.Arith.Arith <> <> lib
 R1675:1679 Coq.omega.Omega <> <> lib
@@ -19,33 +19,32 @@ R2258:2289 IntensionalLib.SF_calculus.Equal <> <> lib
 R2309:2345 IntensionalLib.SF_calculus.Extensions <> <> lib
 R2366:2401 IntensionalLib.Closure_to_SF.Tagging <> <> lib
 R2421:2455 IntensionalLib.Closure_to_SF.Adding <> <> lib
-R2489:2492 Bignums.BigN.BigN <> <> lib
-def 2574:2577 <> size
-R2591:2591 IntensionalLib.Closure_to_SF.SF_size <> M var
-R2601:2603 IntensionalLib.SF_calculus.SF_Terms <> Ref constr
-R2615:2616 IntensionalLib.SF_calculus.SF_Terms <> Op constr
-R2627:2629 IntensionalLib.SF_calculus.SF_Terms <> App constr
-R2640:2640 Bignums.BigN.BigN <> :bigN_scope:x_'+'_x not
-R2648:2652 Bignums.BigN.BigN <> :bigN_scope:x_'+'_x not
-R2660:2660 Bignums.BigN.BigN <> :bigN_scope:x_'+'_x not
-R2641:2644 IntensionalLib.Closure_to_SF.SF_size <> size def
-R2653:2656 IntensionalLib.Closure_to_SF.SF_size <> size def
-prf 2676:2683 <> tag_size
-R2706:2708 Coq.Init.Logic <> :type_scope:x_'='_x not
-R2686:2689 IntensionalLib.Closure_to_SF.SF_size <> size def
-R2692:2694 IntensionalLib.Closure_to_SF.Tagging <> tag def
-R2701:2704 IntensionalLib.SF_calculus.SF_reduction <> s_op def
-R2696:2699 IntensionalLib.SF_calculus.SF_reduction <> s_op def
-prf 2747:2754 <> var_size
-R2772:2774 Coq.Init.Logic <> :type_scope:x_'='_x not
-R2757:2760 IntensionalLib.Closure_to_SF.SF_size <> size def
-R2763:2765 IntensionalLib.Closure_to_SF.Tagging <> var def
-R2767:2770 IntensionalLib.SF_calculus.SF_reduction <> s_op def
-prf 2814:2824 <> size_var_fn
-R2839:2841 Coq.Init.Logic <> :type_scope:x_'='_x not
-R2828:2831 IntensionalLib.Closure_to_SF.SF_size <> size def
-R2833:2838 IntensionalLib.Closure_to_SF.Tagging <> var_fn def
-prf 2880:2887 <> size_add
-R2898:2900 Coq.Init.Logic <> :type_scope:x_'='_x not
-R2890:2893 IntensionalLib.Closure_to_SF.SF_size <> size def
-R2895:2897 IntensionalLib.Closure_to_SF.Adding <> add def
+R2475:2529 IntensionalLib.Closure_to_SF.Abstraction_to_Combination <> <> lib
+def 2655:2658 <> size
+R2672:2672 IntensionalLib.Closure_to_SF.SF_size <> M var
+R2682:2684 IntensionalLib.SF_calculus.SF_Terms <> Ref constr
+R2696:2697 IntensionalLib.SF_calculus.SF_Terms <> Op constr
+R2708:2710 IntensionalLib.SF_calculus.SF_Terms <> App constr
+R2721:2721 Coq.Init.Peano <> :nat_scope:x_'+'_x not
+R2729:2733 Coq.Init.Peano <> :nat_scope:x_'+'_x not
+R2741:2741 Coq.Init.Peano <> :nat_scope:x_'+'_x not
+R2722:2725 IntensionalLib.Closure_to_SF.SF_size <> size def
+R2734:2737 IntensionalLib.Closure_to_SF.SF_size <> size def
+prf 2757:2764 <> var_size
+R2782:2784 Coq.Init.Logic <> :type_scope:x_'='_x not
+R2767:2770 IntensionalLib.Closure_to_SF.SF_size <> size def
+R2773:2775 IntensionalLib.Closure_to_SF.Tagging <> var def
+R2777:2780 IntensionalLib.SF_calculus.SF_reduction <> s_op def
+prf 2824:2831 <> size_add
+R2849:2851 Coq.Init.Logic <> :type_scope:x_'='_x not
+R2834:2837 IntensionalLib.Closure_to_SF.SF_size <> size def
+R2840:2842 IntensionalLib.Closure_to_SF.Adding <> add def
+R2844:2847 IntensionalLib.SF_calculus.SF_reduction <> i_op def
+R2900:2947 IntensionalLib.Closure_calculus.Closure_calculus <> <> lib
+prf 2957:2973 <> size_identity_abs
+R3051:3053 Coq.Init.Logic <> :type_scope:x_'='_x not
+R2977:2980 IntensionalLib.Closure_to_SF.SF_size <> size def
+R2983:2995 IntensionalLib.Closure_to_SF.Abstraction_to_Combination <> closure_to_SF def
+R2998:3000 IntensionalLib.Closure_calculus.Closure_calculus <> Abs constr
+R3026:3045 IntensionalLib.Closure_calculus.Closure_calculus <> Ref constr
+R3002:3021 IntensionalLib.Closure_calculus.Closure_calculus <> Iop constr

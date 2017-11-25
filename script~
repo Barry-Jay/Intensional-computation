@@ -18,6 +18,7 @@ coqc -R "." "IntensionalLib" Closure_to_SF/Tagging.v
 coqc -R "." "IntensionalLib" Closure_to_SF/Adding.v 
 coqc -R "." "IntensionalLib" Closure_to_SF/SF_size.v 
 coqc -R "." "IntensionalLib" Closure_to_SF/Abstraction_to_Combination.v
+coqc -R "." "IntensionalLib" Closure_to_SF/identity_abs_val.v
 
 coqc -R "." "IntensionalLib" Fieska_calculus/Test.v 
 coqc -R "." "IntensionalLib" Fieska_calculus/General.v 
@@ -37,6 +38,7 @@ coqc -R "." "IntensionalLib" Closure_to_Fieska/Adding.v
 coqc -R "." "IntensionalLib" Closure_to_Fieska/Fieska_size.v 
 coqc -R "." "IntensionalLib" Closure_to_Fieska/Abstraction_to_Combination.v
 coqc -R "." "IntensionalLib" Closure_to_Fieska/Eta.v
+coqc -R "." "IntensionalLib" Closure_to_Fieska/identity_abs_val.v
 coqc -R "." "IntensionalLib" Closure_to_Fieska/Optimization.v
 
 coqc -R "." "IntensionalLib" Abstraction_calculus/Abstraction_Terms.v 

@@ -101,6 +101,105 @@ Ltac nf_out :=
 (* fixpoints that wait *) 
 
 
+Definition app_comb M N := App (App (Op Aop) M) N. 
+
+
+(* Y2 *) 
+
+Definition omega2 := 
+star_opt(star_opt (App (Ref 0) (app_comb (app_comb (Ref 1) (Ref 1)) (Ref 0)))).
+
+Definition Y2 f := app_comb (app_comb omega2 omega2) f.
+
+Lemma Y2_program: forall f, program f -> program (Y2 f).
+Proof.
+  unfold Y2, omega2; split_all; unfold program; split; 
+unfold subst, subst_rec; fold subst_rec; unfold app_comb; nf_out; try eapply2 H. 
+Qed.
+
+Lemma omega2_omega2 : 
+forall f, sf_red (App (App omega2 omega2) f) (App f (Y2 f)).
+Proof.
+unfold omega2 at 1, app_comb. intros. 
+eapply transitive_red. eapply2 star_opt_beta2. 
+unfold subst, subst_rec; fold subst_rec. 
+insert_Ref_out. unfold lift.  rewrite lift_rec_null.  
+rewrite subst_rec_lift_rec; try omega.  
+rewrite lift_rec_null. eapply2 preserves_app_sf_red. 
+Qed. 
+
+Lemma Y2_fix: forall M N, 
+sf_red (App (Y2 M) N) (App (App M (Y2 M)) N).
+Proof.
+unfold Y2 at 1, app_comb.  intros.  eval_tac. eval_tac.  
+eapply transitive_red. eapply preserves_app_sf_red. eapply2 omega2_omega2. auto. auto. 
+Qed. 
+
+(* Y3 *) 
+
+Definition omega3 := 
+star_opt(star_opt (star_opt (App (App (Ref 1) 
+  (star_opt (app_comb (app_comb (app_comb (Ref 3) (Ref 3)) (Ref 2)) (Ref 0)))) 
+                                    (Ref 0)))).
+
+Definition Y3 f := star_opt (app_comb (app_comb (app_comb omega3 omega3) (lift 1 f)) (Ref 0)).
+
+Lemma omega3_program: program omega3. 
+Proof. 
+split; auto. unfold omega3; nf_out.  eapply2 nf_active.  eapply2 nf_active. 
+unfold subst, subst_rec; fold subst_rec; nf_out; try eapply2 H; cbv; auto. 
+Qed.  
+
+
+Lemma Y3_program: forall f, program f -> program (Y3 f).
+Proof.
+intros.  unfold Y3, app_comb; split; auto.  
+nf_out; try eapply2 omega3_program.  
+unfold lift; rewrite lift_rec_closed; eapply2 H. 
+(* 1 *) 
+rewrite maxvar_star_opt.  simpl. 
+replace (maxvar (lift 1 f)) with 0. 
+auto.  unfold lift; rewrite lift_rec_closed.  
+assert(maxvar f = 0) by eapply2 H; auto. 
+eapply2 H. 
+Qed.
+
+Lemma omega3_omega3 : 
+forall f M, sf_red (App (App (App omega3 omega3) f) M) (App (App f (Y3 f)) M).
+Proof.
+unfold omega3 at 1, app_comb. intros. 
+eapply transitive_red. eapply2 star_opt_beta3. 
+unfold subst; rewrite ! subst_rec_app.  
+rewrite ! subst_rec_preserves_star_opt.
+repeat (rewrite ! subst_rec_ref; insert_Ref_out). 
+repeat (unfold subst_rec; fold subst_rec; insert_Ref_out). 
+unfold lift; rewrite ! lift_rec_lift_rec; try omega. unfold plus. 
+rewrite ! subst_rec_lift_rec; try omega. rewrite ! lift_rec_null. 
+rewrite ! (lift_rec_closed omega3).  
+unfold Y3.  auto. 
+unfold omega3; cbv; auto. 
+Qed. 
+
+
+
+Lemma Y3_fix: forall M N P, 
+sf_red (App (App (Y3 M) N) P) (App (App (App M (Y3 M)) N) P).
+Proof.
+unfold Y3 at 1, app_comb.  intros. 
+eapply transitive_red. eapply preserves_app_sf_red. eapply star_opt_beta. auto. 
+unfold subst, subst_rec; fold subst_rec. 
+rewrite ! (subst_rec_closed omega3). 
+2: unfold omega3; cbv; omega. 
+unfold lift; rewrite subst_rec_lift_rec; try omega. 
+unfold subst_rec; fold subst_rec. insert_Ref_out. unfold lift. 
+rewrite ! lift_rec_null. eval_tac. eval_tac. eval_tac. 
+eapply transitive_red. eapply preserves_app_sf_red. eapply2 omega3_omega3. auto. auto. 
+Qed. 
+
+
+(* fixpoints that wait *) 
+
+
 Definition omega_k k := 
 star_opt(star_opt (App (Ref 0) 
   (App (App (Op Aop) (App (A_k k) (App (App (Op Aop) (Ref 1)) (Ref 1)))) (Ref 0)))). 
@@ -149,23 +248,6 @@ Qed.
 Lemma Y_k_normal: forall k, normal (Y_k k). Proof. eapply2 Y_k_program. Qed. 
 Lemma Y_k_closed: forall k, maxvar (Y_k k) = 0. Proof. eapply2 Y_k_program. Qed. 
 
-
-Lemma Y2_fix: forall M N, 
-sf_red (App (App (Y_k 2) M) N) (App (App M (App (App (Op Aop) (Y_k 2)) M)) N).
-Proof.
-unfold Y_k at 1, A_k. intros; unfold_op. eval_tac. eval_tac. 
-eapply transitive_red. eapply preserves_app_sf_red. eapply2 omega_omega. auto. auto. 
-Qed. 
-
-
-
-Lemma Y3_fix: forall M N P, 
-sf_red (App (App (App (Y_k 3) M) N) P) (App (App (App M (App (App (Op Aop) (Y_k 3)) M)) N) P).
-Proof.
-unfold Y_k at 1, A_k. intros; unfold_op. eval_tac. eval_tac.  eval_tac. eval_tac. 
- eval_tac. eval_tac. eapply transitive_red. eapply preserves_app_sf_red. 
-eapply preserves_app_sf_red. eapply2 omega_omega. auto. auto. auto. 
-Qed. 
 
 Lemma Y4_fix: forall M N P Q, 
 sf_red (App (App (App (App (Y_k 4) M) N) P) Q) (App (App (App (App M (App (App (Op Aop) (Y_k 4)) M)) N) P) Q).

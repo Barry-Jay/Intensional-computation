@@ -41,12 +41,14 @@ Require Import IntensionalLib.Fieska_calculus.Fixpoints.
 Require Import IntensionalLib.Fieska_calculus.Extensions.
 Require Import IntensionalLib.Closure_to_Fieska.Tagging.
 Require Import IntensionalLib.Closure_to_Fieska.Adding.
+Require Import IntensionalLib.Closure_to_Fieska.Abstraction_to_Combination.
 
-
+(* 
 From Bignums Require Import BigN. 
 
 Delimit Scope bigN_scope with bigN.
 Local Open Scope bigN_scope.
+*) 
 
 Fixpoint size M := 
 match M with 
@@ -66,22 +68,16 @@ Proof. cbv. auto. Qed.
 Lemma size_Y4: size (Y_k 4) = 64. 
 Proof. cbv. auto. Qed. 
 
-Lemma size_tag : size (star_opt (star_opt (tag (Ref 1) (Ref 0)))) = 78. 
-Proof. 
-unfold tag. rewrite star_opt_eta. 2: cbv; auto. 
-unfold subst, subst_rec; fold subst_rec. 
-rewrite subst_rec_closed. 2: cbv; auto. insert_Ref_out.   cbv. auto.
-Qed.
+Lemma size_var : size (var (Op Sop)) = 48. 
+Proof. cbv; auto. Qed. 
 
 
-Lemma size_var : size (star_opt (var (Ref 0))) = 133. 
-Proof. 
-unfold var. rewrite star_opt_eta. 2: cbv; auto. 
-unfold subst; rewrite subst_rec_closed. 2: cbv; auto.  cbv. auto.
-Qed.
- 
-
-Lemma size_add: size add = 4295.
+Lemma size_add: size (add i_op) = 3144.
 Proof. cbv. auto. Qed.  
 
 
+Require Import IntensionalLib.Closure_calculus.Closure_calculus.
+
+
+Lemma size_identity_abs: size (closure_to_fieska (Abs Iop 0 (Ref 0))) = 3199.
+Proof. cbv. auto. Qed. 

@@ -42,13 +42,15 @@ Require Import IntensionalLib.SF_calculus.Extensions.
 
 Require Import IntensionalLib.Closure_to_SF.Tagging.  
 Require Import IntensionalLib.Closure_to_SF.Adding.  
+Require Import IntensionalLib.Closure_to_SF.Abstraction_to_Combination.  
 
+(* 
 From Bignums Require Import BigN. 
 
 
 Delimit Scope bigN_scope with bigN.
 Local Open Scope bigN_scope.
-
+*) 
 
 Fixpoint size M := 
 match M with 
@@ -58,17 +60,17 @@ match M with
 end .
 
 
-Lemma tag_size: size (tag s_op s_op) = 950 . 
+Lemma var_size: size (var s_op) = 417 . 
 Proof. cbv. auto.  Qed.
 
-Lemma var_size: size (var s_op) = 1723 . 
-Proof. cbv. auto.  Qed.
 
-Lemma size_var_fn : size var_fn = 1079. 
-Proof. cbv. auto. Qed. 
-
-Lemma size_add: size add = 56680.
+Lemma size_add: size (add i_op) = 17855.
 Proof. cbv. auto. Qed. 
 
 
+Require Import IntensionalLib.Closure_calculus.Closure_calculus.
+
+Lemma size_identity_abs: 
+size (closure_to_SF (Abs Closure_calculus.Iop 0 (Closure_calculus.Ref 0))) = 18290.
+Proof. cbv. auto. Qed. 
 
