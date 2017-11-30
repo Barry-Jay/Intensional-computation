@@ -50,6 +50,9 @@ Delimit Scope bigN_scope with bigN.
 Local Open Scope bigN_scope.
 *) 
 
+
+Set Printing Depth 10000.
+
 Fixpoint size M := 
 match M with 
 | Ref _ => 1
@@ -81,3 +84,19 @@ Require Import IntensionalLib.Closure_calculus.Closure_calculus.
 
 Lemma size_identity_abs: size (closure_to_fieska (Abs Iop 0 (Ref 0))) = 3199.
 Proof. cbv. auto. Qed. 
+
+
+
+Notation "A ~ B" := (Fieska_Terms.App A B) (at level 79, left associativity). 
+Notation S := (Op Sop).
+Notation F := (Op Fop).
+Notation K := (Op Kop).
+Notation I := (Fieska_Terms.Op Fieska_Terms.Iop). 
+Notation A := (Op Aop). 
+
+Lemma identity_abs_combinator:
+(closure_to_fieska (Abs Closure_calculus.Iop 0%nat (Closure_calculus.Ref 0%nat))) = s_op. 
+Proof.
+cbv. 
+
+
