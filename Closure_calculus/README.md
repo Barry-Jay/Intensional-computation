@@ -22,3 +22,5 @@ Comment. At present, this has triggered changes in all other
 sub-directories. Refactoring will be use to limit the changes to the
 translations, and not the directories containing SF-calculus and
 Fieska-calculus. Also, the pdf's need updating.
+
+Closure_calculus.pdf is now a proper paper. 
