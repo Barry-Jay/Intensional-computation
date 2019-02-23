@@ -16,24 +16,26 @@
 (**********************************************************************)
 
 (**********************************************************************)
-(*                     SF-Calculus                                    *)
-(*                  as Wave Calculus                                  *)
+(*                     Tree-Calculus                                  *)
 (*                                                                    *)
 (*                      Barry Jay                                     *)
 (*                                                                    *)
 (**********************************************************************)
 
 
-(** The operators S and F are enough, but more may be added in future. *) 
+(* See "Trees not Numbers.pdf" *)
+
+(** More operators may be added in future. Strictly, 
+the operator ~ is called the kernel, whose instances are nodes, perhaps leaves. *) 
 
 Inductive operator := | Node . 
 
-(** The terms of SF-calculus are either variables (given as de Bruijn indices), operators or applications. 
+(** The terms of Tree-calculus are either variables (given as de Bruijn indices), operators or applications. 
 Terms are called combinations if they do not use any variables. *) 
 
-Inductive SF:  Set :=
-  | Ref : nat -> SF        
-  | Op  : operator -> SF   
-  | App : SF -> SF -> SF   
+Inductive Tree:  Set :=
+  | Ref : nat -> Tree        
+  | Op  : operator -> Tree   
+  | App : Tree -> Tree -> Tree   
 .
 
