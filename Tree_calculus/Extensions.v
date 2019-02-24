@@ -2368,13 +2368,13 @@ inversion H; subst; left; auto.
 (* 1 *) 
 inversion H; subst. inversion H1; subst.
 (* 3 *)  
-assert(status (App s s0) = Passive) by eapply2 closed_implies_passive. 
+assert(status (App t t0) = Passive) by eapply2 closed_implies_passive. 
 rewrite H3 in H10; discriminate. 
 (* 2 *) 
 simpl in H2; max_out. 
-assert(matchfail P1 s \/ (exists sigma : list Tree, matching P1 s sigma)).
+assert(matchfail P1 t \/ (exists sigma : list Tree, matching P1 t sigma)).
 eapply2 IHP1. unfold program; split_all. 
-assert(matchfail P2 s0 \/ (exists sigma : list Tree, matching P2 s0 sigma)). 
+assert(matchfail P2 t0 \/ (exists sigma : list Tree, matching P2 t0 sigma)). 
 eapply2 IHP2. unfold program; split_all. 
 (* 2 *) 
 inversion H2. left; eapply2 matchfail_active_l.
@@ -2385,13 +2385,13 @@ right; exist (map (lift (length x)) x0++x).
 (* 1 *) 
 inversion H1; subst.
 (* 3 *)  
-assert(status (App s s0) = Passive) by eapply2 closed_implies_passive. 
+assert(status (App t t0) = Passive) by eapply2 closed_implies_passive. 
 rewrite H3 in H10; discriminate. 
 (* 1 *) 
 simpl in H2; max_out. 
-assert(matchfail P1 s \/ (exists sigma : list Tree, matching P1 s sigma)).
+assert(matchfail P1 t \/ (exists sigma : list Tree, matching P1 t sigma)).
 eapply2 IHP1. unfold program; split_all. 
-assert(matchfail P2 s0 \/ (exists sigma : list Tree, matching P2 s0 sigma)). 
+assert(matchfail P2 t0 \/ (exists sigma : list Tree, matching P2 t0 sigma)). 
 eapply2 IHP2. unfold program; split_all. 
 (* 2 *) 
 inversion H2. left; eapply2 matchfail_compound_l. 
