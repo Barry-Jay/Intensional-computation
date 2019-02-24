@@ -16,7 +16,7 @@
 (**********************************************************************)
 
 (**********************************************************************)
-(*                        SF-Calculus                                 *)
+(*                      Tree-Calculus                                 *)
 (*                                                                    *)
 (* is implemented in Coq by adapting the implementation of            *) 
 (* Lambda Calculus from Project Coq                                   *)
@@ -33,15 +33,15 @@
 Require Import Arith Omega List Max.
 Require Import IntensionalLib.SF_calculus.Test.  
 Require Import IntensionalLib.SF_calculus.General.  
-Require Import IntensionalLib.Wave_as_SF.SF_Terms.  
-Require Import IntensionalLib.Wave_as_SF.SF_Tactics.  
-Require Import IntensionalLib.Wave_as_SF.SF_reduction.  
-Require Import IntensionalLib.Wave_as_SF.SF_Normal.  
-Require Import IntensionalLib.Wave_as_SF.SF_Closed.  
-Require Import IntensionalLib.Wave_as_SF.Substitution.  
-Require Import IntensionalLib.Wave_as_SF.SF_Eval.  
-Require Import IntensionalLib.Wave_as_SF.Star.  
-Require Import IntensionalLib.Wave_as_SF.Wait.  
+Require Import IntensionalLib.Tree_calculus.Tree_Terms.  
+Require Import IntensionalLib.Tree_calculus.Tree_Tactics.  
+Require Import IntensionalLib.Tree_calculus.Tree_reduction.  
+Require Import IntensionalLib.Tree_calculus.Tree_Normal.  
+Require Import IntensionalLib.Tree_calculus.Tree_Closed.  
+Require Import IntensionalLib.Tree_calculus.Substitution.  
+Require Import IntensionalLib.Tree_calculus.Tree_Eval.  
+Require Import IntensionalLib.Tree_calculus.Star.  
+Require Import IntensionalLib.Tree_calculus.Wait.  
 
 
 (* fixpoints that wait *) 

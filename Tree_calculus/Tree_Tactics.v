@@ -15,7 +15,7 @@
 (**********************************************************************)
 
 (**********************************************************************)
-(*                    SF_Tactics.v                                    *)
+(*                  Tree_Tactics.v                                    *)
 (*                                                                    *)
 (*                     Barry Jay                                      *)
 (*                                                                    *)
@@ -24,23 +24,23 @@
 Require Import Omega. 
 Require Import IntensionalLib.SF_calculus.Test.  
 Require Import IntensionalLib.SF_calculus.General.  
-Require Import IntensionalLib.Wave_as_SF.SF_Terms. 
+Require Import IntensionalLib.Tree_calculus.Tree_Terms. 
 
-Definition termred := SF -> SF -> Prop.
+Definition termred := Tree -> Tree -> Prop.
 
-Definition preserve (R : termred) (P : SF -> Prop) :=
-  forall x : SF, P x -> forall y : SF, R x y -> P y.
+Definition preserve (R : termred) (P : Tree -> Prop) :=
+  forall x : Tree, P x -> forall y : Tree, R x y -> P y.
 
 
 Inductive multi_step : termred -> termred :=
   | zero_red : forall red M, multi_step red M M
-  | succ_red : forall (red: SF-> SF -> Prop) M N P, 
+  | succ_red : forall (red: Tree-> Tree -> Prop) M N P, 
                    red M N -> multi_step red N P -> multi_step red M P
 .
 
 Hint Constructors multi_step.  
 
-Definition reflective red := forall (M: SF), red M M.
+Definition reflective red := forall (M: Tree), red M M.
 
 Lemma refl_multi_step : forall (red: termred), reflective (multi_step red).
 Proof. red; split_all. Qed.
@@ -60,7 +60,7 @@ match goal with
 end.
 
 
-Definition transitive red := forall (M N P: SF), red M N -> red N P -> red M P. 
+Definition transitive red := forall (M N P: Tree), red M N -> red N P -> red M P. 
 
 Lemma transitive_red : forall red, transitive (multi_step red). 
 Proof. red; induction 1; split_all. 
@@ -171,7 +171,7 @@ Qed.
 
 Hint Resolve diamond_tiling. 
 
-Fixpoint rank (M: SF) := 
+Fixpoint rank (M: Tree) := 
 match M with 
 | Ref _ => 1
 | Op _ => 1

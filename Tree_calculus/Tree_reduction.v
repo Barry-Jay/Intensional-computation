@@ -16,7 +16,7 @@
 (**********************************************************************)
 
 (**********************************************************************)
-(*                   SF_reduction.v                                   *)
+(*                 Tree_reduction.v                                   *)
 (*                                                                    *)
 (*                     Barry Jay                                      *)
 (*                                                                    *)
@@ -26,8 +26,8 @@
 Require Import Arith Omega.
 Require Import IntensionalLib.SF_calculus.Test.  
 Require Import IntensionalLib.SF_calculus.General.  
-Require Import IntensionalLib.Wave_as_SF.SF_Terms.  
-Require Import IntensionalLib.Wave_as_SF.SF_Tactics.  
+Require Import IntensionalLib.Tree_calculus.Tree_Terms.  
+Require Import IntensionalLib.Tree_calculus.Tree_Tactics.  
 
 (* 
 Definition s_op := Op Sop.
@@ -41,13 +41,13 @@ Ltac unfold_op := unfold i_op, k_op, node.
 
 (* compounds *) 
 
-Fixpoint right_component (M : SF) := 
+Fixpoint right_component (M : Tree) := 
 match M with 
 | App _ M2 => M2
 | _ => M
 end.
 
-Definition left_component (U : SF) := 
+Definition left_component (U : Tree) := 
 match U with 
 | App U1 _ => U1 
 | _ => i_op
@@ -62,7 +62,7 @@ forall M N, rank (right_component (App M N)) < rank (App M N).
 Proof. split_all; omega. Qed. 
 
 
-Inductive compound : SF -> Prop := 
+Inductive compound : Tree -> Prop := 
 | N1_compound : forall M, compound (App (Op Node) M)
 | N2_compound : forall M N, compound (App (App (Op Node) M) N)
 .
@@ -107,7 +107,7 @@ Hint Resolve preserves_compound_multi_step.
 
 
 
-(* SF-reduction  *) 
+(* Tree-reduction  *) 
 
 
 Inductive sf_red1 : termred :=
@@ -116,15 +116,15 @@ Inductive sf_red1 : termred :=
   | app_sf_red :
       forall M M' ,
       sf_red1 M M' ->
-      forall N N' : SF, sf_red1 N N' -> sf_red1 (App M N) (App M' N')  
-  | s_red: forall (M M' N N' P P' : SF),
+      forall N N' : Tree, sf_red1 N N' -> sf_red1 (App M N) (App M' N')  
+  | s_red: forall (M M' N N' P P' : Tree),
              sf_red1 M M' -> sf_red1 N N' -> sf_red1 P P' ->                  
              sf_red1 
                    (App (App (App (Op Node) (App (Op Node) M)) N) P)
                   (App (App N' P') (App M' P'))
   | k_red : forall M  M' N o,  sf_red1 M M' -> 
                sf_red1 (App (App (App (Op Node) (Op o)) M) N) M' 
-  | f_red: forall (P P' Q Q' M N N': SF), 
+  | f_red: forall (P P' Q Q' M N N': Tree), 
              sf_red1 P P' -> sf_red1 Q Q' -> sf_red1 N N' -> 
    sf_red1 (App (App (App (Op Node) (App (App (Op Node) P) Q)) M) N)
                      (App (App N' P') Q')
@@ -284,24 +284,24 @@ Definition confluence (A : Set) (R : A -> A -> Prop) :=
   forall x y : A,
   R x y -> forall z : A, R x z -> exists u : A, R y u /\ R z u.
 
-Theorem confluence_sf_red: confluence SF sf_red. 
+Theorem confluence_sf_red: confluence Tree sf_red. 
 Proof. red; split_all; eapply2 diamond_sf_red. Qed. 
 
 
-(* SF-sequential-reduction *) 
+(* Tree-sequential-reduction *) 
 
-Inductive sf_seqred1 : SF -> SF -> Prop := 
+Inductive sf_seqred1 : Tree -> Tree -> Prop := 
   | appl_sf_seqred :  forall M M' N, sf_seqred1 M M' -> 
                                       sf_seqred1 (App M N) (App M' N)  
   | appr_sf_seqred :  forall M N N', sf_seqred1 N N' -> 
                                       sf_seqred1 (App M N) (App M N')  
-  | s_sf_seqred: forall (M N P : SF),
+  | s_sf_seqred: forall (M N P : Tree),
              sf_seqred1 
                    (App (App (App (Op Node) (App (Op Node) M)) N) P) 
                   (App (App N P) (App M P))
   | k_sf_seqred : forall M N o,  
                sf_seqred1 (App (App (App (Op Node) (Op o)) M) N) M 
-  | f_sf_seqred : forall (P Q M N: SF), 
+  | f_sf_seqred : forall (P Q M N: Tree), 
              sf_seqred1 (App (App (App (Op Node) (App (App (Op Node) P) Q)) M) N) 
                      (App (App N P) Q)
 .
@@ -346,7 +346,7 @@ eapply2 preserves_apr_sf_seqred.
 Qed. 
 Hint Resolve preserves_app_sf_seqred.
 
-Lemma preserves_compound_sf_seqred1: forall M N : SF,
+Lemma preserves_compound_sf_seqred1: forall M N : Tree,
    sf_seqred1 M N ->
    compound M ->
    compound N /\

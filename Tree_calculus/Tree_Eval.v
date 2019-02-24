@@ -15,7 +15,7 @@
 (**********************************************************************)
 
 (**********************************************************************)
-(*                     SF_Eval.v                                      *)
+(*                   Tree_Eval.v                                      *)
 (*                                                                    *)
 (*                      Barry Jay                                     *)
 (*                                                                    *)
@@ -23,12 +23,12 @@
 
 Require Import Arith Max.
 Require Import IntensionalLib.SF_calculus.General.  
-Require Import IntensionalLib.Wave_as_SF.SF_Terms.  
-Require Import IntensionalLib.Wave_as_SF.SF_Tactics.  
-Require Import IntensionalLib.Wave_as_SF.SF_reduction.  
-Require Import IntensionalLib.Wave_as_SF.SF_Normal.  
-Require Import IntensionalLib.Wave_as_SF.SF_Closed.  
-Require Import IntensionalLib.Wave_as_SF.Substitution.  
+Require Import IntensionalLib.Tree_calculus.Tree_Terms.  
+Require Import IntensionalLib.Tree_calculus.Tree_Tactics.  
+Require Import IntensionalLib.Tree_calculus.Tree_reduction.  
+Require Import IntensionalLib.Tree_calculus.Tree_Normal.  
+Require Import IntensionalLib.Tree_calculus.Tree_Closed.  
+Require Import IntensionalLib.Tree_calculus.Substitution.  
 
 
 Definition eval_app M N := 
@@ -42,23 +42,23 @@ match M with
 end.
 
 
-Lemma eval_app_from_SF : forall M N, sf_red (App M N) (eval_app M N).
+Lemma eval_app_from_Tree : forall M N, sf_red (App M N) (eval_app M N).
 Proof. 
 induction M; split_all. 
-gen_case IHM1 M1. gen_case IHM1 s.  gen_case IHM1 o. 
-gen_case IHM1 s0. 
+gen_case IHM1 M1. gen_case IHM1 t.  gen_case IHM1 o. 
+gen_case IHM1 t0. 
 (* 2 *) 
 case o0; auto. red; one_step.
 (* 1 *) 
-case s1; split_all. 
+case t1; split_all. 
 (* 2 *) 
 case o0; split_all. red; one_step. 
 (* 1 *) 
-case s3; split_all. case o0; split_all. red; one_step. 
+case t3; split_all. case o0; split_all. red; one_step. 
 Qed. 
 
 
-Fixpoint eval0 (M: SF) :=
+Fixpoint eval0 (M: Tree) :=
 match M with 
 | Ref i => Ref i 
 | Op o => Op o
@@ -66,13 +66,13 @@ match M with
 | App M1 M11 => eval_app (eval0 M1) M11
 end. 
 
-Lemma eval0_from_SF : forall M, sf_red M (eval0 M).
+Lemma eval0_from_Tree : forall M, sf_red M (eval0 M).
 Proof. 
 induction M; split_all.
 eapply transitive_red. 
 eapply preserves_app_sf_red. eapply2 IHM1. auto. 
 eapply transitive_red. 
-eapply2 eval_app_from_SF. 
+eapply2 eval_app_from_Tree. 
 case M1; split_all. 
 case o; split_all. 
 eapply preserves_app_sf_red. auto. eapply2 IHM2. 
@@ -84,7 +84,7 @@ match goal with
 | |-  sf_red ?M _ => red; eval_tac
 | |-  multi_step sf_red1 ?M _ =>
   (apply transitive_red with (eval0 M); 
-[eapply2 eval0_from_SF |  
+[eapply2 eval0_from_Tree |  
   unfold eval0, eval_app;  unfold subst; split_all])
 | _ => auto
 end.

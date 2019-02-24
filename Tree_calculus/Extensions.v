@@ -26,19 +26,19 @@
 Require Import Omega Max Bool List.
 Require Import IntensionalLib.SF_calculus.Test.  
 Require Import IntensionalLib.SF_calculus.General.  
-Require Import IntensionalLib.Wave_as_SF.SF_Terms.  
-Require Import IntensionalLib.Wave_as_SF.SF_Tactics.  
-Require Import IntensionalLib.Wave_as_SF.SF_reduction.  
-Require Import IntensionalLib.Wave_as_SF.SF_Normal.  
-Require Import IntensionalLib.Wave_as_SF.SF_Closed.  
-Require Import IntensionalLib.Wave_as_SF.Substitution.  
-Require Import IntensionalLib.Wave_as_SF.SF_Eval.  
-Require Import IntensionalLib.Wave_as_SF.Star.  
-Require Import IntensionalLib.Wave_as_SF.Wait.  
-Require Import IntensionalLib.Wave_as_SF.Fixpoints.  
-Require Import IntensionalLib.Wave_as_SF.Wave_Factor.  
-Require Import IntensionalLib.Wave_as_SF.Wave_Factor2.  
-Require Import IntensionalLib.Wave_as_SF.Equal.  
+Require Import IntensionalLib.Tree_calculus.Tree_Terms.  
+Require Import IntensionalLib.Tree_calculus.Tree_Tactics.  
+Require Import IntensionalLib.Tree_calculus.Tree_reduction.  
+Require Import IntensionalLib.Tree_calculus.Tree_Normal.  
+Require Import IntensionalLib.Tree_calculus.Tree_Closed.  
+Require Import IntensionalLib.Tree_calculus.Substitution.  
+Require Import IntensionalLib.Tree_calculus.Tree_Eval.  
+Require Import IntensionalLib.Tree_calculus.Star.  
+Require Import IntensionalLib.Tree_calculus.Wait.  
+Require Import IntensionalLib.Tree_calculus.Fixpoints.  
+Require Import IntensionalLib.Tree_calculus.Wave_Factor.  
+Require Import IntensionalLib.Tree_calculus.Wave_Factor2.  
+Require Import IntensionalLib.Tree_calculus.Equal.  
 
 Lemma aux1: forall p q, S(S(S(S(S p)))) <= q ->
                         pred (pred (pred (q - S p))) = q - S (S (S (S p))). 
@@ -112,11 +112,11 @@ omega. omega. elim(test n0 n1); split_all; try noway.
 omega. 
 (* 3 *) 
 unfold relocate. elim(test n0 n); split_all. 
-assert(max (maxvar s) (maxvar s0) >= maxvar s /\ max (maxvar s) (maxvar s0) >= maxvar s0) by eapply2 max_is_max. 
+assert(max (maxvar t) (maxvar t0) >= maxvar t /\ max (maxvar t) (maxvar t0) >= maxvar t0) by eapply2 max_is_max. 
 split_all. 
 replace (S(k+n)) with (S n + k) by omega. 
 eapply2 max_max2; eapply2 maxvar_lift_rec_compare; omega. 
-assert(max (maxvar s) (maxvar s0) >= maxvar s /\ max (maxvar s) (maxvar s0) >= maxvar s0) by eapply2 max_is_max. 
+assert(max (maxvar t) (maxvar t0) >= maxvar t /\ max (maxvar t) (maxvar t0) >= maxvar t0) by eapply2 max_is_max. 
 split_all. 
 rewrite ! lift_rec_misses; try omega. 
 (* 2 *) 
@@ -202,7 +202,7 @@ star_opt (swap (Ref 0)) = App (App s_op (App k_op  (App s_op i_op ))) k_op .
 Proof. split_all. Qed. 
 *)
 
-Definition case_app case (P1 P2 M : SF) := 
+Definition case_app case (P1 P2 M : Tree) := 
 (star_opt (App (App (App (App Fop (Ref 0)) i_op) 
                                (lift 1 (star_opt (star_opt (App (App (App (App 
                                (lift 2 (case P1 (case P2 (App k_op (App k_op M)))))
@@ -227,7 +227,7 @@ star_opt (star_opt (star_opt (App (App (Ref 2) (Ref 0))
                                   (App (Ref 1) (Ref 0))))).
 
 
-Definition case_app_nf case (P1 P2 M: SF) := 
+Definition case_app_nf case (P1 P2 M: Tree) := 
 (App
         (App s_op
            (App
@@ -309,28 +309,28 @@ assert(program M2) by eapply2 IHM2.
  split; auto. nf_out. inversion H0; auto.  
 case o; auto. simpl; inversion H0; auto. 
 (* 1 *) 
-gen_case IHM1 s. 
+gen_case IHM1 t. 
 (* 3 *) 
   split. unfold program. simpl. intro c; inversion c.  
-gen_case H0 (maxvar s0); gen_case H0 (maxvar M2); discriminate. 
+gen_case H0 (maxvar t0); gen_case H0 (maxvar M2); discriminate. 
 intro; discriminate. 
 (* 2 *) 
 split. unfold program.  intro. inversion H.
-assert(is_program s0 = true). 
+assert(is_program t0 = true). 
 eapply2 IHM1.  split; auto. nf_out. 
 inversion H0. 
-assert(status (App (App (Op o) s0) M2) = Passive). 
+assert(status (App (App (Op o) t0) M2) = Passive). 
 eapply2 closed_implies_passive. 
 rewrite H7 in H6; discriminate. inversion H4; auto. case o; auto. 
 simpl in *; max_out. 
 rewrite H2; simpl. eapply2 IHM2.
-eapply2 (program_app (App (Op o) s0) M2).
+eapply2 (program_app (App (Op o) t0) M2).
 intro. 
 apply eq_sym in H. 
-assert(true = is_program s0 /\ true = is_program M2) by eapply2 andb_true_eq.
+assert(true = is_program t0 /\ true = is_program M2) by eapply2 andb_true_eq.
 inversion H0. 
 assert(program M2) by eapply2 IHM2. 
-assert(program (App (Op o) s0)) by eapply2 IHM1. 
+assert(program (App (Op o) t0)) by eapply2 IHM1. 
 inversion H3; inversion H4. inversion H7. 
 split. 
 nf_out. case o; auto. case o; auto. simpl in *. 
@@ -338,20 +338,20 @@ rewrite H6; rewrite H8; auto.
  split; auto. nf_out. case o; auto. 
 simpl in *. rewrite H6; rewrite H8; auto.
 (* 1 *) 
-gen_case IHM1 s1. 
+gen_case IHM1 t1. 
 (* 3 *) 
   split. unfold program. simpl. intro c; inversion c.  
-gen_case H0 (maxvar s2); gen_case H0 (maxvar s0);  gen_case H0 (maxvar M2);  discriminate. 
+gen_case H0 (maxvar t2); gen_case H0 (maxvar t0);  gen_case H0 (maxvar M2);  discriminate. 
 intro; discriminate. 
 (* 2 *) 
 split. unfold program.  intro. inversion H. inversion H0. 
-assert(status (App (App (App (Op o) s2) s0) M2) = Passive). 
+assert(status (App (App (App (Op o) t2) t0) M2) = Passive). 
 eapply2 closed_implies_passive. 
 rewrite H7 in H6; discriminate. inversion H6. 
 intro.  discriminate. 
 split; intro. 
 inversion H.  inversion H0. 
-assert(status (App (App (App (App s3 s4) s2) s0) M2) = Passive). 
+assert(status (App (App (App (App t3 t4) t2) t0) M2) = Passive). 
 eapply2 closed_implies_passive. 
 rewrite H7 in H6; discriminate. inversion H6. 
 discriminate.
@@ -587,7 +587,7 @@ auto.
 Qed.
 
 
-Inductive pattern_normal : nat -> SF -> Prop :=
+Inductive pattern_normal : nat -> Tree -> Prop :=
 | pnf_normal : forall j M, normal M -> pattern_normal j M
 (*  pattern_normal j (Ref n)
 | pnFop : forall j o, pattern_normal j (Op o)
@@ -608,7 +608,7 @@ Inductive pattern_normal : nat -> SF -> Prop :=
 (* 
 Lemma pattern_normal_1_occurs : 
 forall M, pattern_normal 1 M -> 
-normal M \/ exists M1 M2, M = App M1 M2 /\ occurs0 M2 = true. 
+normal M \/ exists M1 M2, M = App M1 M2 /\ occurt0 M2 = true. 
 Proof.
 induction M; split_all; try discriminate.  inversion H; subst.  auto. 
 right; exists M1; exist M2. split; auto. 
@@ -668,7 +668,7 @@ inversion H4; subst; auto. case o; auto.   discriminate.
 gen2_case H1 H4 M1.  gen2_case H1 H4 n. discriminate. 
 generalize H4; insert_Ref_out; intro. discriminate. 
 discriminate.  
-gen2_case H1 H4 s.  gen2_case H1 H4 n. discriminate. 
+gen2_case H1 H4 t.  gen2_case H1 H4 n. discriminate. 
 generalize H4; insert_Ref_out; intro. discriminate. 
 inversion H4; subst; auto. case o; auto.   discriminate.
 Qed. 
@@ -687,7 +687,7 @@ split_all.
 (* 1 *)  
 simpl in H0.  
 rewrite orb_false_iff in H0. inversion H0. clear H0 H2. 
-generalize H H1; clear H H1; case s; intros. 
+generalize H H1; clear H H1; case t; intros. 
 (* 3 *) 
 gen_case H1 n.  discriminate.
 (* 2 *) 
@@ -695,7 +695,7 @@ split_all.
 (* 1 *)  
 simpl in H1.  
 rewrite orb_false_iff in H1. inversion H1. 
-generalize H H0; clear H H0; case s1; intros. 
+generalize H H0; clear H H0; case t1; intros. 
 (* 3 *) 
 gen_case H0 n.  discriminate.
 (* 2 *) 
@@ -703,7 +703,7 @@ split_all.
 (* 1 *)  
 simpl in H0.  
 rewrite orb_false_iff in H0. inversion H0. 
-generalize H H3; clear H H3; case s3; intros. 
+generalize H H3; clear H H3; case t3; intros. 
 (* 3 *) 
 gen_case H3 n.  discriminate.
 (* 2 *) 
@@ -712,12 +712,12 @@ gen_case H o. eapply2 IHp. simpl in *; omega.
 simpl in H3.  
 rewrite orb_false_iff in H3. inversion H3. 
 unfold subst_rec; fold subst_rec.
-replace (status (App (App (App (App s5 s6) s4) s2) s0))
-with (status (App (App (App s5 s6) s4) s2)) by auto. 
+replace (status (App (App (App (App t5 t6) t4) t2) t0))
+with (status (App (App (App t5 t6) t4) t2)) by auto. 
 replace (status
-  (App (App (App (App (subst_rec s5 N 0) (subst_rec s6 N 0)) (subst_rec s4 N 0)) (subst_rec s2 N 0))
- (subst_rec s0 N 0)))
-with (status  (subst_rec (App (App (App s5 s6) s4) s2) N 0)) by auto. 
+  (App (App (App (App (subst_rec t5 N 0) (subst_rec t6 N 0)) (subst_rec t4 N 0)) (subst_rec t2 N 0))
+ (subst_rec t0 N 0)))
+with (status  (subst_rec (App (App (App t5 t6) t4) t2) N 0)) by auto. 
 eapply2 IHp. simpl in *; omega.  simpl in *; auto. 
 rewrite H2; rewrite H4; rewrite H5; rewrite H6; auto.
 Qed. 
@@ -920,7 +920,7 @@ assert(compound (subst_rec (App M1 M2) (Op Node) 0)).
 simpl in H9.  inversion H9; subst; auto.
 (* 3 *) 
 gen3_case H H0 H7 M2. gen3_case H H0 H7 n. 
-gen3_case H H0 H7 (occurs0 s || occurs0 s0). 
+gen3_case H H0 H7 (occurs0 t || occurs0 t0). 
 (* 2 *) 
 unfold star_opt; fold star_opt. 
 assert(occurs0 M1 = true \/ occurs0 M1 <> true) by decide equality. 
@@ -957,7 +957,7 @@ rewrite occurs_false_subst_status. auto.
 simpl; rewrite H6; rewrite H0; auto. 
 (* 2 *) 
 gen3_case H H0 H7 M2. gen3_case H H0 H7 n. 
-gen3_case H H0 H7 (occurs0 s || occurs0 s0). 
+gen3_case H H0 H7 (occurs0 t || occurs0 t0). 
 (* 1 *) 
 Set Keep Proof Equalities.
 assert(M2 = Ref 0 \/ M2 <> Ref 0) by repeat decide equality. 
@@ -1002,7 +1002,7 @@ eapply2 occurs_false_subst_rec_maxvar_gt0.
 eapply2 occurs_false_subst_rec_maxvar_lt. 
 (* 1 *) 
 gen3_case H10 H12 H13 M2. gen3_case H10 H12 H13 n. 
-gen3_case H10 H12 H13 (occurs0 s || occurs0 s0). 
+gen3_case H10 H12 H13 (occurs0 t || occurs0 t0). 
 Qed. 
 
 
@@ -1039,7 +1039,7 @@ Qed.
 (* restore ? 
 
 Lemma case_normal: 
-forall (P M : SF), normal M -> normal (case P M).
+forall (P M : Tree), normal M -> normal (case P M).
 Proof.
   induction P; intros.
   (* 3 *)
@@ -1084,7 +1084,7 @@ Qed.
 *) 
  (* 
 Lemma case_pattern_normal: 
-forall (P M : SF) j, pattern_normal j M -> 
+forall (P M : Tree) j, pattern_normal j M -> 
 pattern_normal (j - (pattern_size P)) (case P M).
 Proof.
   induction P; intros. 
@@ -1218,7 +1218,7 @@ Qed.
 
 (* matching *) 
 
-Inductive matching : SF -> SF -> list SF -> Prop :=
+Inductive matching : Tree -> Tree -> list Tree -> Prop :=
 | match_ref : forall i M, matching (Ref i) M (cons M nil)
 | match_op: forall o, matching (Op o) (Op o) nil
 | match_app: forall p1 p2 M1 M2 sigma1 sigma2,
@@ -1235,12 +1235,12 @@ Proof.
   induction P; split_all; inversion H; subst; unfold map; fold map; auto. 
 (* 2 *) 
 replace (lift k (App M1 M2)) with (App (lift k M1) (lift k M2)) by (unfold lift; auto). 
-replace(fix map (l : list SF) : list SF :=
+replace(fix map (l : list Tree) : list Tree :=
             match l with
             | nil => nil
             | a :: t => lift (length sigma1) a :: map t
             end) with (map (lift (length sigma1))) by auto.
-replace (fix map (l : list SF) : list SF :=
+replace (fix map (l : list Tree) : list Tree :=
          match l with
          | nil => nil
          | a :: t => lift k a :: map t
@@ -1268,8 +1268,8 @@ Proof.
   inversion H; split_all. inversion H0.
   assert(status (App M1 M2) = Passive) by eapply2 closed_implies_passive.
   rewrite H6 in H7; discriminate.
-  replace (nil: list SF)
-  with (List.map (lift (length (nil: list SF))) (nil: list SF) ++ (nil: list SF))
+  replace (nil: list Tree)
+  with (List.map (lift (length (nil: list Tree))) (nil: list Tree) ++ (nil: list Tree))
     by split_all.
   eapply2 match_app. simpl in *. max_out. eapply2 IHM1. unfold program; auto.
   simpl in *. max_out. eapply2 IHM2. unfold program; auto.
@@ -1302,8 +1302,8 @@ Qed.
 
 Lemma maxvar_case_app : 
 forall P1 P2, 
-(forall M : SF, maxvar (case P1 M) = maxvar M - pattern_size P1) -> 
-(forall M : SF, maxvar (case P2 M) = maxvar M - pattern_size P2) -> 
+(forall M : Tree, maxvar (case P1 M) = maxvar M - pattern_size P1) -> 
+(forall M : Tree, maxvar (case P2 M) = maxvar M - pattern_size P2) -> 
 forall M, maxvar (case_app case P1 P2 M) = maxvar M - pattern_size (App P1 P2). 
 Proof. 
 intros. unfold case_app. 
@@ -1683,7 +1683,7 @@ eval_tac. auto.
 Qed. 
 
 Lemma subst_rec_preserves_compound: 
-forall (M: SF), compound M -> forall N k, compound(subst_rec M N k).
+forall (M: Tree), compound M -> forall N k, compound(subst_rec M N k).
 Proof. intros M c; induction c; unfold subst; split_all. Qed. 
 
 
@@ -1778,7 +1778,7 @@ rewrite H in *. discriminate.
 auto. 
 Qed. 
  
-Inductive matchfail : SF -> SF -> Prop :=
+Inductive matchfail : Tree -> Tree -> Prop :=
 | matchfail_op: forall o M, factorable M -> Op o <> M -> matchfail (Op o) M
 | matchfail_compound_op: forall p1 p2 o, compound (App p1 p2) -> matchfail (App p1 p2) (Op o)
 | matchfail_active_op: forall p1 p2 o, status (App p1 p2) = Active -> matchfail (App p1 p2) (Op o)
@@ -1802,7 +1802,7 @@ Proof.
   gen2_case H1 H2 M. inversion H1; split_all. inversion H0. discriminate.  inv1 compound.
   eapply2 matchfail_op. unfold lift.  inversion H1; split_all. inversion H0; discriminate. 
  unfold factorable. right.
-  replace (App (lift_rec s 0 k) (lift_rec s0 0 k)) with (lift_rec (App s s0) 0 k) by auto. 
+  replace (App (lift_rec t 0 k) (lift_rec t0 0 k)) with (lift_rec (App t t0) 0 k) by auto. 
   eapply2 lift_rec_preserves_compound. discriminate. 
 (* 5 *) 
 unfold lift; split_all. 
@@ -2372,9 +2372,9 @@ assert(status (App s s0) = Passive) by eapply2 closed_implies_passive.
 rewrite H3 in H10; discriminate. 
 (* 2 *) 
 simpl in H2; max_out. 
-assert(matchfail P1 s \/ (exists sigma : list SF, matching P1 s sigma)).
+assert(matchfail P1 s \/ (exists sigma : list Tree, matching P1 s sigma)).
 eapply2 IHP1. unfold program; split_all. 
-assert(matchfail P2 s0 \/ (exists sigma : list SF, matching P2 s0 sigma)). 
+assert(matchfail P2 s0 \/ (exists sigma : list Tree, matching P2 s0 sigma)). 
 eapply2 IHP2. unfold program; split_all. 
 (* 2 *) 
 inversion H2. left; eapply2 matchfail_active_l.
@@ -2389,9 +2389,9 @@ assert(status (App s s0) = Passive) by eapply2 closed_implies_passive.
 rewrite H3 in H10; discriminate. 
 (* 1 *) 
 simpl in H2; max_out. 
-assert(matchfail P1 s \/ (exists sigma : list SF, matching P1 s sigma)).
+assert(matchfail P1 s \/ (exists sigma : list Tree, matching P1 s sigma)).
 eapply2 IHP1. unfold program; split_all. 
-assert(matchfail P2 s0 \/ (exists sigma : list SF, matching P2 s0 sigma)). 
+assert(matchfail P2 s0 \/ (exists sigma : list Tree, matching P2 s0 sigma)). 
 eapply2 IHP2. unfold program; split_all. 
 (* 2 *) 
 inversion H2. left; eapply2 matchfail_compound_l. 

@@ -15,7 +15,7 @@
 (**********************************************************************)
 
 (**********************************************************************)
-(*                      SF_Closed.v                                   *)
+(*                    Tree_Closed.v                                   *)
 (*                                                                    *)
 (*                      Barry Jay                                     *)
 (*                                                                    *)
@@ -24,15 +24,15 @@
 
 Require Import Arith Omega Max.
 Require Import IntensionalLib.SF_calculus.General.  
-Require Import IntensionalLib.Wave_as_SF.SF_Terms.  
-Require Import IntensionalLib.Wave_as_SF.SF_Tactics.  
-Require Import IntensionalLib.Wave_as_SF.SF_reduction.  
-Require Import IntensionalLib.Wave_as_SF.SF_Normal.  
+Require Import IntensionalLib.Tree_calculus.Tree_Terms.  
+Require Import IntensionalLib.Tree_calculus.Tree_Tactics.  
+Require Import IntensionalLib.Tree_calculus.Tree_reduction.  
+Require Import IntensionalLib.Tree_calculus.Tree_Normal.  
 
 (* closed terms *) 
 
 
-Fixpoint maxvar (M: SF) := 
+Fixpoint maxvar (M: Tree) := 
 match M with 
 | Ref i => S i
 | Op o  => 0
@@ -44,7 +44,7 @@ Lemma maxvar_app : forall M N, maxvar (App M N) = max (maxvar M) (maxvar N).
 Proof. split_all. Qed.
 
 
-Definition decreases  (rank: SF  -> nat) (red:termred):= 
+Definition decreases  (rank: Tree  -> nat) (red:termred):= 
 forall M N, red M N -> rank M >= rank N.
 
 Lemma decreases_multi_step: 
@@ -92,7 +92,7 @@ generalize IHM1 H H0; clear IHM1 H H0; case M1; intros; try (auto; omega).
 simpl in *. gen_case H0 (maxvar M2); omega.  
 (* 1 *)
 rewrite IHM1. 
-gen2_case H H0 s; split_all. gen2_case H H0  s1; split_all.
+gen2_case H H0 t; split_all. gen2_case H H0  t1; split_all.
  case o; split_all. apply IHp. omega. max_out. max_out. 
 simpl in *. omega. simpl in *;  max_out. 
 Qed. 

@@ -27,13 +27,13 @@
 Require Import Arith Omega Max Bool List.
 Require Import IntensionalLib.SF_calculus.Test.  
 Require Import IntensionalLib.SF_calculus.General.  
-Require Import IntensionalLib.Wave_as_SF.SF_Terms.  
-Require Import IntensionalLib.Wave_as_SF.SF_Tactics.  
-Require Import IntensionalLib.Wave_as_SF.SF_reduction.  
-Require Import IntensionalLib.Wave_as_SF.SF_Normal.  
-Require Import IntensionalLib.Wave_as_SF.SF_Closed.  
-Require Import IntensionalLib.Wave_as_SF.Substitution.  
-Require Import IntensionalLib.Wave_as_SF.SF_Eval.  
+Require Import IntensionalLib.Tree_calculus.Tree_Terms.  
+Require Import IntensionalLib.Tree_calculus.Tree_Tactics.  
+Require Import IntensionalLib.Tree_calculus.Tree_reduction.  
+Require Import IntensionalLib.Tree_calculus.Tree_Normal.  
+Require Import IntensionalLib.Tree_calculus.Tree_Closed.  
+Require Import IntensionalLib.Tree_calculus.Substitution.  
+Require Import IntensionalLib.Tree_calculus.Tree_Eval.  
 
 
 (* naive abstraction -- no optimisation *) 
@@ -181,7 +181,7 @@ gen_case H2 n. discriminate.
 (* 2 *) 
 gen_case H o. 
 (* 1 *) 
-generalize IHM1 H H2; clear IHM1 H H2; case s; intros. 
+generalize IHM1 H H2; clear IHM1 H H2; case t; intros. 
 (* 3 *) 
 simpl in H2. unfold subst_rec; fold subst_rec.  unfold insert_Ref. 
 gen_case H2 n. discriminate. 
@@ -191,7 +191,7 @@ simpl in H2.  unfold subst_rec; fold subst_rec.
 case o; split_all. 
 (* 1 *)
 unfold subst_rec; fold subst_rec.
-generalize IHM1 H H2; clear IHM1 H H2; case s1; intros. 
+generalize IHM1 H H2; clear IHM1 H H2; case t1; intros. 
 (* 3 *) 
 simpl in H2. unfold subst_rec; fold subst_rec.  unfold insert_Ref. 
 gen_case H2 n. 
@@ -199,28 +199,28 @@ gen_case H2 n.
 simpl in H2.  unfold subst_rec; fold subst_rec.  discriminate. 
 case o; split_all. 
 rewrite ! IHp; auto. simpl in H; omega. 
-assert(occurs0 s2 = false /\ occurs0 s0 = false) by eapply2 orb_false_iff. 
+assert(occurs0 t2 = false /\ occurs0 t0 = false) by eapply2 orb_false_iff. 
 split_all. 
 inversion H4; auto. 
 (* 1 *) 
 unfold subst_rec; fold subst_rec. 
-replace (status (App (App (App (App s3 s4) s2) s0) M2)) with (status (App (App (App s3 s4) s2) s0))
+replace (status (App (App (App (App t3 t4) t2) t0) M2)) with (status (App (App (App t3 t4) t2) t0))
 by auto. 
 replace (status (App
         (App
-           (App (App (subst_rec s3 N 0) (subst_rec s4 N 0))
-              (subst_rec s2 N 0)) (subst_rec s0 N 0)) 
+           (App (App (subst_rec t3 N 0) (subst_rec t4 N 0))
+              (subst_rec t2 N 0)) (subst_rec t0 N 0)) 
         (subst_rec M2 N 0))) 
 with
 (status (App
-           (App (App (subst_rec s3 N 0) (subst_rec s4 N 0))
-              (subst_rec s2 N 0)) (subst_rec s0 N 0)) 
+           (App (App (subst_rec t3 N 0) (subst_rec t4 N 0))
+              (subst_rec t2 N 0)) (subst_rec t0 N 0)) 
         )
 by auto. 
 replace (App
-           (App (App (subst_rec s3 N 0) (subst_rec s4 N 0))
-              (subst_rec s2 N 0)) (subst_rec s0 N 0)) 
-with (subst_rec (App (App (App s3 s4) s2) s0) N 0) by auto. 
+           (App (App (subst_rec t3 N 0) (subst_rec t4 N 0))
+              (subst_rec t2 N 0)) (subst_rec t0 N 0)) 
+with (subst_rec (App (App (App t3 t4) t2) t0) N 0) by auto. 
 rewrite  IHp; auto. simpl in *; omega. 
 Qed. 
 
@@ -338,12 +338,12 @@ gen3_case H H1 H3 N.
 unfold_op; eapply2 nf_compound.
 unfold_op; eapply2 nf_compound.
 (* 1 *) 
-gen3_case H1 H H3 (occurs0 s). 
-gen3_case H1 H H3 s0. gen3_case H1 H H3 n. 
+gen3_case H1 H H3 (occurs0 t). 
+gen3_case H1 H H3 t0. gen3_case H1 H H3 n. 
 unfold_op; eapply2 nf_compound.
 unfold_op; eapply2 nf_compound.
-gen3_case H1 H H3 (occurs0 s1). 
-gen3_case H1 H H3 (occurs0 s2). 
+gen3_case H1 H H3 (occurs0 t1). 
+gen3_case H1 H H3 (occurs0 t2). 
 unfold_op; eapply2 nf_compound.
 Qed. 
 
@@ -419,26 +419,26 @@ replace (subst_rec M1 (Op Node) 0) with (subst M1 (Op Node
 )) by (unfold subst; auto). 
 rewrite maxvar_lower. rewrite ! max_zero.  auto.
 (* 1 *)  
-gen_case IHM2 (occurs0 s).
+gen_case IHM2 (occurs0 t).
 (* 2 *)  
 rewrite IHM2. rewrite IHM1. rewrite max_swap. auto. 
 (* 1 *) 
-gen_case IHM2 s0. gen_case IHM2 n. 
+gen_case IHM2 t0. gen_case IHM2 n. 
 rewrite IHM1; rewrite IHM2; auto. 
 rewrite max_swap; auto. 
 replace (subst_rec M1 (Op Node) 0) with (subst M1 (Op Node)) by (unfold subst; auto). 
 rewrite maxvar_lower. 
-replace (subst_rec s (Op Node) 0) with (subst s (Op Node)) by (unfold subst; auto). 
+replace (subst_rec t (Op Node) 0) with (subst t (Op Node)) by (unfold subst; auto). 
 rewrite maxvar_lower. rewrite max_pred; auto. 
 replace (subst_rec M1 (Op Node) 0) with (subst M1 (Op Node)) by (unfold subst; auto). 
 rewrite maxvar_lower. 
-replace (subst_rec s (Op Node) 0) with (subst s (Op Node)) by (unfold subst; auto). 
+replace (subst_rec t (Op Node) 0) with (subst t (Op Node)) by (unfold subst; auto). 
 rewrite maxvar_lower. rewrite max_pred; auto. 
 (* 1 *) 
-gen_case IHM2 (occurs0 s1).
+gen_case IHM2 (occurs0 t1).
 rewrite IHM2. rewrite IHM1. rewrite max_swap. auto. 
-gen_case IHM2 (occurs0 s2). 
-gen_case IHM2 s2. 
+gen_case IHM2 (occurs0 t2). 
+gen_case IHM2 t2. 
 (* 4 *) 
 gen_case IHM2 n.  
 rewrite IHM1. rewrite IHM2.  rewrite max_swap. auto.
@@ -450,11 +450,11 @@ rewrite IHM1. rewrite IHM2. rewrite max_swap; auto.
 (* 1 *) 
 replace (subst_rec M1 (Op Node) 0) with (subst M1 (Op Node)) by (unfold subst; auto). 
 rewrite maxvar_lower. 
-replace (subst_rec s (Op Node) 0) with (subst s (Op Node)) by (unfold subst; auto). 
+replace (subst_rec t (Op Node) 0) with (subst t (Op Node)) by (unfold subst; auto). 
 rewrite maxvar_lower.
-replace (subst_rec s1 (Op Node) 0) with (subst s1 (Op Node)) by (unfold subst; auto). 
+replace (subst_rec t1 (Op Node) 0) with (subst t1 (Op Node)) by (unfold subst; auto). 
 rewrite maxvar_lower.
-replace (subst_rec s2 (Op Node) 0) with (subst s2 (Op Node)) by (unfold subst; auto). 
+replace (subst_rec t2 (Op Node) 0) with (subst t2 (Op Node)) by (unfold subst; auto). 
 rewrite maxvar_lower.
 rewrite ! max_pred. simpl. auto.
 Qed. 
@@ -504,10 +504,10 @@ unfold subst.  replace n with (0+n) by omega.
  rewrite lift_rec_subst_rec. auto. 
 (* 3 *) 
 rewrite ! occurs_lift_rec_succ in *; auto. 
-gen_case IHM2 (occurs0 s0). 
-gen_case IHM2 (occurs0 s). 
+gen_case IHM2 (occurs0 t0). 
+gen_case IHM2 (occurs0 t). 
 rewrite orb_false_r. 
-case (occurs0 s). 
+case (occurs0 t). 
 3: simpl in *; omega. 3: simpl in *; omega. 
 (* 2 *) 
 unfold lift_rec; fold lift_rec. 
@@ -570,8 +570,8 @@ auto.
 unfold subst. replace k with (0+k) by auto. rewrite ! subst_rec_subst_rec. simpl. insert_Ref_out. 
 auto. 
 (* 1 *) 
-case (occurs0 s); split_all. 
-case (occurs0 s0); split_all. 
+case (occurs0 t); split_all. 
+case (occurs0 t0); split_all. 
 unfold subst. replace k with (0+k) by auto. rewrite ! subst_rec_subst_rec. simpl. auto.  
 Qed. 
 
@@ -610,8 +610,8 @@ eval_tac. insert_Ref_out. eapply2 preserves_app_sf_red. rewrite H0; auto.
 (* 2 *) 
 eval_tac. eapply2 preserves_app_sf_red. rewrite H0; auto. 
 (* 1 *) 
-assert(occurs0 s = false -> subst_rec s N 0 = subst_rec s (Op Node) 0) by eapply2 no_subst. 
-gen2_case H1 IHM2 (occurs0 s).
+assert(occurs0 t = false -> subst_rec t N 0 = subst_rec t (Op Node) 0) by eapply2 no_subst. 
+gen2_case H1 IHM2 (occurs0 t).
 eapply succ_red. eapply2 s_red. 
 eapply transitive_red. 
 eapply preserves_app_sf_red. 
@@ -619,8 +619,8 @@ eapply2 IHM1. omega.
 eapply2 IHM2. omega.
 unfold subst; auto.  
 (* 1 *) 
-assert(occurs0 s0 = false -> subst_rec s0 N 0 = subst_rec s0 (Op Node) 0) by eapply2 no_subst. 
-gen3_case H2 H IHM2 s0. gen3_case H H2 IHM2 n. 
+assert(occurs0 t0 = false -> subst_rec t0 N 0 = subst_rec t0 (Op Node) 0) by eapply2 no_subst. 
+gen3_case H2 H IHM2 t0. gen3_case H H2 IHM2 n. 
 (* 4 *) 
 eapply succ_red. eapply2 s_red. 
 eapply transitive_red. 
@@ -632,9 +632,9 @@ unfold subst; auto.
 (* 2 *) 
 eval_tac. eapply2 preserves_app_sf_red. rewrite H0; auto. rewrite H1; auto. 
 (* 1 *) 
-assert(occurs0 s1 = false -> subst_rec s1 N 0 = subst_rec s1 (Op Node) 0) by eapply2 no_subst. 
-assert(occurs0 s2 = false -> subst_rec s2 N 0 = subst_rec s2 (Op Node) 0) by eapply2 no_subst. 
-gen2_case IHM2 H3 (occurs0 s1). 
+assert(occurs0 t1 = false -> subst_rec t1 N 0 = subst_rec t1 (Op Node) 0) by eapply2 no_subst. 
+assert(occurs0 t2 = false -> subst_rec t2 N 0 = subst_rec t2 (Op Node) 0) by eapply2 no_subst. 
+gen2_case IHM2 H3 (occurs0 t1). 
 eapply succ_red. eapply2 s_red. 
 eapply transitive_red. 
 eapply preserves_app_sf_red. 
@@ -642,7 +642,7 @@ eapply2 IHM1. omega.
 eapply2 IHM2. omega.
 unfold subst; auto.  
 (* 1 *) 
-gen2_case IHM2 H4 (occurs0 s2).  
+gen2_case IHM2 H4 (occurs0 t2).  
 eapply succ_red. eapply2 s_red. 
 eapply transitive_red. 
 eapply preserves_app_sf_red. 

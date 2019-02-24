@@ -14,7 +14,7 @@
 (* 02110-1301 USA                                                     *)
 
 (**********************************************************************)
-(*                      SF_Normal.v                                   *)
+(*                    Tree_Normal.v                                   *)
 (*                                                                    *)
 (*                      Barry Jay                                     *)
 (*                                                                    *)
@@ -22,9 +22,9 @@
 
 Require Import Arith Omega Max.
 Require Import IntensionalLib.SF_calculus.General.  
-Require Import IntensionalLib.Wave_as_SF.SF_Terms.  
-Require Import IntensionalLib.Wave_as_SF.SF_Tactics.  
-Require Import IntensionalLib.Wave_as_SF.SF_reduction.  
+Require Import IntensionalLib.Tree_calculus.Tree_Terms.  
+Require Import IntensionalLib.Tree_calculus.Tree_Tactics.  
+Require Import IntensionalLib.Tree_calculus.Tree_reduction.  
 
 
 Inductive status_val := 
@@ -42,7 +42,7 @@ end.
 
 (* normal terms *) 
 
-Inductive normal : SF -> Prop := 
+Inductive normal : Tree -> Prop := 
 | nf_ref : forall n, normal (Ref n)
 | nf_op : forall o, normal (Op o)
 | nf_active : forall M1 M2, normal M1 -> normal M2 -> 
@@ -83,7 +83,7 @@ eapply2 IHnor2.
 Qed. 
 
 
-Theorem SF_progress : forall (M : SF), normal M \/ (exists N, sf_seqred1 M N) .
+Theorem Tree_progress : forall (M : Tree), normal M \/ (exists N, sf_seqred1 M N) .
 Proof. 
 induction M; try (inversion IHM); subst; split_all; eauto.
 (* 1 *)
@@ -93,11 +93,11 @@ gen_case H M1. case o; try (right; eauto; fail); left; auto.
 inversion H; subst.
 (* 2 *) 
 left; auto. 
-eapply2 nf_active. gen_case H5 s. gen_case H5 s1. discriminate. 
+eapply2 nf_active. gen_case H5 t. gen_case H5 t1. discriminate. 
 (* 1 *) 
-gen2_case H3 H5 s.
+gen2_case H3 H5 t.
 left; case o; auto. 
-gen2_case H3 H5 s1. 
+gen2_case H3 H5 t1. 
 gen2_case H3 H5 o; try (right; eauto; fail). 
 inversion H3; subst. inversion H8. 
 inversion H7; subst. left; eapply2 nf_active. 

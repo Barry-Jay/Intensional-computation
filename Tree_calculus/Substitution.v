@@ -19,17 +19,17 @@
 (*                                                                    *)
 (*                     Barry Jay                                      *)
 (*                                                                    *)
-(* adapted from Substitution.v of Project Coq  to act on SF-terms     *)
+(* adapted from Substitution.v of Project Coq  to act on Tree-terms     *)
 (**********************************************************************)
 
 Require Import Arith Omega List.
 Require Import IntensionalLib.SF_calculus.Test.  
 Require Import IntensionalLib.SF_calculus.General.  
-Require Import IntensionalLib.Wave_as_SF.SF_Terms.  
-Require Import IntensionalLib.Wave_as_SF.SF_Tactics.  
-Require Import IntensionalLib.Wave_as_SF.SF_reduction.  
-Require Import IntensionalLib.Wave_as_SF.SF_Normal.  
-Require Import IntensionalLib.Wave_as_SF.SF_Closed.  
+Require Import IntensionalLib.Tree_calculus.Tree_Terms.  
+Require Import IntensionalLib.Tree_calculus.Tree_Tactics.  
+Require Import IntensionalLib.Tree_calculus.Tree_reduction.  
+Require Import IntensionalLib.Tree_calculus.Tree_Normal.  
+Require Import IntensionalLib.Tree_calculus.Tree_Closed.  
 
 
 
@@ -80,7 +80,7 @@ forall n k, relocate 0 (S n) k = 0.
 Proof. split_all. Qed. 
 
 
-Fixpoint lift_rec (L : SF) : nat -> nat -> SF :=
+Fixpoint lift_rec (L : Tree) : nat -> nat -> Tree :=
   fun k n => 
   match L with
   | Ref i => Ref (relocate i k n)
@@ -88,13 +88,13 @@ Fixpoint lift_rec (L : SF) : nat -> nat -> SF :=
   | App M N => App (lift_rec M k n) (lift_rec N k n)
    end.
 
-Definition lift (n : nat) (N : SF) := lift_rec N 0 n.
+Definition lift (n : nat) (N : Tree) := lift_rec N 0 n.
 
 
 (* Lifting lemmas *)
 
 Lemma lift_rec_null_term : 
-forall (U : SF)(n: nat), lift_rec U n 0 = U.
+forall (U : Tree)(n: nat), lift_rec U n 0 = U.
 Proof. 
 simple induction U; split_all.  
 relocate_lt; auto. 
@@ -102,7 +102,7 @@ rewrite H; auto. rewrite H0; auto.
 Qed.
 
 Lemma lift1 :
- forall (U : SF) (j i k : nat),
+ forall (U : Tree) (j i k : nat),
  lift_rec (lift_rec U i j) (j + i) k = lift_rec U i (j + k).
 Proof.
 simple induction U; simpl in |- *;  split_all. 
@@ -113,7 +113,7 @@ elim (test (j + i) n); split_all; try noway. rewrite H; auto. rewrite H0; auto.
 Qed. 
 
 Lemma lift_lift_rec :
- forall (U : SF) (k p n i : nat),
+ forall (U : Tree) (k p n i : nat),
  i <= n ->
  lift_rec (lift_rec U i p) (p + n) k = lift_rec (lift_rec U n k) i p.
 Proof.
@@ -137,24 +137,24 @@ Qed.
 
 
 Lemma lift_lift_term :
- forall (U : SF) (k p n : nat),
+ forall (U : Tree) (k p n : nat),
  lift_rec (lift p U) (p+ n) k = lift p (lift_rec U n k).
 Proof.
 unfold lift in |- *; intros; apply lift_lift_rec; trivial with arith.
 Qed.
 
-Lemma liftrecO : forall (U : SF) (n : nat), lift_rec U n 0 = U.
+Lemma liftrecO : forall (U : Tree) (n : nat), lift_rec U n 0 = U.
 Proof.
 simple induction U; simpl in |- *; intros; split_all; relocate_lt; congruence. 
 Qed.
 
-Lemma liftO : forall (U : SF) , lift 0 U = U.
+Lemma liftO : forall (U : Tree) , lift 0 U = U.
 Proof.
 unfold lift in |- *; split_all; apply liftrecO.
 Qed.
 
 Lemma lift_rec_lift_rec :
- forall (U : SF) (n p k i : nat),
+ forall (U : Tree) (n p k i : nat),
  k <= i + n ->
  i <= k -> lift_rec (lift_rec U i n) k p = lift_rec U i (p + n).
 
@@ -171,7 +171,7 @@ rewrite H; split_all; rewrite H0; split_all; split_all.
 Qed. 
 
 Lemma lift_rec_lift :
- forall (U : SF)  (n p k i : nat),
+ forall (U : Tree)  (n p k i : nat),
  k <= n -> lift_rec (lift  n U)  k p = lift (p + n) U.
 Proof.
 unfold lift in |- *; intros; rewrite lift_rec_lift_rec; trivial with arith.
@@ -199,7 +199,7 @@ Proof. induction M; split_all; try discriminate. case n; split_all; discriminate
 
 
 Lemma lift_rec_null : 
-forall (U : SF) (n: nat), lift_rec U n 0 = U.
+forall (U : Tree) (n: nat), lift_rec U n 0 = U.
 Proof. simple induction U; split_all.
  rewrite relocate_null; congruence.
 rewrite H; auto. rewrite H0; auto. 
@@ -212,7 +212,7 @@ rewrite ? lift_rec_not_ref_0.
 
 
 Lemma lift_rec_preserves_compound : 
-forall (M: SF), compound M -> forall (n k : nat), compound(lift_rec M n k).
+forall (M: Tree), compound M -> forall (n k : nat), compound(lift_rec M n k).
 Proof. 
 intros M c; induction c; split_all. 
 Qed. 
@@ -232,7 +232,7 @@ match goal with
 
 induction M; split_all.
 rewrite IHM1. (* pepm 2: omega.  *) 
-gen_case H M1. gen_case H s. gen_case H s1. gen_case H o. eapply2 IHp; omega. omega.
+gen_case H M1. gen_case H t. gen_case H t1. gen_case H o. eapply2 IHp; omega. omega.
 Qed. 
 
 Lemma lift_rec_preserves_normal: forall M n k, normal M -> normal (lift_rec M n k).
@@ -269,7 +269,7 @@ induction M; split_all; inversion H; subst; split_all.
 gen_case H1 M1; try discriminate.  invsub.
 case o; auto.  
 gen_case H1 M1; try discriminate. inversion H1. 
-gen_case H2 s; try discriminate. case o; auto. 
+gen_case H2 t; try discriminate. case o; auto. 
 Qed. 
 
 Lemma lift_rec_reflects_normal : forall M n k, normal (lift_rec M n k) -> normal M. 
@@ -284,7 +284,7 @@ Qed.
 (* Substitution *)
 
 
-Definition insert_Ref (N : SF) (i k : nat) :=
+Definition insert_Ref (N : Tree) (i k : nat) :=
   match compare k i with
   
    (* k<i *) | inleft (left _) => Ref (pred i)
@@ -292,8 +292,8 @@ Definition insert_Ref (N : SF) (i k : nat) :=
    (* k>i *) | _ => Ref i
   end.
 
-Fixpoint subst_rec (L : SF) : SF -> nat -> SF :=
-  fun (N : SF) (k : nat) =>
+Fixpoint subst_rec (L : Tree) : Tree -> nat -> Tree :=
+  fun (N : Tree) (k : nat) =>
   match L with
   | Ref i => insert_Ref N i k
   | Op o => Op o
@@ -312,13 +312,13 @@ Lemma subst_rec_ref: forall i N k,  subst_rec (Ref i) N k = insert_Ref N i k.
 Proof.  split_all. Qed. 
                                                       
 
-Definition subst (M N : SF) := subst_rec M N 0.
+Definition subst (M N : Tree) := subst_rec M N 0.
 
 
 (* The three cases of substitution of U for (Ref n) *)
 
 Lemma subst_eq :
- forall (M U : SF) (n : nat), subst_rec (Ref n) U n = lift n U. 
+ forall (M U : Tree) (n : nat), subst_rec (Ref n) U n = lift n U. 
 Proof.
 simpl in |- *; unfold insert_Ref in |- *; split_all. 
 elim (compare n n); intro P; try noway. 
@@ -326,7 +326,7 @@ elim P; intro Q; simpl in |- *; trivial with arith; try noway.
 Qed.
 
 Lemma subst_gt :
- forall (M U : SF) (n p : nat),
+ forall (M U : Tree) (n p : nat),
  n > p -> subst_rec (Ref n) U p = Ref (pred n).
 Proof.
 simpl in |- *; unfold insert_Ref in |- *.
@@ -337,7 +337,7 @@ absurd (n > p); auto with arith.
 Qed. 
 
 Lemma subst_lt :
- forall (M U : SF) (n p : nat), p > n -> subst_rec (Ref n) U p = Ref n.
+ forall (M U : Tree) (n p : nat), p > n -> subst_rec (Ref n) U p = Ref n.
 Proof.
 simpl in |- *; unfold insert_Ref in |- *.
 intros; elim (compare p n); intro P; trivial with arith.
@@ -348,7 +348,7 @@ Qed.
 (* Substitution lemma *)
 
 Lemma lift_rec_subst_rec :
- forall (V U : SF) (k p n : nat),
+ forall (V U : Tree) (k p n : nat),
  lift_rec (subst_rec V U p) (p + n) k =
  subst_rec (lift_rec V (S (p + n)) k) (lift_rec U n k) p.
 Proof.
@@ -377,7 +377,7 @@ Qed.
 
 
 Lemma lift_subst :
- forall (U V : SF) (k n : nat),
+ forall (U V : Tree) (k n : nat),
  lift_rec (subst U V) n k =
  subst (lift_rec U (S n) k) (lift_rec V n k).
 Proof.
@@ -388,7 +388,7 @@ auto.
 Qed.
 
 Lemma subst_rec_lift_rec1 :
- forall (U V : SF) (n p k : nat),
+ forall (U V : Tree) (n p k : nat),
  k <= n ->
  subst_rec (lift_rec U k p) V (p + n) =
  lift_rec (subst_rec U V n) k p.
@@ -424,7 +424,7 @@ rewrite H; split_all.  rewrite H0; split_all.
 Qed. 
 
 Lemma subst_rec_lift1 :
- forall (U V : SF) (n p : nat),
+ forall (U V : Tree) (n p : nat),
  subst_rec (lift p U) V (p + n) = lift p (subst_rec U V n).
 Proof.
 unfold lift in |- *; intros; rewrite subst_rec_lift_rec1;
@@ -433,7 +433,7 @@ Qed.
 
 
 Lemma subst_rec_lift_rec :
- forall (U V : SF) (p q n : nat),
+ forall (U V : Tree) (p q n : nat),
  q <= p + n ->
  n <= q -> subst_rec (lift_rec U n (S p)) V q = lift_rec U n p.
 Proof.
@@ -454,7 +454,7 @@ Qed.
 (* subst_rec_subst_rec *)
 
 Lemma subst_rec_subst_rec :
- forall (V U W : SF) (n p : nat),
+ forall (V U W : Tree) (n p : nat),
  subst_rec (subst_rec V U p) W (p + n) =
  subst_rec (subst_rec V W (S (p + n))) (subst_rec U W n) p.
 Proof.
@@ -503,7 +503,7 @@ Qed.
 
 
 Lemma subst_rec_subst_0 :
- forall (U V W : SF) (n : nat),
+ forall (U V W : Tree) (n : nat),
  subst_rec (subst_rec V U 0) W n =
  subst_rec (subst_rec V W (S n)) (subst_rec U W n) 0.
 Proof.
@@ -517,7 +517,7 @@ Qed.
 (**************************)
 
 Lemma substitution :
- forall (U V W : SF) (n : nat),
+ forall (U V W : Tree) (n : nat),
  subst_rec (subst U V) W n =
  subst (subst_rec U W (S n)) (subst_rec V W n).
 Proof.
@@ -528,7 +528,7 @@ Qed.
 
 
 Lemma subst_lift_null :
-forall (W V : SF)(n : nat), subst_rec (lift_rec W n 1) V n = W.
+forall (W V : Tree)(n : nat), subst_rec (lift_rec W n 1) V n = W.
 Proof.
 simple induction W; split_all. 
 unfold insert_Ref. 
@@ -623,13 +623,13 @@ unfold subst_rec; fold subst_rec; insert_Ref_out; unfold pred.
 
 
 Definition subst_preserves_l (red: termred) := 
-forall (M M' N : SF), red M M' -> red  (subst M N) (subst M' N).
+forall (M M' N : Tree), red M M' -> red  (subst M N) (subst M' N).
 
 Definition subst_preserves_r (red: termred) := 
-forall (M N N' : SF), red N N' -> red  (subst M N) (subst M N').
+forall (M N N' : Tree), red N N' -> red  (subst M N) (subst M N').
 
 Definition subst_preserves (red: termred) := 
-forall (M M' : SF), red M M' -> forall N N', red N N' -> 
+forall (M M' : Tree), red M M' -> forall N N', red N N' -> 
 red  (subst M N) (subst M' N').
 
 Lemma subst_preserves_l_multi_step : 
@@ -659,17 +659,17 @@ Qed.
 
 
 Lemma subst_preserves_compound: 
-forall (M: SF), compound M -> forall N, compound(subst M N).
+forall (M: Tree), compound M -> forall N, compound(subst M N).
 Proof. intros M c; induction c; unfold subst; split_all. Qed. 
 Hint Resolve subst_preserves_compound.
 
-Lemma  subst_rec_preserves_components_l : forall (M : SF) n k, compound M -> 
+Lemma  subst_rec_preserves_components_l : forall (M : Tree) n k, compound M -> 
   subst_rec(left_component M) n k = left_component(subst_rec M n k).
 Proof. induction M; split_all; inv1 compound. Qed. 
 
 
 Lemma  subst_rec_preserves_components_r : 
-forall (M : SF),  compound M -> forall n k,   
+forall (M : Tree),  compound M -> forall n k,   
 subst_rec(right_component M) n k = right_component(subst_rec M n k).
 Proof. induction M; split_all; inversion H; subst; split_all. Qed. 
 Lemma subst_rec_preserves_compounds: 
