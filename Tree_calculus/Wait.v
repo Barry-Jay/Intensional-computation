@@ -80,6 +80,14 @@ Proof. intros; unfold app_comb; unfold_op. repeat eapply2 nf_compound. Qed.
 Lemma maxvar_app_comb : forall M N,  maxvar (app_comb M N) = max(maxvar M) (maxvar N).
 Proof. intros; unfold app_comb. unfold_op; split_all. rewrite max_swap. auto. Qed.
 
+Lemma app_comb_program: forall M N, program M -> program N -> program (app_comb M N). 
+Proof. 
+intros; inversion H; inversion H0; split.  
+eapply2 app_comb_normal. 
+rewrite maxvar_app_comb. rewrite H2; rewrite H4; auto. 
+Qed. 
+ 
+
 
 Lemma rank_app_comb: forall M N, rank (app_comb M N) > rank (App M N).
 Proof. intros; unfold app_comb; split_all. omega. Qed.

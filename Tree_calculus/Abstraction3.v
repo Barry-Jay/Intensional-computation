@@ -1,11 +1,5 @@
 (**********************************************************************)
-(* This Program is free software; you can redistribute it and/or      *)
-(* modify it under the terms of the GNU Lesser General Public License *)
-(* as published by the Free Software Foundation; either version 2.1   *)
-(* of the License, or (at your option) any later version.             *)
-(*                                                                    *)
-(* This program is distributed in the hope that it will be useful,    *)
-(* but WITHOUT ANY WARRANTY; without even the implied warranty of     *)
+(* This Program is free sofut even the implied warranty of     *)
 (* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the      *)
 (* GNU General Public License for more details.                       *)
 (*                                                                    *)
@@ -39,6 +33,7 @@ Require Import IntensionalLib.Tree_calculus.Fixpoints.
 Require Import IntensionalLib.Tree_calculus.Wave_Factor.  
 Require Import IntensionalLib.Tree_calculus.Wave_Factor2.  
 Require Import IntensionalLib.Tree_calculus.Equal.  
+Require Import IntensionalLib.Tree_calculus.Case.  
 Require Import IntensionalLib.Tree_calculus.Extensions.  
 Require Import IntensionalLib.Tree_calculus.Wait2.  
 Require Import IntensionalLib.Tree_calculus.Abstraction.  
@@ -48,40 +43,6 @@ Require Import IntensionalLib.Tree_calculus.Abstraction2a.
 Set
 Keep Proof Equalities.
 
-
-
-Lemma app_mono: forall M N P, App M N = App M P -> N = P. 
-Proof.  split_all. inversion H. auto. Qed. 
-
-
-
-Lemma b_fn_normal: normal b_fn. 
-Proof. 
-unfold b_fn. 
-match goal with 
-| |- normal (star_opt (star_opt (star_opt ?M))) => 
-replace (star_opt (star_opt (star_opt M))) with (multi_star 3 M)
-end.
-2: unfold multi_star; congruence. 
-match goal with 
-| |- normal (multi_star 3 ?M) => 
-assert(maxvar M = 3) by eapply2 b_fn_body_maxvar 
-end.
-rewrite <- H at 1. clear H.  
-apply bind_normal_to_normal.
-eapply2 aux8.  
-Qed.
-
-Lemma b_op_program: program b_op. 
-Proof.
-unfold program.
-split. 
-eapply2 nf_compound. eapply2 nf_compound. eapply2 nf_compound. unfold_op; repeat eapply2 nf_compound. 
-unfold_op; eapply2 nf_compound.  eapply2 nf_compound.  eapply2 nf_compound.  eapply2 nf_compound. 
- eapply2 b_fn_normal.  eapply2 nf_compound. eapply2 Y_k_normal.  
-eapply2 b_op_closed.
-Qed. 
- 
 
 
 Lemma matchfail_program: forall P M, program P -> program M -> P <> M -> matchfail P M. 
@@ -151,34 +112,34 @@ inversion H4; auto. simpl in *; max_out.
 Qed. 
 
 
-Lemma star_mono: forall M N, star M = star N -> M = N. 
+
+Lemma b_fn_normal: normal b_fn. 
 Proof. 
-induction M; split_all. 
-gen_case H n; split_all.
-gen_case H N. 
-gen_case H n0. 
-inversion H. inversion H. inversion H. 
-gen_case H2 t. 
-gen_case H2 n0. 
-discriminate . discriminate . discriminate.
-discriminate.
-gen_case H N. 
-gen_case H n1. discriminate.
-inversion H; subst. auto. discriminate. 
-discriminate. 
-gen_case H N. 
-gen_case H n. discriminate. discriminate. 
-inversion H; subst. auto. 
-inversion H; subst . 
-gen_case H N. 
-gen_case H n. all: try discriminate. inversion H. 
-gen_case H1 M2. gen_case H1 n0.  all: try discriminate. 
-inversion H; subst. 
-rewrite (IHM1 t); auto. rewrite (IHM2 t0); auto. 
+unfold b_fn. 
+match goal with 
+| |- normal (star_opt (star_opt (star_opt ?M))) => 
+replace (star_opt (star_opt (star_opt M))) with (multi_star 3 M)
+end.
+2: unfold multi_star; congruence. 
+match goal with 
+| |- normal (multi_star 3 ?M) => 
+assert(maxvar M = 3) by eapply2 b_fn_body_maxvar 
+end.
+rewrite <- H at 1. clear H.  
+apply bind_normal_to_normal.
+eapply2 aux8.  
+Qed.
+
+Lemma b_op_program: program b_op. 
+Proof.
+unfold program.
+split. 
+eapply2 nf_compound. eapply2 nf_compound. eapply2 nf_compound. unfold_op; repeat eapply2 nf_compound. 
+unfold_op; eapply2 nf_compound.  eapply2 nf_compound.  eapply2 nf_compound.  eapply2 nf_compound. 
+ eapply2 b_fn_normal.  eapply2 nf_compound. eapply2 Y_k_normal.  
+eapply2 b_op_closed.
 Qed. 
-
-
-
+ 
 
 Lemma b_j_red: forall M N, sf_red (App (App (App b_op M) N) j_op)M.
 Proof.
@@ -192,107 +153,38 @@ eapply2 star_opt_beta3. auto.
 unfold subst. rewrite ! subst_rec_preserves_extension.
 (* 1 *) 
 eapply transitive_red. 
-eapply2 extensions_by_matchfail. 
-unfold app_comb. 
-eapply2 matchfail_compound_r.
-eapply2 program_matching.
-unfold_op; unfold program; split; auto. 
-repeat eapply2 nf_compound. 
-eapply2 matchfail_compound_r.
-eapply2 match_app.
-eapply2 match_app.
-unfold_op; eapply2 match_app.
-unfold_op. 
-eapply2 matchfail_compound_r.
-eapply2 matchfail_compound_r.
-unfold_op; eapply2 program_matching. 
-unfold_op; unfold program; split; auto. 
-repeat eapply2 nf_compound. 
-eapply2 matchfail_compound_r.
-eapply2 match_app. 
-eapply2 match_app. 
-unfold_op; eapply2 match_app. 
-unfold_op; eapply2 matchfail_compound_r.
-eapply2 matchfail_compound_r.
-eapply2 program_matching.
-unfold_op; unfold program; split; auto. 
-repeat eapply2 nf_compound. 
-eapply2 matchfail_compound_l.
-eapply2 matchfail_compound_r.
-eapply2 matchfail_compound_r.
-eapply2 matchfail_compound_r.
-unfold h_fn, omega_k. simpl.
-eapply2 matchfail_compound_l.
-eapply2 matchfail_compound_r.
-eapply2 matchfail_compound_r.
-unfold_op; eapply2 matchfail_compound_l.
+eapply2 extensions_by_matchfail.
+eapply2 matchfail_app_comb_l. 
+eapply2 matchfail_app_comb_l. 
+eapply2 matchfail_app_comb_r. 
+eapply2 matchfail_program. 
+unfold h_fn; split; auto.
+repeat eapply2 star_opt_normal.
+unfold program; split.  eapply2 omega_k_normal. eapply2 omega_k_closed.
+discriminate .    
 (* 1 *)  
 eapply transitive_red. 
 eapply2 extensions_by_matchfail. 
-unfold app_comb. 
-eapply2 matchfail_compound_r.
-eapply2 program_matching.
-unfold_op; unfold program; split; auto. 
-repeat eapply2 nf_compound. 
-eapply2 matchfail_compound_r.
-eapply2 match_app.
-eapply2 match_app.
-unfold_op; eapply2 match_app.
-unfold_op. 
-eapply2 matchfail_compound_r.
-eapply2 matchfail_compound_r.
-unfold_op; eapply2 program_matching. 
-unfold_op; unfold program; split; auto. 
-repeat eapply2 nf_compound. 
-eapply2 matchfail_compound_r.
-eapply2 match_app. 
-eapply2 match_app. 
-unfold_op; eapply2 match_app. 
-unfold_op; eapply2 matchfail_compound_r.
-eapply2 matchfail_compound_r.
-eapply2 program_matching.
-unfold_op; unfold program; split; auto. 
-repeat eapply2 nf_compound. 
-eapply2 matchfail_compound_r.
-eapply2 match_app. 
-eapply2 match_app. 
-eapply2 matchfail_compound_r.
-unfold_op; eapply2 matchfail_compound_l. unfold_op. 
-eapply2 matchfail_compound_r.
-eapply2 matchfail_compound_r.
-unfold_op; eapply2 matchfail_compound_l.
-eapply2 matchfail_compound_r.
-eapply2 matchfail_compound_r.
-eapply2 matchfail_op. 
-unfold factorable; split_all. 
-discriminate. 
+eapply2 matchfail_app_comb_l. 
+eapply2 matchfail_app_comb_l. 
+eapply2 matchfail_app_comb_l. 
+eapply2 matchfail_program. 
+unfold program; split.
+eapply2 app_comb_normal.
+rewrite maxvar_app_comb. rewrite ! omega_k_closed. auto. 
+unfold program; split.
+eapply2 A_k_normal. eapply2 A_k_closed. 
+discriminate .    
 (* 1 *) 
 eapply transitive_red. 
 eapply2 extensions_by_matchfail. 
-unfold app_comb. 
-eapply2 matchfail_compound_r.
-eapply2 program_matching.
-unfold_op; unfold program; split; auto. 
-repeat eapply2 nf_compound. 
-eapply2 matchfail_compound_r.
-unfold_op; repeat eapply2 match_app. 
-unfold_op; eapply2 matchfail_compound_r.
-unfold_op;  eapply2 matchfail_compound_r.
-unfold_op; repeat eapply2 match_app. 
- eapply2 matchfail_compound_r.
-unfold_op; repeat eapply2 match_app. 
-unfold_op; eapply2 matchfail_compound_r.
-unfold_op; eapply2 matchfail_compound_r.
-unfold_op; repeat eapply2 match_app. 
- eapply2 matchfail_compound_l.
+eapply2 matchfail_app_comb_l. 
+eapply2 matchfail_app_comb_l. 
+eapply2 matchfail_app_comb_r. 
 eapply2 matchfail_program. 
-unfold program; split.
-repeat eapply2 nf_compound.
-rewrite ! maxvar_app. rewrite omega_k_closed. auto. 
-unfold program; split.
-repeat eapply2 nf_compound.
-rewrite ! maxvar_app. rewrite omega_k_closed. auto. 
-intro. inversion H. (* slow *) 
+unfold program; split. eapply2 omega_k_normal. eapply2 omega_k_closed.
+unfold program; split. eapply2 omega_k_normal. eapply2 omega_k_closed.
+eapply2 omega_3_not_omega_2. 
 (* 1 *) 
 eapply transitive_red. 
 eapply2 extensions_by_matching.
@@ -310,6 +202,8 @@ unfold plus, subst. rewrite ! subst_rec_lift_rec. all: try omega .
 rewrite lift_rec_null.  auto. eapply2 Y_k_closed.
 Qed. 
  
+ 
+
 Lemma b_r_red: forall M N P, sf_red (App (App (App b_op M) N) (App r_op P)) (App N P).
 Proof.
 intros. unfold b_op. 
@@ -325,112 +219,59 @@ eapply preserves_app_sf_red. auto.
 eapply transitive_red. 
 eapply2 app_comb_red. 
 eapply2 r_aux. 
+(* 1 *) 
 eapply transitive_red. 
 eapply2 extensions_by_matchfail.
-eapply2 matchfail_compound_r.
-eapply2 program_matching.
-unfold_op; unfold program; split; auto. 
-repeat eapply2 nf_compound. 
-eapply2 matchfail_compound_r.
-eapply2 match_app.
-eapply2 match_app.
-unfold_op; eapply2 match_app.
-unfold_op. 
-eapply2 matchfail_compound_r.
-eapply2 matchfail_compound_r.
-eapply2 program_matching.
-unfold_op; unfold program; split; auto. 
-repeat eapply2 nf_compound. 
-eapply2 matchfail_compound_r.
-eapply2 match_app. 
-eapply2 match_app. 
-eapply2 matchfail_compound_r.
-eapply2 matchfail_compound_r.
-eapply2 program_matching.
-unfold_op; unfold program; split; auto. 
-repeat eapply2 nf_compound. 
-unfold_op; eapply2 matchfail_compound_l.
-eapply2 matchfail_compound_r.
-eapply2 matchfail_compound_r.
-eapply2 matchfail_compound_r.
-(* 2 *) 
+eapply2 matchfail_app_comb_l.
+eapply2 matchfail_app_comb_l.
+eapply2 matchfail_app_comb_r.
 eapply2 matchfail_program.
 unfold program; unfold h_fn; split; auto.
-unfold_op; simpl; repeat eapply2 nf_compound. 
-all: try (unfold_op; auto).
+unfold_op; simpl; unfold_op; repeat eapply2 nf_compound. 
 unfold subst; simpl; auto.
 unfold program; split. eapply2 omega_k_normal. eapply2 omega_k_closed.
-unfold omega_k, h_fn.  intro. inversion H. 
-(* 1 *)
+apply h_fn_not_omega. 
+(* 1 *) 
 eapply transitive_red.
-eapply2 extensions_by_matchfail. 
-eapply2 matchfail_compound_r. 
-repeat eapply2 match_app.
-eapply2 matchfail_compound_r. 
-repeat eapply2 match_app.
-eapply2 matchfail_compound_r. 
-eapply2 matchfail_compound_r. 
-repeat eapply2 match_app.
-eapply2 matchfail_compound_r. 
-repeat eapply2 match_app.
-eapply2 matchfail_compound_r. 
-repeat eapply2 match_app.
-eapply2 matchfail_compound_r. 
-repeat eapply2 match_app.
-eapply2 matchfail_compound_r. 
-repeat eapply2 match_app.
-eapply2 matchfail_compound_r. 
-repeat eapply2 match_app.
-eapply2 matchfail_compound_l. 
-eapply2 matchfail_compound_r. 
-eapply2 matchfail_compound_r. 
-repeat eapply2 match_app.
-unfold_op. unfold occurs0. 
-rewrite ! orb_false_r.
-unfold subst, subst_rec.  
-eapply2 matchfail_compound_l.
+eapply2 extensions_by_matchfail.
+eapply2 matchfail_app_comb_l.
+eapply2 matchfail_app_comb_l.
+eapply2 matchfail_app_comb_l.
+eapply2 matchfail_program.
+unfold program; split. 
+eapply2 app_comb_normal. 
+rewrite maxvar_app_comb; rewrite ! omega_k_closed; auto. 
+split. eapply2 omega_k_normal. eapply2 omega_k_closed.
+discriminate.  
 (* 1 *) 
 eapply transitive_red. 
 eapply2 extensions_by_matching. 
-eapply2 match_app.
-repeat eapply2 match_app.
-eapply2 match_app.
-eapply2 match_app.
-repeat eapply2 match_app.
-eapply2 match_app.
-eapply2 match_app.
-repeat eapply2 match_app.
-eapply2 match_app.
-eapply2 match_app.
-repeat eapply2 match_app.
-eapply2 match_app.
-eapply2 match_app.
-eapply2 match_app.
-repeat eapply2 match_app.
+eapply2 app_comb_matching. 
+eapply2 app_comb_matching. 
 eapply2 program_matching. 
 unfold program. split.  
-repeat eapply2 nf_compound. 
-repeat eapply2 maxvar_app.
+eapply2 app_comb_normal. 
+rewrite maxvar_app_comb. 
+rewrite ! (omega_k_closed); cbv; auto. 
 (* 1 *) 
-rewrite ! app_nil_r. 
 rewrite ! app_nil_l.
 unfold length; fold length. 
-rewrite ! map_lift0. 
-unfold fold_left.
-unfold map.  unfold app. 
+unfold fold_left, map, app, subst. 
 rewrite ! subst_rec_app.
-unfold pattern_size.
-rewrite ! pattern_size_closed. unfold plus. 
-rewrite ! subst_rec_ref.  insert_Ref_out. 
-unfold subst; rewrite ! subst_rec_app.
-unfold lift; rewrite ! lift_rec_lift_rec; try omega. 
-unfold plus. rewrite ! subst_rec_lift_rec; try omega. 
-unfold subst_rec; fold subst_rec.  insert_Ref_out. 
-unfold subst_rec; fold subst_rec.  insert_Ref_out. 
- unfold subst_rec; fold subst_rec.  insert_Ref_out. 
- unfold subst_rec; fold subst_rec.  insert_Ref_out. 
+rewrite ! pattern_size_app_comb. 
+rewrite ! pattern_size_ref. 
+rewrite ! pattern_size_closed. 
+2: eapply2 omega_k_closed. 
+unfold plus. 
+rewrite ! subst_rec_ref.  insert_Ref_out.
+unfold plus, lift; rewrite ! lift_rec_lift_rec; try omega. 
+unfold plus; rewrite ! subst_rec_lift_rec; try omega. 
+rewrite ! lift_rec_null. 
+rewrite ! subst_rec_ref.  insert_Ref_out.
+rewrite ! subst_rec_ref.  insert_Ref_out.
+rewrite ! subst_rec_ref.  insert_Ref_out.
+rewrite ! subst_rec_ref.  insert_Ref_out.
  unfold lift; rewrite ! lift_rec_null. auto. 
-rewrite omega_k_closed. auto. 
 Qed. 
 
 Lemma Y_k_red4: forall M N, sf_red (App (App (Y_k 4) M) N) 
@@ -456,6 +297,8 @@ unfold A_k.
  auto. 
 Qed. 
 
+
+(* delete ? 
 Lemma aux_big: 
 matchfail
   (App
@@ -530,6 +373,7 @@ unfold_op; eapply2 matchfail_compound_l.
 simpl; auto.
 Qed.
 
+
 Lemma aux_hb : forall P Q, 
 matchfail
   (app_comb
@@ -537,44 +381,73 @@ matchfail
      (Ref 1)) (app_comb (app_comb (ab_fn b_op) P) Q).
 Proof.
 intros. 
-eapply2 matchfail_compound_r.
-eapply2 program_matching.
-unfold_op; unfold program; split; auto. 
-repeat eapply2 nf_compound. 
-eapply2 matchfail_compound_r.
-eapply2 match_app.
-eapply2 match_app.
-unfold_op; eapply2 match_app.
-unfold_op. 
-eapply2 matchfail_compound_r.
-eapply2 matchfail_compound_r.
-eapply2 program_matching.
-unfold_op; unfold program; split; auto. 
-repeat eapply2 nf_compound. 
-eapply2 matchfail_compound_r.
-repeat eapply2 match_app. 
-eapply2 matchfail_compound_r.
+eapply2 matchfail_app_comb_l.
+eapply2 matchfail_app_comb_l.
 unfold ab_fn. 
+rewrite star_opt_occurs_true.
+3: discriminate. 
+2: rewrite ! occurs_app.
+2: unfold occurs0 at 2; rewrite orb_true_r; simpl; auto. 
+(* 1 *) 
+rewrite (star_opt_occurs_true (App b_op _)).
+3: discriminate. 
+2: rewrite ! occurs_app.
+2: unfold occurs0 at 2; rewrite orb_true_r; simpl; auto. 
+(* 1 *) 
+unfold star_opt at 3 4 5.
+rewrite occurs_closed. 
+2: eapply2 b_op_closed. 
+(* 1 *) 
 rewrite star_opt_occurs_true. 
-rewrite star_opt_occurs_true. 
-rewrite (star_opt_occurs_true (App b_op _)). 
-unfold star_opt at 6 5 3.  unfold occurs0. 
-unfold_op. 
+3: discriminate.
+2: rewrite ! occurs_app.
+2: unfold occurs0 at 4.  2: rewrite  orb_true_r at 1. 
+2: rewrite  orb_true_r at 1. 
+2: rewrite  orb_true_r at 1. 
+2: simpl; auto. 
+(* 1 *) 
+rewrite (star_opt_occurs_true (Op Node)). 
+2: cbv; auto. 
+2: discriminate. 
+unfold_op; unfold star_opt at 3 4. 
+  unfold occurs0. 
 rewrite ! orb_false_l. 
-all: cycle 1. 
-unfold occurs0. rewrite orb_true_r. simpl; auto. 
-congruence . 
-unfold star_opt at 1. unfold occurs0. 
-rewrite orb_true_r at 1. 
-rewrite orb_true_r at 1. 
-rewrite orb_true_r at 1.  
-rewrite orb_true_l. auto. 
-rewrite (star_opt_occurs_true (App b_op _)) at 1.
-congruence. 
-unfold occurs0. rewrite orb_true_r. simpl; auto. 
-congruence . 
-unfold occurs0. rewrite orb_true_r. simpl; auto. 
-congruence .
+rewrite star_opt_occurs_true . 
+all: cycle 1.
+2: discriminate.  
+rewrite star_opt_occurs_false.
+2: rewrite ! occurs_app. 
+2: replace (occurs0 (subst b_op (Op Node))) with false. 
+2: cbv; auto. 
+2: unfold subst; rewrite subst_rec_closed. 
+2: rewrite occurs_closed. 2: auto. 
+2: eapply2 b_op_closed. 
+2: rewrite b_op_closed; auto. 
+unfold subst_rec; fold subst_rec.
+insert_Ref_out. 
+rewrite ! occurs_app. 
+replace (occurs0 (Ref (pred 1))) with true by auto.
+replace (occurs0 (Op Node)) with false by auto.
+rewrite occurs_closed. simpl. auto.
+unfold_op; auto. 
+(* 1 *)  
+eapply2 matchfail_program. 
+split. 
+eapply2 nf_compound. 
+repeat eapply2 nf_compound. 
+eapply2 nf_compound. 
+repeat eapply2 nf_compound. 
+eapply2 nf_compound. 
+eapply2 nf_compound.
+eapply2 h_fn_normal. 
+ 
+eapply2 nf_compound. 
+eapply2 nf_compound. 
+
+
+
+
+
 eapply2 aux_big.
 Qed.  
 
@@ -785,10 +658,182 @@ rewrite star_opt_occurs_true. congruence .
 simpl; auto. discriminate.
 Qed.
 
+*)
 
+
+Lemma ab_fn_program: 
+forall M, program M -> program (ab_fn M).
+Proof.
+intros. inversion H. unfold ab_fn; split.
+all: cycle 1.
+rewrite ! maxvar_star_opt. 
+rewrite ! maxvar_app.
+rewrite H1. 
+cbv; auto.  
+rewrite star_opt_occurs_true.
+2: rewrite ! occurs_app. 
+2: unfold occurs0 at 2 .
+2: rewrite orb_true_r. 2: simpl; auto. 2: congruence. 
+unfold star_opt at 3. 
+rewrite (star_opt_occurs_true (App M _)). 
+2: rewrite ! occurs_app. 
+2: unfold occurs0 at 2.
+2: rewrite orb_true_r. 2: simpl; auto. 2: congruence. 
+unfold star_opt at 3 4. 
+rewrite occurs_closed . 2: auto. 
+unfold subst; rewrite subst_rec_closed. 2: rewrite H1; auto. 
+(* 1 *) 
+repeat eapply2 star_opt_normal.
+repeat eapply2 nf_compound. 
+all: unfold_op; auto. 
+Qed. 
+
+Lemma yk_not_a: forall k h, matchfail (app_comb (app_comb (omega_k k) (omega_k k)) h) (ab_fn b_op). 
+Proof. 
+unfold ab_fn. 
+rewrite star_opt_occurs_true. 
+2: rewrite ! occurs_app.  2: unfold occurs0 at 2.
+2: rewrite orb_true_r; simpl; auto. 
+2: discriminate. 
+unfold star_opt at 3.
+(* 1 *) 
+rewrite (star_opt_occurs_true (App b_op _)). 
+2: rewrite ! occurs_app.  2: unfold occurs0 at 2.
+2: rewrite orb_true_r; simpl; auto. 
+2: discriminate. 
+unfold star_opt at 3 4.
+rewrite occurs_closed. 
+2: eapply2 b_op_closed.
+(* 1 *)  
+rewrite star_opt_occurs_true. 
+2: rewrite ! occurs_app.  2: unfold occurs0 at 4.
+2: replace (occurs0 (Op Node)) with false by auto. 
+2: rewrite ! orb_false_l. 2: simpl; auto. 
+2: congruence. 
+(* 1 *) 
+rewrite (star_opt_occurs_true (Op Node)).
+2: cbv; auto. 2: congruence. 
+(* 1 *) 
+rewrite (star_opt_occurs_true (Op Node)).
+2: cbv; auto. 2: congruence. 
+(* 1 *) 
+unfold_op; unfold star_opt at 3 4 5. 
+unfold occurs0.  rewrite orb_false_l.
+(* 1 *) 
+rewrite (star_opt_occurs_false (App
+                 (App (Op Node)
+                    (App (Op Node) (App (App (Op Node) (Op Node)) (Ref 1))))
+                 (subst b_op (Op Node)))). 
+2: rewrite ! occurs_app. 
+2: rewrite ! orb_false_l.
+2: apply occurs_closed.
+2: unfold subst; rewrite subst_rec_closed. 
+2: eapply2 b_op_closed. 
+2: rewrite b_op_closed; auto.
+(* 1 *) 
+rewrite ! subst_rec_app.
+rewrite ! subst_rec_ref. insert_Ref_out. 
+(* 1 *) 
+unfold subst; rewrite ! subst_rec_closed. 
+2: cbv; auto. 
+2: rewrite b_op_closed; auto. 
+2: rewrite subst_rec_closed. 
+2: rewrite b_op_closed; auto. 
+2: rewrite b_op_closed; auto. 
+2: cbv; auto. 
+(* 1 *) 
+rewrite (star_opt_occurs_true).
+rewrite star_opt_closed. 
+all: cycle 1. 
+cbv; auto. 
+rewrite ! occurs_app. 
+rewrite ! orb_false_l. 
+simpl; auto.
+congruence.
+(* 1 *) 
+intros. 
+eapply2 matchfail_compound_l.
+eapply2 matchfail_compound_r.
+eapply2 matchfail_compound_r.
+unfold_op; eapply2 matchfail_compound_l.
+Qed. 
+ 
+ 
+Lemma app_comb_not_a: forall M N, matchfail (app_comb M N) (ab_fn b_op). 
+Proof. 
+unfold ab_fn. 
+rewrite star_opt_occurs_true. 
+2: rewrite ! occurs_app.  2: unfold occurs0 at 2.
+2: rewrite orb_true_r; simpl; auto. 
+2: discriminate. 
+unfold star_opt at 3.
+(* 1 *) 
+rewrite (star_opt_occurs_true (App b_op _)). 
+2: rewrite ! occurs_app.  2: unfold occurs0 at 2.
+2: rewrite orb_true_r; simpl; auto. 
+2: discriminate. 
+unfold star_opt at 3 4.
+rewrite occurs_closed. 
+2: eapply2 b_op_closed.
+(* 1 *)  
+rewrite star_opt_occurs_true. 
+2: rewrite ! occurs_app.  2: unfold occurs0 at 4.
+2: replace (occurs0 (Op Node)) with false by auto. 
+2: rewrite ! orb_false_l. 2: simpl; auto. 
+2: congruence. 
+(* 1 *) 
+rewrite (star_opt_occurs_true (Op Node)).
+2: cbv; auto. 2: congruence. 
+(* 1 *) 
+rewrite (star_opt_occurs_true (Op Node)).
+2: cbv; auto. 2: congruence. 
+(* 1 *) 
+unfold_op; unfold star_opt at 3 4 5. 
+unfold occurs0.  rewrite orb_false_l.
+(* 1 *) 
+rewrite (star_opt_occurs_false (App
+                 (App (Op Node)
+                    (App (Op Node) (App (App (Op Node) (Op Node)) (Ref 1))))
+                 (subst b_op (Op Node)))). 
+2: rewrite ! occurs_app. 
+2: rewrite ! orb_false_l.
+2: apply occurs_closed.
+2: unfold subst; rewrite subst_rec_closed. 
+2: eapply2 b_op_closed. 
+2: rewrite b_op_closed; auto.
+(* 1 *) 
+rewrite ! subst_rec_app.
+rewrite ! subst_rec_ref. insert_Ref_out. 
+(* 1 *) 
+unfold subst; rewrite ! subst_rec_closed. 
+2: cbv; auto. 
+2: rewrite b_op_closed; auto. 
+2: rewrite subst_rec_closed. 
+2: rewrite b_op_closed; auto. 
+2: rewrite b_op_closed; auto. 
+2: cbv; auto. 
+(* 1 *) 
+rewrite (star_opt_occurs_true).
+rewrite star_opt_closed. 
+all: cycle 1. 
+cbv; auto. 
+rewrite ! occurs_app. 
+rewrite ! orb_false_l. 
+simpl; auto.
+congruence.
+(* 1 *) 
+intros. 
+eapply2 matchfail_compound_l.
+eapply2 matchfail_compound_r.
+eapply2 matchfail_compound_r.
+unfold_op; eapply2 matchfail_compound_l.
+Qed. 
+ 
+ 
+ 
 
 Lemma b_a_red: 
-forall M N P Q, program P -> program Q -> 
+forall M N P Q, (* program P -> program Q -> *) 
 sf_red (App (App (App b_op M) N) (App (App abs_op P) Q)) 
 (App (App abs_op (App (App (App b_op M) N) P)) Q).
 Proof.
@@ -806,74 +851,40 @@ unfold subst. rewrite ! subst_rec_preserves_extension.
 (* 1 *) (* H *) 
 eapply transitive_red. 
 eapply2 extensions_by_matchfail.
-eapply2 aux_hb.
+eapply2 matchfail_app_comb_l. 
+eapply2 matchfail_app_comb_l.
+eapply2 app_comb_not_a. 
 (* 1 *)   (* B *) 
 eapply transitive_red.
 eapply2 extensions_by_matchfail. 
-eapply2 matchfail_compound_r.
-repeat eapply2 match_app. 
-all: unfold_op; auto.  
-eapply2 matchfail_compound_r.
-repeat eapply2 match_app. 
-eapply2 matchfail_compound_r.
-eapply2 matchfail_compound_r.
-repeat eapply2 match_app. 
-eapply2 matchfail_compound_r.
-repeat eapply2 match_app. 
-eapply2 matchfail_compound_r.
-eapply2 aux_ab_fn. 
+eapply2 matchfail_app_comb_l.
+eapply2 matchfail_app_comb_l.
+eapply2 app_comb_not_a. 
 (* 1 *) (* R *) 
 eapply transitive_red.
 eapply2 extensions_by_matchfail.
-eapply2 matchfail_compound_r. 
-repeat eapply2 match_app. 
-eapply2 matchfail_compound_r. 
-repeat eapply2 match_app. 
-eapply2 matchfail_compound_r. 
-eapply2 matchfail_compound_r. 
-repeat eapply2 match_app. 
-eapply2 matchfail_compound_r. 
-repeat eapply2 match_app. 
-eapply matchfail_compound_r. auto.  auto. 
-repeat eapply2 match_app. 
-(* 2 *) 
-eapply2 aux_ab_fn2. 
+eapply2 matchfail_app_comb_l.
+eapply2 matchfail_app_comb_l.
+eapply2 app_comb_not_a. 
 (* 1 *) (* J , tricky to distinguish J from A *) 
 eapply transitive_red.
 eapply2 extensions_by_matchfail.
-eapply2 matchfail_compound_r. 
-repeat eapply2 match_app. 
-eapply2 matchfail_compound_r. 
-repeat eapply2 match_app. 
-eapply2 matchfail_compound_r. 
-unfold Y_k. 
-eapply2 matchfail_compound_r. 
-repeat eapply2 match_app.
-all: unfold_op; auto.
-assert(matchfail (omega_k 2) P \/ exists sigma, matching (omega_k 2) P sigma).
-apply match_program. eapply2 omega_k_normal. auto. 
-inversion H1.
-(* 3 *) 
-eapply matchfail_compound_l. auto.  auto.
-eapply2 matchfail_compound_r. 
-(* 2 *) 
+eapply2 matchfail_app_comb_l.
+assert( matchfail (omega_k 2) P \/ exists sigma, matching (omega_k 2) P sigma).
+eapply2 match_program.
+inversion H1; subst. 
+eapply2 matchfail_app_comb_r.
 inversion H2; subst. 
-eapply2 matchfail_compound_r.
-repeat eapply2 match_app.
-(* 2 *) 
-eapply2 matchfail_compound_r.
-eapply2 aux_ab_fn3.  
+eapply2 matchfail_app_comb_l.
+eapply2 app_comb_not_a.
 (* 1 *) (* A *) 
 eapply transitive_red. 
 eapply2 extensions_by_matching.
 eapply2 match_app.
 repeat eapply2 match_app.
+all: unfold_op; auto. 
 eapply2 match_app.
 repeat eapply2 match_app.
-eapply2 match_app.
-eapply2 match_app.
-repeat eapply2 match_app.
-eapply2 match_app.
 repeat eapply2 match_app.
 (* 1 *) 
 rewrite ! app_nil_r. 
@@ -948,9 +959,10 @@ eapply2 app_comb_matching.
 eapply2 program_matching. 
 unfold program; split. 
 repeat eapply2 app_comb_normal.
-unfold h_fn. repeat eapply2 star_opt_normal. 
-unfold app_comb. unfold_op; rewrite ! maxvar_app. 
-rewrite ! omega_k_closed. simpl. auto. 
+eapply2 h_fn_program.
+rewrite ! maxvar_app_comb. 
+rewrite ! omega_k_closed. 
+unfold max. eapply2 h_fn_program. 
 (* 1 *) 
 rewrite ! pattern_size_app_comb. 
 replace (pattern_size (omega_k 4)) with 0 by (rewrite pattern_size_closed; [auto| eapply2 omega_k_closed]). 
@@ -996,48 +1008,14 @@ eapply2 a_op2_red.
 (* 1 *) 
 eapply transitive_red.
 eapply2 extensions_by_matchfail. 
-eapply2 matchfail_compound_r.
-eapply2 program_matching.
-unfold_op; unfold program; split; auto. 
-repeat eapply2 nf_compound. 
-eapply2 matchfail_compound_r.
-eapply2 match_app.
-eapply2 match_app.
-unfold_op; eapply2 match_app.
-unfold_op. 
-eapply2 matchfail_compound_r.
-eapply2 matchfail_compound_r.
-eapply2 program_matching.
-unfold_op; unfold program; split; auto. 
-repeat eapply2 nf_compound. 
-eapply2 matchfail_compound_r.
-repeat eapply2 match_app. 
-eapply2 matchfail_compound_r.
-eapply2 matchfail_compound_r.
-eapply2 program_matching.
-unfold_op; unfold program; split; auto. 
-repeat eapply2 nf_compound. 
-eapply2 matchfail_compound_l.
-eapply2 matchfail_program. 
-unfold program; split. 
-eapply2 nf_compound. 
-eapply2 nf_compound. 
-eapply2 nf_compound. 
-unfold h_fn. 
-repeat eapply2 star_opt_normal. 
-rewrite ! maxvar_app. unfold h_fn. 
-rewrite ! maxvar_star_opt. auto.
-split. 
-eapply2 nf_compound. 
-eapply2 nf_compound.
-eapply2 nf_compound. 
-eapply2 b_fn_normal.  
-rewrite ! maxvar_app. 
-rewrite b_fn_closed.  auto. 
+eapply2 matchfail_app_comb_l. 
+eapply2 matchfail_app_comb_l. 
+eapply2 matchfail_app_comb_r.
+eapply2 matchfail_program.
+eapply2 h_fn_program.
+split. eapply2 b_fn_normal. eapply2 b_fn_closed. 
 assert(b_fn <> h_fn) by apply b_not_h.
-  
-intro. apply H. eapply app_mono. eapply app_mono.  eapply app_mono. apply eq_sym. eexact H0.
-
+intro. apply H. apply eq_sym. congruence.  auto. 
 (* 1 *)    
 eapply transitive_red. 
 eapply2 extensions_by_matching.
@@ -1058,21 +1036,27 @@ rewrite ! pattern_size_app_comb.
 replace (pattern_size (omega_k 4)) with 0 by (rewrite pattern_size_closed; [auto| eapply2 omega_k_closed]). 
 replace (pattern_size (h_fn)) with 0 . 
 2: (rewrite pattern_size_closed; unfold h_fn; auto). 
-unfold pattern_size. unfold plus. unfold length. unfold app. unfold map. 
-unfold fold_left, subst. 
+unfold pattern_size. unfold plus. unfold length. unfold app, map, fold_left, subst. 
 rewrite ! subst_rec_app. 
 rewrite ! subst_rec_preserves_app_comb.
-rewrite (subst_rec_closed (omega_k _)) at 1. 
-rewrite (subst_rec_closed (omega_k _)) at 1. 
-rewrite (subst_rec_closed (omega_k _)) at 1. 
-rewrite (subst_rec_closed (omega_k _)) at 1. 
-rewrite (subst_rec_closed (omega_k _)) at 1. 
-rewrite (subst_rec_closed (omega_k _)) at 1. 
-rewrite (subst_rec_closed (omega_k _)) at 1. 
-rewrite (subst_rec_closed (omega_k _)) at 1. 
-rewrite (subst_rec_closed (omega_k _)) at 1. 
-rewrite (subst_rec_closed (omega_k _)) at 1. 
-rewrite (subst_rec_closed (omega_k _)) at 1. 
+rewrite (subst_rec_closed (A_k _)) at 1.  2: rewrite A_k_closed; auto . 
+rewrite (subst_rec_closed (A_k _)) at 1.  2: rewrite A_k_closed; auto . 
+rewrite (subst_rec_closed (A_k _)) at 1.  2: rewrite A_k_closed; auto . 
+rewrite (subst_rec_closed (A_k _)) at 1.  2: rewrite A_k_closed; auto . 
+rewrite (subst_rec_closed (A_k _)) at 1.  2: rewrite A_k_closed; auto . 
+rewrite (subst_rec_closed (A_k _)) at 1.  2: rewrite A_k_closed; auto . 
+rewrite (subst_rec_closed (omega_k _)) at 1. 2: rewrite omega_k_closed; auto . 
+rewrite (subst_rec_closed (omega_k _)) at 1. 2: rewrite omega_k_closed; auto . 
+rewrite (subst_rec_closed (omega_k _)) at 1. 2: rewrite omega_k_closed; auto . 
+rewrite (subst_rec_closed (omega_k _)) at 1. 2: rewrite omega_k_closed; auto . 
+rewrite (subst_rec_closed (omega_k _)) at 1. 2: rewrite omega_k_closed; auto . 
+rewrite (subst_rec_closed (omega_k _)) at 1. 2: rewrite omega_k_closed; auto . 
+rewrite (subst_rec_closed (omega_k _)) at 1. 2: rewrite omega_k_closed; auto . 
+rewrite (subst_rec_closed (omega_k _)) at 1. 2: rewrite omega_k_closed; auto . 
+rewrite (subst_rec_closed (omega_k _)) at 1. 2: rewrite omega_k_closed; auto . 
+rewrite (subst_rec_closed (omega_k _)) at 1. 2: rewrite omega_k_closed; auto . 
+rewrite (subst_rec_closed (omega_k _)) at 1. 2: rewrite omega_k_closed; auto . 
+rewrite (subst_rec_closed (omega_k _)) at 1. 2: rewrite omega_k_closed; auto . 
  rewrite subst_rec_ref at 1.  insert_Ref_out. 
  rewrite subst_rec_ref at 1.  insert_Ref_out. 
  rewrite subst_rec_ref at 1.  insert_Ref_out. 
@@ -1092,23 +1076,13 @@ rewrite ! lift_rec_null.
  rewrite ! subst_rec_ref.  insert_Ref_out. 
  rewrite ! subst_rec_ref.  insert_Ref_out. 
 unfold lift. rewrite ! lift_rec_lift_rec; try omega.
+unfold plus. 
 rewrite ! subst_rec_lift_rec; try omega.
  rewrite ! subst_rec_ref.  insert_Ref_out. 
  rewrite ! subst_rec_ref.  insert_Ref_out. 
  rewrite ! subst_rec_ref.  insert_Ref_out. 
-unfold lift, plus. rewrite ! subst_rec_lift_rec; try omega.
-all: try (rewrite omega_k_closed; auto). 
-rewrite ! lift_rec_null.
-rewrite (subst_rec_closed (A_k _)) at 1.
-rewrite (subst_rec_closed (A_k _)) at 1.
-rewrite (subst_rec_closed (A_k _)) at 1.
-rewrite (subst_rec_closed (A_k _)) at 1.
-rewrite (subst_rec_closed (A_k _)) at 1.
-rewrite (subst_rec_closed (A_k _)) at 1.
-rewrite subst_rec_closed. 
-all : try (rewrite A_k_closed; omega). 
+unfold lift; rewrite ! lift_rec_null.
 auto. 
-rewrite omega_k_closed. auto. 
 Qed. 
 
 

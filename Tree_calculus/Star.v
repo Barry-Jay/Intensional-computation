@@ -105,6 +105,40 @@ case n; unfold_op; auto.
 unfold_op; auto.
 Qed.  
 
+
+
+Lemma app_mono: forall M N P, App M N = App M P -> N = P. 
+Proof.  split_all. inversion H. auto. Qed. 
+
+
+Lemma star_mono: forall M N, star M = star N -> M = N. 
+Proof. 
+induction M; split_all. 
+gen_case H n; split_all.
+gen_case H N. 
+gen_case H n0.
+inversion H. inversion H. inversion H. 
+gen_case H2 t. 
+gen_case H2 n0. 
+discriminate . discriminate . discriminate.
+discriminate.
+gen_case H N. 
+gen_case H n1. discriminate.
+inversion H; subst. auto. discriminate. 
+discriminate. 
+gen_case H N. 
+gen_case H n. discriminate. discriminate.
+case o; case o0; auto.  
+discriminate. 
+gen_case H N. 
+gen_case H n. all: try discriminate. inversion H. 
+gen_case H1 M2. gen_case H1 n0.  all: try discriminate. 
+inversion H; subst. 
+rewrite (IHM1 t); auto. rewrite (IHM2 t0); auto. 
+Qed. 
+
+
+
 (* optimising star *) 
 
 Fixpoint occurs0 M := 
@@ -716,4 +750,276 @@ Qed.
 
 
 
+Lemma app_preserves_active: forall M N, status M = Active -> status (App M N) = Active.
+Proof.
+induction M; intros. auto. auto. 
+gen2_case IHM1 H M1.
+gen2_case IHM1 H t. 
+discriminate. 
+Qed. 
+ 
+ 
 
+Inductive bind_normal : Tree -> Prop := 
+| bn_normal : forall M, normal M -> bind_normal M
+| bn_app : forall M N, bind_normal M -> bind_normal N ->  maxvar (App M N) > 0 -> bind_normal (App M N)
+.
+
+Hint Constructors bind_normal. 
+
+Lemma bind_normal_stem: forall M, bind_normal M -> bind_normal (App (Op Node) M). 
+Proof. 
+intros. inversion H; subst. 
+(* 2 *) 
+eapply2 bn_normal. 
+(* 1 *) 
+eapply2 bn_app. 
+Qed. 
+
+Lemma bind_normal_fork: forall M N, bind_normal M -> bind_normal N -> bind_normal (App (App (Op Node) M) N). 
+Proof. 
+intros. inversion H; subst. inversion H0; subst. 
+(* 3 *) 
+eapply2 bn_normal.
+(* 2 *) 
+eapply2 bn_app. rewrite maxvar_app. 
+match goal with 
+| |- ?m >0 => assert (m >= maxvar (App M0 N0)) by eapply2 max_is_max 
+end. 
+omega. 
+(* 1 *)   
+eapply2 bn_app.
+rewrite maxvar_app. 
+match goal with 
+| |- ?m >0 => assert (m >= maxvar (App (Op Node) (App M0 N0))) by eapply2 max_is_max 
+end.
+rewrite ! maxvar_app in *. 
+simpl. 
+match goal with 
+| |- ?m >0 => assert (m >= (Nat.max (maxvar M0) (maxvar N0)) ) by eapply2 max_is_max 
+end.
+omega. 
+
+Qed. 
+
+Fixpoint size P := 
+match P with 
+| App M N => size M + size N 
+| _ => 1
+end.
+
+Lemma size_positive: forall M, size M >0.
+Proof. induction M; split_all. omega. Qed. 
+
+
+
+Lemma aux: forall m M, m > size M -> occurs0 M = false -> status (subst M (Op Node)) = status M. 
+Proof.
+induction m ; split_all. omega.  
+(* 1 *) 
+gen2_case H H0 M. 
+gen2_case H H0 n. discriminate. 
+assert(occurs0 t = false /\ occurs0 t0 = false). 
+gen_case H0 (occurs0 t). discriminate. 
+inversion H1.
+unfold subst in *. rewrite IHm; auto.
+all: cycle 1.
+assert (size t0 >0) by eapply2 size_positive.  
+omega.
+(* 1 *)  
+gen2_case H H2 t. 
+gen2_case H H2 n. 
+gen2_case H H2 t1. 
+gen2_case H H2 n. 
+gen2_case H H2 t3. 
+gen2_case H H2 n. discriminate.  
+case o; auto.
+eapply2 IHm. omega.
+gen_case H2 (occurs0 t4).
+Qed. 
+    
+
+
+Lemma aux2: forall M, occurs0 M = false -> normal M -> normal (subst M (Op Node)).
+Proof.
+induction M ; split_all. 
+(* 2 *) 
+gen_case H n. discriminate. 
+unfold subst, subst_rec; insert_Ref_out. auto.   
+(* 1 *) 
+assert(status (subst (App M1 M2) (Op Node)) = status (App M1 M2)).
+eapply2 aux. 
+assert(occurs0 M1 = false /\ occurs0 M2 = false). 
+gen_case H (occurs0 M1). discriminate. 
+inversion H2. 
+inversion H0; subst.
+apply nf_active.
+eapply2 IHM1. eapply2 IHM2. 
+unfold subst, subst_rec in *; 
+rewrite H1. auto. 
+eapply2 nf_compound. 
+assert(compound (subst_rec (App M1 M2) (Op Node) 0)) by eapply2 subst_rec_preserves_compounds.
+simpl in *; auto. 
+Qed. 
+  
+
+Lemma aux4: forall M, occurs0 M = false -> maxvar M > 0 -> maxvar (subst_rec M (Op Node) 0) >0.
+Proof. 
+induction M; split_all. 
+gen_case H n. discriminate. omega. 
+assert(occurs0 M1 = false /\ occurs0 M2 = false). 
+gen_case H (occurs0 M1). 
+discriminate. 
+inversion H1. 
+assert(maxvar M1 >0 \/ maxvar M2 >0).
+gen_case H0 (maxvar M1). 
+left; omega. 
+inversion H4.
+assert(Nat.max (maxvar (subst_rec M1 (Op Node) 0))
+  (maxvar (subst_rec M2 (Op Node) 0))  >= 
+maxvar (subst_rec M1 (Op Node) 0) )
+by eapply2 max_is_max.
+assert(maxvar (subst_rec M1 (Op Node) 0) >0). 
+eapply2 IHM1.   omega.
+assert(Nat.max (maxvar (subst_rec M1 (Op Node) 0))
+  (maxvar (subst_rec M2 (Op Node) 0))  >= 
+maxvar (subst_rec M2 (Op Node) 0) )
+by eapply2 max_is_max.
+assert(maxvar (subst_rec M2 (Op Node) 0) >0). 
+eapply2 IHM2.   omega.
+Qed. 
+
+ 
+Lemma aux3: forall m M, m > size M -> occurs0 M = false -> bind_normal M -> bind_normal (subst M (Op Node)).
+Proof.
+induction m; intros. 
+omega. 
+gen3_case H H0 H1 M. 
+(* 2 *) 
+gen3_case H H0 H1 n. discriminate. cbv. eapply2 bn_normal. 
+(* 1 *) 
+assert(occurs0 t = false /\ occurs0 t0 = false). 
+gen_case H0 (occurs0 t). discriminate. 
+inversion H2. 
+inversion H1; subst.
+(* 2 *) 
+eapply2 bn_normal. eapply2 aux2. 
+(* 1 *) 
+unfold subst, subst_rec; fold subst_rec. 
+eapply2 bn_app.
+eapply2 IHm. 
+assert(size t0>0) by eapply2 size_positive. omega.  
+eapply2 IHm. 
+assert(size t>0) by eapply2 size_positive. omega.
+(* 1 *) 
+assert(maxvar (subst_rec (App t t0) (Op Node) 0) >0).
+eapply2 aux4.
+simpl in *; auto. 
+Qed. 
+ 
+ 
+
+
+
+Lemma star_opt_preserves_bind_normal: forall M, bind_normal M -> bind_normal (star_opt M). 
+Proof. 
+induction M; intros.
+(* 3 *) 
+cbv; auto. case n; auto. 
+(* 2 *) 
+cbv; auto. 
+(* 1 *) 
+assert(bind_normal (star_opt M1)). 
+inversion H; subst; auto. 
+inversion H0; eapply2 bn_normal; eapply2 star_opt_normal. 
+(* 1 *) 
+assert(bind_normal (star_opt M2)). 
+inversion H; subst; auto. 
+inversion H1; eapply2 bn_normal; eapply2 star_opt_normal.
+(* 1 *) 
+inversion H; subst. 
+eapply2 bn_normal. 
+eapply2 star_opt_normal.
+(* 1 *)   
+unfold star_opt; fold star_opt. 
+assert(occurs0 M1 = true \/ occurs0 M1 <> true) by decide equality .
+inversion H2. rewrite H3.  
+(* 2 *) 
+eapply2 bind_normal_fork.
+eapply2 bind_normal_stem.
+(* 1 *) 
+assert(occurs0 M1 = false). 
+gen_case H3 (occurs0 M1). congruence. 
+rewrite H7.
+generalize IHM2 H H5 H6; clear IHM2 H H5 H6; case M2; intros.
+(* 3 *) 
+case n; split_all.
+unfold subst. eapply2 aux3. 
+unfold_op. eapply2 bind_normal_fork.
+eapply2 aux3.  simpl; rewrite H7; auto.
+eapply2 bn_app. simpl. 
+assert(Nat.max (maxvar M1) (S (S n0)) >= S (S n0)) by eapply2 max_is_max. omega.
+(* 2 *) 
+simpl.
+unfold_op. eapply2 bind_normal_fork.
+eapply2 aux3.  simpl; rewrite H7; auto.
+(* 1 *) 
+assert(occurs0 (App t t0) = true \/ occurs0 (App t t0) <> true) by decide equality. 
+inversion H8. 
+(* 2 *) 
+rewrite H9 in *. 
+eapply2 bind_normal_fork.
+eapply2 bind_normal_stem.  
+(* 1 *) 
+assert(occurs0 (App t t0) = false). 
+gen_case H9 (occurs0 (App t t0)). congruence.  
+rewrite H10.  
+unfold_op. 
+eapply2 bind_normal_fork.
+eapply2 aux3. 
+simpl in *. rewrite H7. rewrite H10; auto. 
+Qed. 
+ 
+
+
+Fixpoint multi_star n M := 
+match n with 
+| 0 => M 
+| S k => multi_star k (star_opt M)
+end .
+
+Lemma multi_star_plus: forall m n M, multi_star (m+n) M = multi_star m (multi_star n M).
+Proof.
+induction m; split_all. 
+rewrite IHm. 
+cut(multi_star n (star_opt M) = star_opt (multi_star n M)); auto. congruence . 
+generalize M; clear.  induction n; split_all.
+Qed. 
+ 
+
+
+Lemma bind_normal_to_normal: forall M, bind_normal M -> normal (multi_star (maxvar M) M). 
+Proof.
+cut (forall m M, m>= maxvar M -> bind_normal M -> normal (multi_star m M)). 
+intros. eapply2 H.
+induction m; split_all.
+inversion H0; subst. auto. omega. 
+(* 1 *) 
+eapply2 IHm. rewrite maxvar_star_opt. omega. 
+eapply2 star_opt_preserves_bind_normal. 
+Qed. 
+ 
+ 
+
+Lemma lift_rec_preserves_bind_normal: forall M n k, bind_normal M -> bind_normal (lift_rec M n k).
+Proof.
+induction M; split_all.
+inversion H; subst. 
+eapply2 bn_normal.  
+assert(normal(lift_rec (App M1 M2) n k)) by eapply2 lift_rec_preserves_normal. 
+simpl in *; auto. 
+eapply2 bn_app. 
+simpl. 
+assert(maxvar(lift_rec (App M1 M2) n k) >0) by eapply2 lift_rec_preserves_variables. 
+simpl in *; auto. 
+Qed.

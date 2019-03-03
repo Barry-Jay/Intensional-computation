@@ -195,6 +195,42 @@ App (App (App is_leaf (Ref 2)) (Ref 1))
  
 
 
+Lemma Fop_normal: normal Fop. 
+Proof.
+replace Fop with (multi_star 3  (App (App (App is_leaf (Ref 2)) (Ref 1))
+              (App
+                 (App (App is_stem (Ref 2))
+                    (App
+                       (App (App (Op Node) (App (Ref 2) (Op Node))) (Ref 1))
+                       (App Wave_Factor.swap (Ref 0))))
+                 (App (App (App (Op Node) (Ref 2)) (Ref 1))
+                    (App (App compose (Ref 0)) (Op Node)))))).
+2: unfold Fop, multi_star; congruence.
+match goal with 
+| |- normal (multi_star 3 ?M) => replace 3 with (maxvar M) 
+end. 
+2: cbv; auto. 
+eapply2 bind_normal_to_normal.
+eapply2 bn_app. 
+eapply2 bn_app. 
+eapply2 bn_app. eapply2 bn_normal. cbv. repeat eapply2 nf_compound. 
+cbv; auto.  cbv; auto. 
+eapply2 bn_app. 
+eapply2 bn_app. 
+eapply2 bn_app.   
+eapply2 bn_normal. cbv. repeat eapply2 nf_compound. cbv; auto.  
+eapply2 bn_app. 
+eapply2 bn_app. cbv. eapply2 bn_normal. repeat eapply2 nf_compound.  cbv; auto. cbv; auto.  
+eapply2 bn_app. 
+eapply2 bn_app. 
+eapply2 bn_app. 
+eapply2 bn_normal; unfold compose; repeat eapply2 nf_compound. unfold_op; auto. unfold_op; auto. 
+fold subst_rec star_opt.
+simpl .
+all: unfold_op; simpl; auto. 
+Qed. 
+   
+
 Lemma factor_leaf: 
 forall u t, sf_red (App (App (App Fop (Op Node)) u) t) u.
 Proof.

@@ -181,6 +181,18 @@ Hint Resolve A_k_closed A_k_normal omega_k_normal.
 
 
 
+Lemma omega_k_closed: forall k, maxvar(omega_k k) = 0. 
+Proof. 
+induction k; split_all. 
+unfold omega_k; fold omega_k. 
+rewrite ! maxvar_star_opt. 
+rewrite maxvar_app. 
+rewrite ! maxvar_app_comb. 
+rewrite A_k_closed.
+simpl. auto.
+Qed.
+ 
+
 Lemma omega_omega : 
 forall k M, k<5 -> sf_red (App (App (omega_k k) (omega_k k)) M) (App M (app_comb (Y_k k) M)).
 Proof.
@@ -305,13 +317,6 @@ eapply transitive_red. eapply preserves_app_sf_red. eapply preserves_app_sf_red.
 eapply preserves_app_sf_red. eapply2 omega_omega.  all: auto. 
 Qed. 
 
-
-Fixpoint size M := 
-match M with 
-| Ref _ => 1 
-| Op _ => 1
-| App M1 M2 => S(size M2 + size M1)
-end . 
 
 
 (* 

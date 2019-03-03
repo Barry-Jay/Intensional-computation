@@ -26,27 +26,71 @@
 Require Import Omega Max Bool List.
 Require Import IntensionalLib.SF_calculus.Test.  
 Require Import IntensionalLib.SF_calculus.General.  
-Require Import IntensionalLib.Wave_as_SF.SF_Terms.  
-Require Import IntensionalLib.Wave_as_SF.SF_Tactics.  
-Require Import IntensionalLib.Wave_as_SF.SF_reduction.  
-Require Import IntensionalLib.Wave_as_SF.SF_Normal.  
-Require Import IntensionalLib.Wave_as_SF.SF_Closed.  
-Require Import IntensionalLib.Wave_as_SF.Substitution.  
-Require Import IntensionalLib.Wave_as_SF.SF_Eval.  
-Require Import IntensionalLib.Wave_as_SF.Star.  
-Require Import IntensionalLib.Wave_as_SF.Wait.  
-Require Import IntensionalLib.Wave_as_SF.Fixpoints.  
-Require Import IntensionalLib.Wave_as_SF.Wave_Factor.  
-Require Import IntensionalLib.Wave_as_SF.Wave_Factor2.  
-Require Import IntensionalLib.Wave_as_SF.Equal.  
-Require Import IntensionalLib.Wave_as_SF.Extensions.  
-Require Import IntensionalLib.Wave_as_SF.Wait2.  
+Require Import IntensionalLib.Tree_calculus.Tree_Terms.  
+Require Import IntensionalLib.Tree_calculus.Tree_Tactics.  
+Require Import IntensionalLib.Tree_calculus.Tree_reduction.  
+Require Import IntensionalLib.Tree_calculus.Tree_Normal.  
+Require Import IntensionalLib.Tree_calculus.Tree_Closed.  
+Require Import IntensionalLib.Tree_calculus.Substitution.  
+Require Import IntensionalLib.Tree_calculus.Tree_Eval.  
+Require Import IntensionalLib.Tree_calculus.Star.  
+Require Import IntensionalLib.Tree_calculus.Wait.  
+Require Import IntensionalLib.Tree_calculus.Fixpoints.  
+Require Import IntensionalLib.Tree_calculus.Wave_Factor.  
+Require Import IntensionalLib.Tree_calculus.Wave_Factor2.  
+Require Import IntensionalLib.Tree_calculus.Equal.  
+Require Import IntensionalLib.Tree_calculus.Case.  
+Require Import IntensionalLib.Tree_calculus.Extensions.  
+Require Import IntensionalLib.Tree_calculus.Wait2.  
 
  
+
+Lemma matchfail_app_comb_r : 
+forall P1 P2 Q1 Q2, matchfail P2 Q2 -> matchfail (app_comb P1 P2) (app_comb Q1 Q2).
+Proof.
+intros; unfold app_comb. 
+eapply2 matchfail_compound_r.
+eapply2 program_matching. 
+unfold_op; split. 
+repeat eapply2 nf_compound.
+cbv; auto.  
+unfold_op; eapply2 matchfail_compound_l. 
+eapply2 matchfail_compound_r.
+Qed. 
+
+Lemma matchfail_app_comb_l : 
+forall P1 P2 Q1 Q2 sigma, matching P2 Q2 sigma -> matchfail P1 Q1 -> matchfail (app_comb P1 P2) (app_comb Q1 Q2).
+Proof.
+intros; unfold app_comb. 
+eapply2 matchfail_compound_r.
+eapply2 program_matching. 
+unfold_op; split. 
+repeat eapply2 nf_compound.
+cbv; auto.  
+unfold_op; eapply2 matchfail_compound_r. 
+repeat eapply2 match_app.
+Qed. 
+
 Definition h_fn := 
 star_opt (star_opt (star_opt (star_opt 
 (App (App (Ref 3) (App (App (Ref 3) (Ref 2)) (Ref 1))) (Ref 0))))).
 
+Lemma h_fn_program: program h_fn. 
+Proof.
+unfold h_fn; split.
+repeat eapply2 star_opt_normal.
+repeat eapply2 maxvar_star_opt.
+Qed. 
+  
+
+
+Lemma h_fn_not_omega: h_fn <> omega_k 3. 
+Proof. unfold h_fn, omega_k; intro H; discriminate. Qed. 
+
+Lemma omega_3_not_omega_2: omega_k 3 <> omega_k 2. 
+Proof. unfold omega_k; intro H. discriminate. Qed. 
+
+ 
 Definition h_op := app_comb (Y_k 4) h_fn .
 
 Lemma h_red: forall M N P, sf_red (App (App (App h_op M) N) P) (App (App h_op (App (App h_op M) N)) P).
@@ -175,21 +219,6 @@ Qed.
     
     
 
-
-Lemma pattern_size_app_comb: forall M N, pattern_size (app_comb M N) = pattern_size N + pattern_size M. 
-Proof. intros. unfold app_comb. simpl. auto. Qed. 
-
-Lemma omega_k_closed: forall k, maxvar(omega_k k) = 0. 
-Proof. 
-induction k; split_all. 
-unfold omega_k; fold omega_k. 
-rewrite ! maxvar_star_opt. 
-rewrite maxvar_app. 
-rewrite ! maxvar_app_comb. 
-rewrite A_k_closed.
-simpl. auto.
-Qed.
- 
 Definition b_fn := 
 star_opt (star_opt (star_opt (
 extension (app_comb (app_comb (app_comb (app_comb (omega_k 4) (omega_k 4)) h_fn) (Ref 0)) (Ref 1))
@@ -222,15 +251,9 @@ Definition abs_op := ab_op b_op.
 
 (* do a lemma here that confirms the matching wrt A *) 
 
-Lemma maxvar_ref: forall n, maxvar (Ref n) = S n. Proof. split_all.  Qed. 
 
-
-
-Lemma b_op_closed: maxvar b_op = 0.
-Proof. 
-unfold b_op. 
-rewrite maxvar_app_comb. 
-rewrite Y_k_closed. 2: omega. unfold max. 
+Lemma b_fn_closed: maxvar b_fn = 0.
+Proof.
 unfold b_fn. 
 rewrite ! maxvar_star_opt.
 rewrite ! maxvar_extension. 
@@ -262,6 +285,16 @@ unfold_op; unfold subst, subst_rec. insert_Ref_out.
 rewrite star_opt_occurs_true.
 cbv. auto. cbv. auto. congruence.  
 Qed. 
+
+
+
+Lemma b_op_closed: maxvar b_op = 0.
+Proof. 
+unfold b_op. 
+rewrite maxvar_app_comb. 
+rewrite Y_k_closed. 2: omega. unfold max. 
+eapply2 b_fn_closed.
+Qed.
 
 
  
@@ -313,14 +346,3 @@ replace (subst_rec b_op M 0) with b_op.
 2: rewrite b_op_closed; omega.   auto.
 Qed.
 
-
-Lemma Fop_closed: maxvar Fop = 0.
-Proof. 
-unfold Fop.   unfold is_leaf, is_stem, is_fork, swap. 
-unfold tree_test; unfold_op. 
-rewrite ! maxvar_star_opt.
-rewrite ! maxvar_app.
-rewrite ! maxvar_star_opt.
-rewrite ! maxvar_app.
-cbv. auto. 
-Qed. 

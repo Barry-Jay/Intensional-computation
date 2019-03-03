@@ -39,7 +39,8 @@ Require Import IntensionalLib.Tree_calculus.Fixpoints.
 Require Import IntensionalLib.Tree_calculus.Wave_Factor.  
 Require Import IntensionalLib.Tree_calculus.Wave_Factor2.  
 Require Import IntensionalLib.Tree_calculus.Equal.  
-Require Import IntensionalLib.Tree_calculus.Extensions.  
+Require Import IntensionalLib.Tree_calculus.Case.  
+Require Import IntensionalLib.Tree_calculus.Extensions.
 Require Import IntensionalLib.Tree_calculus.Wait2.  
 Require Import IntensionalLib.Tree_calculus.Abstraction.  
 Require Import IntensionalLib.Tree_calculus.Abstraction2.  
@@ -108,16 +109,4 @@ omega.
 apply aux9.
 Qed. 
 
-
-Lemma aux10: 3 = 3.
-Proof. auto. Qed. 
-(* 
-
-Lemma star_opt_bind_normal_mono: 
-forall M N, bind_normal M -> bind_normal N -> star_opt M = star_opt N -> M = N. 
-Proof. 
-induction M; split_all. 
-
-Qed.
-*)
 

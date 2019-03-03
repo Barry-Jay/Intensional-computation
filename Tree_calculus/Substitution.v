@@ -93,6 +93,8 @@ Definition lift (n : nat) (N : Tree) := lift_rec N 0 n.
 
 (* Lifting lemmas *)
 
+
+
 Lemma lift_rec_null_term : 
 forall (U : Tree)(n: nat), lift_rec U n 0 = U.
 Proof. 
@@ -793,4 +795,19 @@ Proof.
   induction sigma; split_all. unfold lift; rewrite lift_rec_null. auto. 
 unfold lift, subst. rewrite subst_rec_lift_rec; try omega. unfold lift in *. rewrite IHsigma. auto. 
 Qed.
+
+
+
+Lemma lift_rec_preserves_variables: forall M n k, maxvar M >0 -> maxvar (lift_rec M n k) > 0.
+Proof. 
+induction M; split_all. 
+omega. 
+assert((maxvar M1 > 0) \/ (maxvar M2 >0)).
+gen_case H (maxvar M1). left; omega. 
+inversion H0; subst. 
+assert(Nat.max (maxvar (lift_rec M1 n k)) (maxvar (lift_rec M2 n k))  >= maxvar (lift_rec M1 n k)) by eapply2 max_is_max. 
+assert(maxvar(lift_rec M1 n k) >0) by eapply2 IHM1. omega. 
+assert(Nat.max (maxvar (lift_rec M1 n k)) (maxvar (lift_rec M2 n k))  >= maxvar (lift_rec M2 n k)) by eapply2 max_is_max. 
+assert(maxvar(lift_rec M2 n k) >0) by eapply2 IHM2. omega.
+Qed. 
 

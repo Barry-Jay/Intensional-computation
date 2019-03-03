@@ -630,3 +630,44 @@ end .
 Lemma size_equal_comb : size equal_comb = 6079. 
 Proof. cbv; auto. Qed. 
 *) 
+
+
+
+
+Lemma equal_comb_normal: normal equal_comb. 
+Proof. 
+unfold equal_comb. 
+eapply2 app_comb_normal.
+eapply2 Y_k_normal. 
+replace equal_fn with (multi_star (maxvar equal_body) equal_body). 
+all: cycle 1. 
+unfold equal_fn. replace (maxvar equal_body) with 3. 
+unfold multi_star; auto. 
+cbv; auto. 
+eapply2 bind_normal_to_normal. 
+unfold  equal_body.
+eapply2 bn_app. 
+eapply2 bn_app. 
+eapply2 bn_app. eapply2 bn_normal.  eapply2 Fop_normal. cbv. omega. 
+eapply2 bn_app. 
+eapply2 bn_app. 
+eapply2 bn_app. eapply2 bn_normal.  eapply2 Fop_normal. 
+eapply2 bn_normal. unfold_op; auto. 
+unfold_op; eapply2 bn_normal. repeat eapply2 nf_compound. cbv; auto.
+repeat eapply2 star_opt_preserves_bind_normal.   
+eapply2 bn_app. 
+eapply2 bn_app. 
+eapply2 bn_app.
+eapply2 bn_normal.
+eapply2 Fop_normal. cbv; auto. 
+unfold_op; eapply2 bn_normal; repeat eapply2 nf_compound. 
+cbv; auto. 
+(* 3 *) 
+repeat eapply2 star_opt_preserves_bind_normal.   
+eapply2 bn_normal.
+eapply2 nf_active. 
+repeat eapply2 nf_active.
+unfold_op; repeat eapply2 nf_compound. 
+cbv; auto. cbv; auto.  
+Qed. 
+

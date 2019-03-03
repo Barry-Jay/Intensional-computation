@@ -74,3 +74,16 @@ eapply preserves_app_sf_red.
 eval_tac. all: auto.
 Qed. 
 
+
+Lemma Fop_closed: maxvar Fop = 0.
+Proof. 
+unfold Fop.   unfold is_leaf, is_stem, is_fork, swap. 
+unfold tree_test; unfold_op. 
+rewrite ! maxvar_star_opt.
+rewrite ! maxvar_app.
+rewrite ! maxvar_star_opt.
+rewrite ! maxvar_app.
+cbv. auto. 
+Qed. 
+
+

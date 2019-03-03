@@ -16,7 +16,7 @@
 (**********************************************************************)
 
 (**********************************************************************)
-(*                   Abstraction2.v                                   *)
+(*                   Abstraction1a.v                                  *)
 (*                                                                    *)
 (*                     Barry Jay                                      *)
 (*                                                                    *)
@@ -39,165 +39,33 @@ Require Import IntensionalLib.Tree_calculus.Fixpoints.
 Require Import IntensionalLib.Tree_calculus.Wave_Factor.  
 Require Import IntensionalLib.Tree_calculus.Wave_Factor2.  
 Require Import IntensionalLib.Tree_calculus.Equal.  
-Require Import IntensionalLib.Tree_calculus.Case.  
 Require Import IntensionalLib.Tree_calculus.Extensions.  
 Require Import IntensionalLib.Tree_calculus.Wait2.  
 Require Import IntensionalLib.Tree_calculus.Abstraction.  
 
-Set
-Keep Proof Equalities.
 
-
-
-Lemma bind_normal_case : forall P M, bind_normal M -> bind_normal (case P M). 
-Proof. 
-induction P; intros; unfold case;  fold case.
-eapply2 star_opt_preserves_bind_normal. 
-unfold_op. eapply2 bind_normal_fork. 
-eapply2 star_opt_preserves_bind_normal.
-eapply2 bn_app. 
-eapply2 bn_app. 
-eapply2 bn_app. 
-eapply2 bn_normal.  eapply2 Fop_normal. 
-unfold_op. eapply2 bind_normal_fork.
-unfold lift. 
-eapply2 lift_rec_preserves_bind_normal. 
-unfold maxvar; fold maxvar. rewrite Fop_closed. 
-simpl. case (maxvar(lift 1 M)); intros; omega.
-unfold swap; unfold_op; eapply2 bn_normal. repeat eapply2 nf_compound. 
-rewrite ! maxvar_app. rewrite ! maxvar_ref. 
-assert(Nat.max
-  (Nat.max (Nat.max (maxvar Fop) 1)
-     (Nat.max (maxvar k_op) (maxvar (lift 1 M))))
-  (Nat.max (maxvar k_op) (Nat.max (maxvar k_op) (maxvar (swap (Ref 0))))) >= 
- (Nat.max (Nat.max (maxvar Fop) 1)
-     (Nat.max (maxvar k_op) (maxvar (lift 1 M))))
-) by eapply2 max_is_max. 
-assert( (Nat.max (Nat.max (maxvar Fop) 1)
-     (Nat.max (maxvar k_op) (maxvar (lift 1 M)))) >= (Nat.max (maxvar Fop) 1)) by eapply2 max_is_max. 
-assert((Nat.max (maxvar Fop) 1) >= 1) by eapply2 max_is_max. omega. 
-(* 1 *) 
-assert(is_program (App P1 P2) = true \/  (is_program (App P1 P2) <> true)) by decide equality.
-inversion H0. 
-(* 2 *) 
-rewrite H1.  
-eapply2 star_opt_preserves_bind_normal. 
-apply bn_app.
-apply bn_app.  
-apply bn_app.
-apply bn_app.  
-apply bn_normal. eapply2 equal_comb_normal. 
-eapply2 bn_normal; auto.
-rewrite maxvar_app.  rewrite equal_comb_closed. cbv; auto.
-all: cycle 1. 
-rewrite maxvar_app. rewrite maxvar_app.  rewrite equal_comb_closed.
-unfold max; fold max. unfold maxvar at 1. 
-assert(max 1 (maxvar (App P1 P2)) >= 1) by eapply2 max_is_max. omega. 
-unfold_op. 
-eapply2 bind_normal_fork. 
-unfold lift. eapply2 lift_rec_preserves_bind_normal.
-rewrite maxvar_app. rewrite maxvar_app.  rewrite maxvar_app.  rewrite equal_comb_closed.
-unfold max; fold max. unfold maxvar at 1. 
-assert(Nat.max (Nat.max 1 (maxvar (App P1 P2))) (maxvar (App k_op (lift 1 M))) >= 
-(Nat.max 1 (maxvar (App P1 P2)))) by eapply2 max_is_max. 
-assert((Nat.max 1 (maxvar (App P1 P2))) >= 1) by eapply2 max_is_max. 
-omega.
-eapply2 bn_normal; unfold swap; unfold_op; repeat eapply2 nf_compound. 
-rewrite maxvar_app. rewrite maxvar_app.  rewrite maxvar_app.   rewrite maxvar_app.  rewrite equal_comb_closed.
-unfold max; fold max. unfold maxvar at 1. 
-assert(Nat.max
-  (Nat.max (Nat.max 1 (maxvar (App P1 P2))) (maxvar (App k_op (lift 1 M))))
-  (maxvar (swap (Ref 0))) >= (Nat.max (Nat.max 1 (maxvar (App P1 P2))) (maxvar (App k_op (lift 1 M)))))
-by eapply2 max_is_max. 
-assert(Nat.max (Nat.max 1 (maxvar (App P1 P2))) (maxvar (App k_op (lift 1 M))) >= 
-(Nat.max 1 (maxvar (App P1 P2)))) by eapply2 max_is_max. 
-assert((Nat.max 1 (maxvar (App P1 P2))) >= 1) by eapply2 max_is_max. 
-omega.
-(* 2 *) 
-all: cycle 1. 
-eapply2 bn_normal. 
-assert(program (App P1 P2)) by eapply2 program_is_program. 
-inversion H2; auto. 
-(* 1 *) 
-assert(is_program(App P1 P2) = false). 
-gen_case H1 (is_program (App P1 P2)). congruence . 
-rewrite H2. 
-(* 1 *) 
-unfold case_app. 
-eapply2 star_opt_preserves_bind_normal.
-eapply2 bn_app. all: cycle 1. 
-unfold swap. eapply2 bn_normal. unfold_op; repeat eapply2 nf_compound. 
-unfold swap; unfold_op; unfold maxvar; fold maxvar.
-unfold max; fold max.  
-match goal with 
-| |- Nat.max ?m ?n >0 => assert(Nat.max m n >= n) by eapply2 max_is_max
-end.  omega. 
-(* 1 *) 
-eapply2 bn_app. 
-eapply2 bn_app. 
-eapply2 bn_app. 
-eapply2 bn_normal.  eapply2 Fop_normal. 
-eapply2 bn_normal; unfold_op; repeat eapply2 nf_compound. 
-all: cycle 1. 
-unfold maxvar; fold maxvar. 
-match goal with 
-| |- Nat.max ?m ?n >0 => assert(Nat.max m n >= m) by eapply2 max_is_max
-end.
-assert(Nat.max (Nat.max (maxvar Fop) 1) (maxvar i_op) >= (Nat.max (maxvar Fop) 1)) by eapply2 max_is_max. 
-assert(Nat.max (maxvar Fop) 1 >= 1) by eapply2 max_is_max. omega. 
-(* 1 *) 
-unfold lift; eapply2 lift_rec_preserves_bind_normal. 
-repeat eapply2 star_opt_preserves_bind_normal. 
-eapply2 bn_app.
-2: unfold_op; eapply2 bn_normal; repeat eapply2 nf_compound. 
-eapply2 bn_app.
-all: cycle 1. 
-unfold maxvar; fold maxvar. 
-match goal with 
-| |- Nat.max ?m 1 >0 => assert(Nat.max m 1 >= 1) by eapply2 max_is_max end. 
-omega .
-unfold maxvar; fold maxvar. 
-match goal with 
-| |- Nat.max ?m ?n >0 => assert(Nat.max m n >= m) by eapply2 max_is_max end. 
-assert(Nat.max
-       (Nat.max
-          (Nat.max
-             (maxvar
-                (lift_rec (case P1 (case P2 (App k_op (App k_op M)))) 0 2)) 2)
-          (Nat.max (maxvar k_op)
-             (Nat.max (maxvar k_op) (Nat.max (maxvar k_op) (maxvar i_op)))))
-       1 >= 1) by eapply2 max_is_max. 
-omega. 
-(* 1 *) 
-eapply2 bn_app. 
-all: cycle 1. 
-unfold_op; eapply2 bn_normal; repeat eapply2 nf_compound.
-unfold maxvar; fold maxvar.
-match goal with 
-| |- Nat.max ?m ?n >0 => assert(Nat.max m n >= m) by eapply2 max_is_max end. 
-assert(Nat.max
-       (maxvar (lift_rec (case P1 (case P2 (App k_op (App k_op M)))) 0 2)) 2 >= 2) 
-by eapply2 max_is_max. 
-omega.
-(* 1 *) 
-eapply2 bn_app. 
-all: cycle 1. 
-unfold maxvar; fold maxvar. 
-match goal with 
-| |- Nat.max ?m ?n >0 => assert(Nat.max m n >= n) by eapply2 max_is_max end. 
-omega .
-eapply2 lift_rec_preserves_bind_normal. 
-eapply2 IHP1. eapply2 IHP2.
-unfold_op. eapply2 bind_normal_fork. eapply2 bind_normal_fork. 
-Qed. 
-
- Lemma bind_normal_extension: forall P M R, bind_normal M -> bind_normal R -> bind_normal (extension P M R).
-Proof. 
-intros. unfold extension. eapply2 bind_normal_fork . eapply2 bind_normal_stem.
-unfold_op. eapply2 bind_normal_fork. eapply2 bind_normal_case. 
+Lemma b_op_program: program b_op. 
+Proof.
+unfold program.
+split. 
+eapply2 nf_compound. eapply2 nf_compound. eapply2 nf_compound. unfold_op; repeat eapply2 nf_compound. 
+unfold_op; eapply2 nf_compound.  eapply2 nf_compound.  eapply2 nf_compound.  eapply2 nf_compound. 
+ eapply2 b_fn_normal.  eapply2 nf_compound. eapply2 Y_k_normal.  
+eapply2 b_op_closed.
 Qed. 
  
+(* 
 
+Lemma star_opt_bind_normal_mono: 
+forall M N, bind_normal M -> bind_normal N -> star_opt M = star_opt N -> M = N. 
+Proof. 
+induction M; split_all. 
+
+Qed.
+*)
+
+Lemma h_fn_size:   size h_fn = 50.
+Proof. cbv. auto. Qed.
 
 
 Lemma size_subst: forall M, size (subst M (Op Node)) = size M. 
@@ -406,9 +274,6 @@ unfold_op; simpl; omega.
 Qed. 
 
 
-Lemma h_fn_size:   size h_fn = 50.
-Proof. cbv. auto. Qed.
-
 
 Lemma b_fn_size : size b_fn >50 . 
 Proof.
@@ -477,104 +342,3 @@ assert(size b_fn > 50) by eapply2 b_fn_size.
 omega.
 Qed. 
 
- 
-Lemma b_fn_body_maxvar : 
-maxvar
-  (extension
-     (app_comb
-        (app_comb (app_comb (app_comb (omega_k 4) (omega_k 4)) h_fn) (Ref 0))
-        (Ref 1))
-     (App (App (App (App (Ref 4) (Ref 3)) (Ref 2)) (Ref 0))
-        (App (App (App (Ref 4) (Ref 3)) (Ref 2)) (Ref 1)))
-     (extension
-        (app_comb
-           (app_comb (app_comb (app_comb (omega_k 4) (omega_k 4)) (Ref 0))
-              (Ref 1)) (Ref 2))
-        (App
-           (App
-              (app_comb (app_comb (app_comb (A_k 5) (omega_k 4)) (omega_k 4))
-                 (Ref 0)) (App (App (App (Ref 5) (Ref 4)) (Ref 3)) (Ref 1)))
-           (App (App (App (Ref 5) (Ref 4)) (Ref 3)) (Ref 2)))
-        (extension
-           (app_comb (app_comb (app_comb (omega_k 3) (omega_k 3)) (Ref 0))
-              (Ref 1)) (App (Ref 2) (Ref 1))
-           (extension (app_comb (Y_k 2) (Ref 0)) (Ref 2)
-              (extension (app_comb (app_comb (Ref 0) (Ref 1)) (Ref 2))
-                 (App
-                    (App (app_comb (A_k 3) (Ref 0))
-                       (App (App (App (Ref 5) (Ref 4)) (Ref 3)) (Ref 1)))
-                    (Ref 2)) i_op))))) = 3.
-Proof. 
-rewrite maxvar_extension.
-rewrite ! maxvar_app. 
-rewrite ! pattern_size_app_comb. 
-rewrite ! pattern_size_ref.
-rewrite ! pattern_size_closed. 
-2: eapply2 omega_k_closed.
-2: cbv; auto. 
-rewrite ! maxvar_ref. 
-unfold plus, minus,  max; fold max.
-rewrite maxvar_extension.
-rewrite ! maxvar_app. 
-rewrite ! maxvar_app_comb.
-rewrite A_k_closed. 
-rewrite omega_k_closed.
-rewrite ! maxvar_ref. 
-rewrite ! pattern_size_app_comb. 
-rewrite ! pattern_size_ref.
-rewrite ! pattern_size_closed. 
-2: eapply2 omega_k_closed. 
-unfold plus, minus,  max; fold max.
-(* 1 *)  
-rewrite maxvar_extension.
-rewrite ! maxvar_app. 
-rewrite ! pattern_size_app_comb. 
-rewrite ! pattern_size_ref.
-rewrite ! pattern_size_closed. 
-2: eapply2 omega_k_closed.
-rewrite ! maxvar_ref. 
-unfold plus, minus,  max; fold max.
-rewrite maxvar_extension.
-rewrite ! maxvar_ref. 
-rewrite ! pattern_size_app_comb. 
-rewrite ! pattern_size_ref.
-rewrite ! pattern_size_closed. 
-2: eapply2 Y_k_closed.
-(* 1 *)  
-rewrite maxvar_extension.
-rewrite ! maxvar_app. 
-rewrite ! pattern_size_app_comb. 
-rewrite ! pattern_size_ref.
-rewrite ! maxvar_app_comb.
-rewrite ! maxvar_ref.
-rewrite A_k_closed.  
-unfold_op; unfold maxvar, plus, minus,  max; fold max. auto. 
-Qed. 
-
-Lemma aux7: bind_normal
-  (extension
-     (app_comb (app_comb (app_comb (omega_k 3) (omega_k 3)) (Ref 0)) (Ref 1))
-     (App (Ref 2) (Ref 1))
-     (extension (app_comb (Y_k 2) (Ref 0)) (Ref 2)
-        (extension (app_comb (app_comb (Ref 0) (Ref 1)) (Ref 2))
-           (App
-              (App (app_comb (A_k 3) (Ref 0))
-                 (App (App (App (Ref 5) (Ref 4)) (Ref 3)) (Ref 1))) (Ref 2))
-           i_op))).
-Proof. 
-eapply bind_normal_extension.
-eapply2 bn_normal. 
-eapply bind_normal_extension.
-auto. 
-eapply bind_normal_extension.
-2: unfold_op; eapply2 bn_normal.  
-apply bn_app.
-apply bn_app.
-eapply2 bn_normal. 
-eapply2 app_comb_normal.
-eapply2 bn_normal. 
-rewrite maxvar_app. rewrite maxvar_app_comb. 
-rewrite A_k_closed. cbv; omega. auto.  
-rewrite 2 maxvar_app. rewrite maxvar_app_comb. 
-rewrite A_k_closed. cbv; omega.
-Qed. 

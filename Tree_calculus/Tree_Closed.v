@@ -164,3 +164,9 @@ assert(status M = Passive). eapply2 closed_implies_passive.
 max_out. max_out. 
 rewrite H4 in H8; discriminate. auto. 
 Qed. 
+
+
+
+
+Lemma maxvar_ref: forall n, maxvar (Ref n) = S n. Proof. split_all.  Qed. 
+
