@@ -85,7 +85,8 @@ Inductive abs_red1 : termred :=
                                 (App (App (Op Aop) (App (App (App (Op Bop) M) N) P)) Q)
   | b_i_red : forall M N, abs_red1 (App (App (App (Op Bop) M) N) (Op Iop)) (Op Iop)
   | b_b_red : forall M N P Q, abs_red1 (App (App (App (Op Bop) M) N) (App (App (Op Bop) P) Q))
-                               (App (App (App (App (Op Bop) M) N) P) (App (App (App (Op Bop) M) N) Q))
+                               (App (App (Op Bop) (App (App (App (Op Bop) M) N) P))
+                                    (App (App (App (Op Bop) M) N) Q))
   | b_op_red : forall M N o, o<> Jop -> abs_red1 (App (App (App (Op Bop) M) N) (Op o)) (Op o)
   | b_compound_red: forall M N P Q, true_compound (App P Q) -> 
                    abs_red1 (App (App (App (Op Bop) M) N) (App P Q))

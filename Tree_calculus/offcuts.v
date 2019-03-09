@@ -1,4 +1,33 @@
 
+Lemma Y4_aux : forall M N P, sf_red (App (App (app_comb (Y_k 4) M) N) P) 
+(app_comb (app_comb (app_comb (app_comb (omega_k 4) (omega_k 4)) M) N) P).
+Proof. 
+intros.  
+eapply transitive_red. eapply preserves_app_sf_red.
+eapply2 app_comb_red. auto.
+unfold Y_k; fold Y_k.     
+eapply transitive_red. eapply preserves_app_sf_red.  eapply preserves_app_sf_red.
+eapply2 app_comb_red. all: auto.
+eapply transitive_red. eapply preserves_app_sf_red. eapply preserves_app_sf_red.
+eapply preserves_app_sf_red.
+eapply2 app_comb_red. all: auto.
+eapply transitive_red. eapply preserves_app_sf_red. eapply preserves_app_sf_red.
+eapply preserves_app_sf_red.
+eapply2 A3_red. all: auto.
+eapply transitive_red. eapply preserves_app_sf_red. eapply preserves_app_sf_red.
+eapply2 app_comb_red. all: auto.
+eapply transitive_red. eapply preserves_app_sf_red. eapply preserves_app_sf_red.
+eapply2 A3_red. all: auto.
+eapply transitive_red. eapply preserves_app_sf_red. 
+eapply2 app_comb_red. all: auto.
+eapply transitive_red. eapply preserves_app_sf_red. 
+eapply2 A3_red. all: auto.
+eapply transitive_red. 
+eapply2 app_comb_red.
+unfold A_k. 
+eapply2 a_op2_red.  
+Qed. 
+    
 Lemma star_opt_preserves_bind_normal: forall M, bind_normal M -> bind_normal (multi_star (maxvar M) M). 
 star_opt M).
 Proof.

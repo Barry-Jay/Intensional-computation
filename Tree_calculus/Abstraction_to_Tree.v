@@ -85,7 +85,30 @@ eapply2 b_r_red.
 (* 6 *) 
 eapply2 b_h_red.
 (* 5 *) 
-eapply2 b_a_red.  
+eapply2 b_a_red. 
+all: cycle 1. 
+(* 5 *) 
+eapply2 b_i_red.
+(* 4 *) 
+eapply2 b_b_red.
+(* 3 *) 
+all: cycle 1. 
+
+
+problems with atoms, compounds and abs_op. 
+
+
+gen_case H o. 
+(* 8 *) 
+congruence. 
+(* 7 *) 
+
+
+
+
+discriminate. 
+
+eapply2 zero_red.     
  
  
 

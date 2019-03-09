@@ -84,10 +84,12 @@ bind_normal
            (app_comb (app_comb (app_comb (omega_k 3) (omega_k 3)) (Ref 0))
               (Ref 1)) (App (Ref 2) (Ref 1))
            (extension (app_comb (Y_k 2) (Ref 0)) (Ref 2)
-              (extension (app_comb (app_comb (Ref 0) (Ref 1)) (Ref 2))
+              (extension
+                 (app_comb (app_comb (Ref 0) (app_comb (A_k 3) (Ref 1)))
+                    (Ref 2))
                  (App
-                    (App (app_comb (A_k 3) (Ref 0))
-                       (App (App (App (Ref 5) (Ref 4)) (Ref 3)) (Ref 1)))
+                    (App (app_comb (A_k 3) (Ref 1))
+                       (App (App (App (Ref 5) (Ref 4)) (Ref 3)) (Ref 0)))
                     (Ref 2)) i_op))))).
 Proof.
 apply bind_normal_extension. 

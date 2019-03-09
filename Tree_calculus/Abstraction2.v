@@ -481,29 +481,34 @@ Qed.
 Lemma b_fn_body_maxvar : 
 maxvar
   (extension
-     (app_comb
-        (app_comb (app_comb (app_comb (omega_k 4) (omega_k 4)) h_fn) (Ref 0))
-        (Ref 1))
-     (App (App (App (App (Ref 4) (Ref 3)) (Ref 2)) (Ref 0))
-        (App (App (App (Ref 4) (Ref 3)) (Ref 2)) (Ref 1)))
-     (extension
         (app_comb
-           (app_comb (app_comb (app_comb (omega_k 4) (omega_k 4)) (Ref 0))
-              (Ref 1)) (Ref 2))
-        (App
-           (App
-              (app_comb (app_comb (app_comb (A_k 5) (omega_k 4)) (omega_k 4))
-                 (Ref 0)) (App (App (App (Ref 5) (Ref 4)) (Ref 3)) (Ref 1)))
-           (App (App (App (Ref 5) (Ref 4)) (Ref 3)) (Ref 2)))
+           (app_comb (app_comb (app_comb (omega_k 4) (omega_k 4)) h_fn)
+              (Ref 0)) (Ref 1))
+        (App (App (App (App (Ref 4) (Ref 3)) (Ref 2)) (Ref 0))
+           (App (App (App (Ref 4) (Ref 3)) (Ref 2)) (Ref 1)))
         (extension
-           (app_comb (app_comb (app_comb (omega_k 3) (omega_k 3)) (Ref 0))
-              (Ref 1)) (App (Ref 2) (Ref 1))
-           (extension (app_comb (Y_k 2) (Ref 0)) (Ref 2)
-              (extension (app_comb (app_comb (Ref 0) (Ref 1)) (Ref 2))
-                 (App
-                    (App (app_comb (A_k 3) (Ref 0))
-                       (App (App (App (Ref 5) (Ref 4)) (Ref 3)) (Ref 1)))
-                    (Ref 2)) i_op))))) = 3.
+           (app_comb
+              (app_comb (app_comb (app_comb (omega_k 4) (omega_k 4)) (Ref 0))
+                 (Ref 1)) (Ref 2))
+           (App
+              (App
+                 (app_comb
+                    (app_comb (app_comb (A_k 5) (omega_k 4)) (omega_k 4))
+                    (Ref 0))
+                 (App (App (App (Ref 5) (Ref 4)) (Ref 3)) (Ref 1)))
+              (App (App (App (Ref 5) (Ref 4)) (Ref 3)) (Ref 2)))
+           (extension
+              (app_comb (app_comb (app_comb (omega_k 3) (omega_k 3)) (Ref 0))
+                 (Ref 1)) (App (Ref 2) (Ref 1))
+              (extension (app_comb (Y_k 2) (Ref 0)) (Ref 2)
+                 (extension
+                    (app_comb (app_comb (Ref 0) (app_comb (A_k 3) (Ref 1)))
+                       (Ref 2))
+                    (App
+                       (App (app_comb (A_k 3) (Ref 1))
+                          (App (App (App (Ref 5) (Ref 4)) (Ref 3)) (Ref 0)))
+                       (Ref 2)) i_op)))))
+ = 3.
 Proof. 
 rewrite maxvar_extension.
 rewrite ! maxvar_app. 
@@ -551,15 +556,17 @@ rewrite A_k_closed.
 unfold_op; unfold maxvar, plus, minus,  max; fold max. auto. 
 Qed. 
 
-Lemma aux7: bind_normal
+Lemma aux7: 
+bind_normal
   (extension
      (app_comb (app_comb (app_comb (omega_k 3) (omega_k 3)) (Ref 0)) (Ref 1))
      (App (Ref 2) (Ref 1))
      (extension (app_comb (Y_k 2) (Ref 0)) (Ref 2)
-        (extension (app_comb (app_comb (Ref 0) (Ref 1)) (Ref 2))
+        (extension
+           (app_comb (app_comb (Ref 0) (app_comb (A_k 3) (Ref 1))) (Ref 2))
            (App
-              (App (app_comb (A_k 3) (Ref 0))
-                 (App (App (App (Ref 5) (Ref 4)) (Ref 3)) (Ref 1))) (Ref 2))
+              (App (app_comb (A_k 3) (Ref 1))
+                 (App (App (App (Ref 5) (Ref 4)) (Ref 3)) (Ref 0))) (Ref 2))
            i_op))).
 Proof. 
 eapply bind_normal_extension.

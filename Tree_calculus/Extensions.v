@@ -42,7 +42,7 @@ Require Import IntensionalLib.Tree_calculus.Equal.
 Require Import IntensionalLib.Tree_calculus.Case.  
 
 
-
+Set Keep Proof Equalities.
 
 
 Definition extension P M R := App (App (Op Node) (App (Op Node)  (App k_op R))) (case P M). 
@@ -255,12 +255,13 @@ Inductive matchfail : Tree -> Tree -> Prop :=
 Hint Constructors matchfail. 
 
 
+
 Lemma matchfail_lift: forall P M, matchfail P M -> forall k, matchfail P (lift k M).
 Proof.
   induction P; split_all; inversion H; subst; unfold lift, lift_rec; fold lift_rec. 
 (* 7 *) 
-  gen3_case H H1 H0 M. inversion H; split_all. inversion H2.  inversion H4. discriminate.  inv1 compound.
-  eapply2 matchfail_op. inversion H0; split_all. inversion H2; discriminate. 
+  gen2_case H1 H2 M. inversion H1; split_all. inversion H0.  discriminate.  inv1 compound.
+  eapply2 matchfail_op. inversion H1; split_all. inversion H0; discriminate. 
  unfold factorable. right.
   replace (App (lift_rec t 0 k) (lift_rec t0 0 k)) with (lift_rec (App t t0) 0 k) by auto. 
   eapply2 lift_rec_preserves_compound. discriminate. 
@@ -292,8 +293,7 @@ forall P M, maxvar P = 0 -> matchfail P M -> sf_red (App (App equal_comb M) P) (
 Proof. 
 induction P; split_all. inversion H0; subst. 
 inversion H0; split_all; subst; split_all. 
-inversion H1. inversion H3; subst. gen_case H0 o; gen_case H0 x; inversion H0.
-gen_case H2 o0; gen_case H2 x; congruence. 
+inversion H2. inversion H1; subst. gen_case H3 o; gen_case H3 x; congruence.
 (* 2 *) 
 eapply2 unequal_compound_op. 
 (* 1 *) 
@@ -334,9 +334,10 @@ insert_Ref_out.
 rewrite ! subst_rec_closed. 
 2: simpl; auto. 2: simpl; auto. 
 unfold lift; rewrite lift_rec_null. 
-inversion H0. inversion H2. subst.
-gen_case H1 x; gen_case H1 o0; congruence. 
-inversion H2; subst. 
+inversion H1. inversion H0. subst.
+gen_case H2 x; gen_case H2 o; congruence. 
+inversion H0; subst. inversion H1; subst.
+inversion H3; discriminate . 
 eapply transitive_red. eapply preserves_app_sf_red. 
 eapply2 factor_stem. auto. eval_tac. eval_tac.
 eapply transitive_red. eapply preserves_app_sf_red. 
@@ -893,3 +894,24 @@ Qed.
 
 
  
+Lemma matchfail_app_comb_r : 
+forall P1 P2 Q1 Q2, matchfail P2 Q2 -> matchfail (app_comb P1 P2) (app_comb Q1 Q2).
+Proof.
+intros; unfold app_comb. 
+eapply2 matchfail_compound_r.
+unfold_op; eapply2 program_matching.
+unfold program; split; auto. repeat eapply2 nf_compound.   
+unfold_op; eapply2 matchfail_compound_l. 
+eapply2 matchfail_compound_r. 
+Qed. 
+
+Lemma matchfail_app_comb_l : 
+forall P1 P2 Q1 Q2 sigma, matching P2 Q2 sigma -> matchfail P1 Q1 -> matchfail (app_comb P1 P2) (app_comb Q1 Q2).
+Proof.
+intros; unfold app_comb. 
+eapply2 matchfail_compound_r.
+unfold_op; eapply2 program_matching.
+unfold program; split; auto. repeat eapply2 nf_compound.   
+unfold_op; eapply2 matchfail_compound_r. 
+repeat eapply2 match_app. 
+Qed. 
