@@ -585,3 +585,72 @@ rewrite A_k_closed. cbv; omega. auto.
 rewrite 2 maxvar_app. rewrite maxvar_app_comb. 
 rewrite A_k_closed. cbv; omega.
 Qed. 
+
+
+Lemma aux9: bind_normal
+  (App
+     (app_comb (app_comb (app_comb (A_k 5) (omega_k 4)) (omega_k 4)) (Ref 0))
+     (App (App (App (Ref 5) (Ref 4)) (Ref 3)) (Ref 1))).
+Proof.
+apply bn_app.
+apply bn_normal. 
+repeat eapply2 app_comb_normal. 
+eapply2 bn_normal.
+rewrite maxvar_app. rewrite ! maxvar_app_comb. 
+rewrite A_k_closed.
+rewrite omega_k_closed.
+unfold maxvar. simpl. omega. 
+Qed. 
+
+
+
+Lemma aux8: 
+bind_normal
+  (extension
+     (app_comb
+        (app_comb (app_comb (app_comb (omega_k 4) (omega_k 4)) h_fn) (Ref 0))
+        (Ref 1))
+     (App (App (App (App (Ref 4) (Ref 3)) (Ref 2)) (Ref 0))
+        (App (App (App (Ref 4) (Ref 3)) (Ref 2)) (Ref 1)))
+     (extension
+        (app_comb
+           (app_comb (app_comb (app_comb (omega_k 4) (omega_k 4)) (Ref 0))
+              (Ref 1)) (Ref 2))
+        (App
+           (App
+              (app_comb (app_comb (app_comb (A_k 5) (omega_k 4)) (omega_k 4))
+                 (Ref 0)) (App (App (App (Ref 5) (Ref 4)) (Ref 3)) (Ref 1)))
+           (App (App (App (Ref 5) (Ref 4)) (Ref 3)) (Ref 2)))
+        (extension
+           (app_comb (app_comb (app_comb (omega_k 3) (omega_k 3)) (Ref 0))
+              (Ref 1)) (App (Ref 2) (Ref 1))
+           (extension (app_comb (Y_k 2) (Ref 0)) (Ref 2)
+              (extension
+                 (app_comb (app_comb (Ref 0) (app_comb (A_k 3) (Ref 1)))
+                    (Ref 2))
+                 (App
+                    (App (app_comb (A_k 3) (Ref 1))
+                       (App (App (App (Ref 5) (Ref 4)) (Ref 3)) (Ref 0)))
+                    (Ref 2)) i_op))))).
+Proof.
+apply bind_normal_extension. 
+apply bn_normal. 
+repeat eapply2 nf_active. 
+apply bind_normal_extension.
+2: eapply2 aux7.  
+apply bn_app.
+all: cycle 1. 
+eapply2 bn_normal. 
+rewrite ! maxvar_app.
+match goal with 
+| |- Nat.max ?m ?n >0 => assert(Nat.max m n >= n) by eapply2 max_is_max end. 
+assert(Nat.max
+      (Nat.max (Nat.max (maxvar (Ref 5)) (maxvar (Ref 4))) (maxvar (Ref 3)))
+      (maxvar (Ref 2)) >= maxvar (Ref 2)) by eapply2 max_is_max.
+assert(maxvar (Ref 2) >0) by (cbv; omega). 
+omega.  
+apply aux9.
+Qed. 
+
+
+

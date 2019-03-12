@@ -81,6 +81,53 @@ eapply2 program_matching.
 unfold_op; unfold program; split_all. 
 Qed. 
 
+
+
+Definition flip N :=  App (App node (App node (App k_op N))) i_op.
+
+Lemma flip_flips: forall M N, sf_red (App (flip N) M) (App M N).
+Proof. 
+intros; unfold flip; unfold_op. eval_tac.  eval_tac.
+eapply transitive_red. eapply preserves_app_sf_red.
+eapply succ_red. eapply2 k_red. 
+ auto.  eval_tac. auto. 
+Qed. 
+
+Lemma maxvar_flip: forall N, maxvar (flip N) = maxvar N.
+Proof. intros; unfold flip. unfold_op; simpl.  rewrite max_zero; auto.  Qed.
+
+Lemma flip_normal: forall N, normal N -> normal (flip N). 
+Proof.  intros; unfold flip. unfold_op; simpl. repeat eapply2 nf_compound.  Qed.
+
+Lemma subst_rec_preserves_flip: forall N P k, subst_rec (flip N) P k = flip (subst_rec N P k). 
+Proof. intros; unfold flip; unfold_op.  simpl; auto. Qed. 
+  
+
+Definition app_comb2 M N := app_comb (flip N) M. 
+
+Lemma app_comb2_red : forall M N P, sf_red (App (app_comb2 M N) P) (App (App M N) P).
+Proof.
+intros; unfold app_comb2. eapply transitive_red. eapply2 app_comb_red.
+eapply transitive_red. eapply preserves_app_sf_red.
+eapply2 flip_flips. auto. auto. 
+Qed.
+
+Lemma maxvar_app_comb2: forall M N, maxvar (app_comb2 M N) = max (maxvar M) (maxvar N). 
+Proof. intros; unfold app_comb2. rewrite maxvar_app_comb. rewrite maxvar_flip.  eapply2 max_swap. 
+Qed.      
+
+Lemma app_comb2_normal: forall M N, normal M -> normal N -> normal (app_comb2 M N).
+Proof. intros; unfold app_comb2. eapply2 app_comb_normal.  eapply2 flip_normal. Qed.
+
+Lemma subst_rec_preserves_app_comb2: 
+forall M N P k, subst_rec (app_comb2 M N) P k = app_comb2 (subst_rec M P k) (subst_rec N P k).
+Proof. 
+intros; unfold app_comb2.  rewrite subst_rec_preserves_app_comb.  rewrite subst_rec_preserves_flip. auto. 
+Qed.  
+  
+ 
+
+
 (* delete ? 
 ace sigma
 with (((map (lift (length (nil: list Tree))) sigma) ++ nil)). 

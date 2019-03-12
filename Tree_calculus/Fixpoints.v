@@ -210,6 +210,10 @@ unfold lift. rewrite ! lift_rec_null.
 rewrite subst_rec_lift_rec; try omega.  rewrite lift_rec_null. unfold Y_k. auto. 
 Qed. 
 
+Lemma omega_3_not_omega_2: omega_k 3 <> omega_k 2. 
+Proof. unfold omega_k; intro H. discriminate. Qed. 
+
+
 Lemma Y_k_program: forall k, k<5 -> program (Y_k k).
 Proof.
 intros. unfold program. split. 
@@ -224,6 +228,7 @@ Qed.
   
 Lemma Y_k_normal: forall k, k<5 -> normal (Y_k k). Proof. eapply2 Y_k_program. Qed. 
 Lemma Y_k_closed: forall k, k<5 -> maxvar (Y_k k) = 0. Proof. eapply2 Y_k_program. Qed. 
+
 
 
 
