@@ -212,7 +212,7 @@ Lemma star_opt_size: forall M, size (star_opt M) + 1>= size M.
 Proof.
 induction M; split_all. 
 case n; split_all.  omega. 
-case (occurs0 M1).
+case (occurs 0 M1).
 unfold size; fold size. omega. 
 gen_case IHM2 M2. 
 (* 3 *) 
@@ -221,8 +221,8 @@ rewrite size_subst. omega.
 all: replace (subst_rec M1 (Op Node) 0) with (subst M1 (Op Node)) by auto.  
 all: try rewrite size_subst. omega. omega. 
 (* 1 *) 
-gen_case IHM2 (occurs0 t). omega. 
-gen_case IHM2 (occurs0 t0). 
+gen_case IHM2 (occurs 0 t). omega. 
+gen_case IHM2 (occurs 0 t0). 
 gen_case IHM2 t0; try omega.   
 (* 1 *) 
 all: replace (subst_rec M1 (Op Node) 0) with (subst M1 (Op Node)) by auto.  

@@ -22,11 +22,12 @@
 (*                                                                    *)
 (**********************************************************************)
 
+(* 
 Add LoadPath ".." as IntensionalLib.
-
+*)
 Require Import Arith Omega.
-Require Import SF_calculus.General.
-Require Import Abstraction_calculus.Abstraction_Terms. 
+Require Import IntensionalLib.SF_calculus.General.  
+Require Import IntensionalLib.Abstraction_calculus.Abstraction_Terms. 
 
 Definition termred := Term -> Term -> Prop.
 

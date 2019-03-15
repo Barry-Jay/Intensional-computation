@@ -22,8 +22,9 @@
 (*                                                                    *)
 (**********************************************************************)
 
+(* 
 Add LoadPath ".." as IntensionalLib.
-
+*) 
 Require Import Arith.
 Require Import IntensionalLib.SF_calculus.General.
 Require Import IntensionalLib.Abstraction_calculus.Abstraction_Terms. 

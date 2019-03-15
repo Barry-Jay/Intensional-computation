@@ -214,7 +214,7 @@ Definition case_app case (P1 P2 M : Tree) :=
 
 Ltac occurs_true_tac M := 
 rewrite (star_opt_occurs_true M) at 1;
-[| rewrite ! occurs_app; replace (occurs0 (Ref 0)) with true by split_all; 
+[| rewrite ! occurs_app; replace (occurs 0 (Ref 0)) with true by split_all; 
 rewrite ? orb_true_r; auto | discriminate]. 
 
 Ltac occurs_false_tac M := 
@@ -251,7 +251,7 @@ Lemma case_app_val :
 forall case P1 P2 M, sf_red (case_app case P1 P2 M) (case_app_nf case P1 P2 M).
 Proof. 
 intros; unfold case_app. 
-unfold star_opt at 3;  unfold occurs0; fold occurs0. 
+unfold star_opt at 3;  unfold occurs; fold occurs 0. 
 unfold lift; rewrite ! occurs_lift_rec_zero. simpl. 
 rewrite subst_rec_lift_rec; try omega. 
 rewrite ! occurs_lift_rec_zero. simpl. 
@@ -651,7 +651,7 @@ rewrite H in H7; discriminate.
    noway. 
 Qed. 
 
-Lemma occurs_maxvar_1: forall M, maxvar M = 1 -> occurs0 M = true.
+Lemma occurs_maxvar_1: forall M, maxvar M = 1 -> occurs 0 M = true.
 Proof.
 induction M; split_all. inversion H; subst. auto. noway. 
 gen3_case IHM1 IHM2 H (maxvar M1). 
@@ -667,7 +667,7 @@ Qed.
 
 
 Lemma occurs_false_subst_compound: 
-forall M N, occurs0 M = false -> compound (subst_rec M N 0) -> compound M. 
+forall M N, occurs 0 M = false -> compound (subst_rec M N 0) -> compound M. 
 Proof.
 induction M; split_all.
 gen2_case H H0 n.  discriminate. generalize H0; insert_Ref_out; intro. 
@@ -687,7 +687,7 @@ Qed.
 
 
 Lemma occurs_false_subst_active: 
-forall M N, occurs0 M = false -> status (subst_rec M N 0) = status M. 
+forall M N, occurs 0 M = false -> status (subst_rec M N 0) = status M. 
 Proof.
 rank_tac. 
 induction p; split_all. assert (rank M >0) by eapply2 rank_positive. noway. 
@@ -737,7 +737,7 @@ Qed.
 
 
 Lemma occurs_false_subst_normal2: 
-forall M N, occurs0 M = false -> normal (subst_rec M N 0) -> normal M. 
+forall M N, occurs 0 M = false -> normal (subst_rec M N 0) -> normal M. 
 Proof.
 induction M; split_all.
 inversion H0; subst. rewrite orb_false_iff in H. inversion H. 
@@ -753,19 +753,19 @@ simpl; rewrite H1; rewrite H2; auto.
 Qed.
 
 Lemma normal_star_opt_app: 
-forall M1 M2, occurs0 (App M1 M2)  = true 
+forall M1 M2, occurs 0 (App M1 M2)  = true 
 -> normal (star_opt M1) -> normal (star_opt M2) -> 
 normal (star_opt (App M1 M2)).
 Proof.
 intros.  unfold star_opt; fold star_opt. simpl in H. 
 rewrite orb_true_iff in H.  inversion H. rewrite H2. 
-eapply2 nf_compound. 
-assert(occurs0 M1 = true \/ occurs0 M1 <> true) by decide equality. 
+eapply2 nf_compound.
+assert(occurs 0 M1 = true \/ occurs 0 M1 <> true) by decide equality. 
 inversion H3. 
 (* 2 *) 
 rewrite H4. eapply2 nf_compound.
 (* 1 *)  
-assert(occurs0 M1 = false). gen_case H4 (occurs0 M1). 
+assert(occurs 0 M1 = false). gen_case H4 (occurs 0 M1). 
 assert False by eapply2 H4; noway. 
 rewrite H5. 
 rewrite (star_opt_occurs_false) in H0. 2: auto. 
@@ -780,7 +780,7 @@ Qed.
 
 (* delete 
 Lemma pattern_normal_subst_occurs_false: 
-forall M j, occurs0 M = false -> pattern_normal j M  -> 
+forall M j, occurs 0 M = false -> pattern_normal j M  -> 
 pattern_normal (pred j) (subst M s_op). 
 Proof. 
 induction M; split_all. 
@@ -815,13 +815,13 @@ auto.
 
 
 Lemma occurs_false_subst_rec_maxvar_gt0 : 
-forall M, occurs0 M = false -> 0< maxvar M -> 
+forall M, occurs 0 M = false -> 0< maxvar M -> 
 forall N, 0 < maxvar (subst_rec M N 0). 
 Proof.
 induction M; split_all; subst.  
 simpl in *. gen_case H n. discriminate. omega. 
 simpl in *. 
-assert(occurs0 M1 = false /\ occurs0 M2 = false). eapply2 orb_false_iff. 
+assert(occurs 0 M1 = false /\ occurs 0 M2 = false). eapply2 orb_false_iff. 
 inversion H. 
 assert(0< maxvar M1 \/ 0< maxvar M2). 
 gen_case H0 (maxvar M1). left; omega. 
@@ -835,13 +835,13 @@ maxvar (subst_rec M2 N 0)) by eapply2 max_is_max.  omega.
 Qed. 
 
 Lemma occurs_false_subst_rec_maxvar_lt : 
-forall M, occurs0 M = false ->  forall j, maxvar M <= j -> 
+forall M, occurs 0 M = false ->  forall j, maxvar M <= j -> 
 forall N, maxvar (subst_rec M N 0) <= pred j.  
 Proof.
 induction M; split_all; subst.  simpl in *.
  gen2_case H H0 n. discriminate. omega. omega. 
  simpl in *. 
-assert(occurs0 M1 = false /\ occurs0 M2 = false). eapply2 orb_false_iff. 
+assert(occurs 0 M1 = false /\ occurs 0 M2 = false). eapply2 orb_false_iff. 
 inversion H1. 
 assert (Nat.max (maxvar M1) (maxvar M2)  >= maxvar M1) by eapply2 max_is_max. 
 assert (Nat.max (maxvar M1) (maxvar M2)  >= maxvar M2) by eapply2 max_is_max. 
@@ -853,7 +853,7 @@ Qed.
 
 
 Lemma occurs_false_subst_pattern_normal: 
-forall M j N, occurs0 M = false -> pattern_normal j M -> pattern_normal (pred j) (subst_rec M N 0). 
+forall M j N, occurs 0 M = false -> pattern_normal j M -> pattern_normal (pred j) (subst_rec M N 0). 
 Proof.
 induction M; split_all.
 (* 3 *) 
@@ -861,7 +861,7 @@ gen2_case H H0 n. discriminate.  insert_Ref_out. eapply2 pnf_normal.
 (* 2 *)  
 eapply2 pnf_normal.
 (* 1 *)    
-assert(occurs0 M1 = false /\ occurs0 M2 = false) by eapply2 orb_false_iff. 
+assert(occurs 0 M1 = false /\ occurs 0 M2 = false) by eapply2 orb_false_iff. 
 inversion H1. 
 inversion H0.
 (* 4 *) 
@@ -898,14 +898,14 @@ eapply2 pnf_normal. eapply2 star_opt_normal.
 eapply2 pnf_normal. eapply2 star_opt_normal.
 (* 3 *)   
 unfold star_opt; fold star_opt. 
-assert(occurs0 M1 = true \/ occurs0 M1 <> true) by decide equality. 
+assert(occurs 0 M1 = true \/ occurs 0 M1 <> true) by decide equality. 
 inversion H0. 
 (* 4 *) 
 rewrite H1. eapply2 pnf_compound. eapply2 pnf_compound.  eapply2 pnf_normal. 
 eapply2 pnf_compound. eapply2 pnf_normal. 
 (* 3 *)  
 assert(pattern_normal  (pred j) (star_opt M2)) by eapply2 IHM2. 
-assert(occurs0 M1 = false). gen_case H1 (occurs0 M1).  
+assert(occurs 0 M1 = false). gen_case H1 (occurs 0 M1).  
 assert False by eapply2 H1; noway. 
 rewrite H6.
 assert(pattern_normal (pred j) (subst_rec M1 (Op Node) 0)) .
@@ -917,7 +917,7 @@ unfold subst, subst_rec; fold subst_rec.
 assert(pattern_normal (pred j) (App (App (Op Node) (App (Op Node) (star_opt M2))) (star_opt M1))). 
 eapply2 pnf_compound. eapply2 pnf_compound. eapply2 pnf_normal. 
 eapply2 pnf_compound. eapply2 pnf_normal. 
-assert(occurs0 M2 = false -> 
+assert(occurs 0 M2 = false -> 
   pattern_normal (pred j) (App k_op (App (subst_rec M1 (Op Node) 0) (subst_rec M2 (Op Node) 0)))). 
 intro. 
 assert(pattern_normal (pred j) (subst_rec M2 (Op Node) 0)).
@@ -932,17 +932,17 @@ assert(compound (subst_rec (App M1 M2) (Op Node) 0)).
 simpl in H9.  inversion H9; subst; auto.
 (* 3 *) 
 gen3_case H H0 H7 M2. gen3_case H H0 H7 n. 
-gen3_case H H0 H7 (occurs0 t || occurs0 t0). 
+gen3_case H H0 H7 (occurs 0 t || occurs 0 t0). 
 (* 2 *) 
 unfold star_opt; fold star_opt. 
-assert(occurs0 M1 = true \/ occurs0 M1 <> true) by decide equality. 
+assert(occurs 0 M1 = true \/ occurs 0 M1 <> true) by decide equality. 
 inversion H0. 
 (* 3 *) 
 rewrite H1. eapply2 pnf_compound. eapply2 pnf_compound.  eapply2 pnf_normal.
  eapply2 pnf_compound.  eapply2 pnf_normal.
 (* 2 *)  
 assert(pattern_normal  (pred j) (star_opt M2)) by eapply2 IHM2. 
-assert(occurs0 M1 = false). gen_case H1 (occurs0 M1). 
+assert(occurs 0 M1 = false). gen_case H1 (occurs 0 M1). 
 assert False by eapply2 H1; noway. 
 rewrite H6.
 assert(pattern_normal (pred j) (subst_rec M1 (Op Node) 0)) .
@@ -953,7 +953,7 @@ clear IHM1 IHM2 H H0 H1 .
 unfold subst, subst_rec; fold subst_rec. 
 assert(pattern_normal (pred j) (App (App (Op Node) (App (Op Node) (star_opt M2))) (star_opt M1))). 
 eapply2 pnf_compound. eapply2 pnf_compound. eapply2 pnf_normal. eapply2 pnf_compound. eapply2 pnf_normal. 
-assert(occurs0 M2 = false -> 
+assert(occurs 0 M2 = false -> 
   pattern_normal (pred j) (App k_op (App (subst_rec M1 (Op Node) 0) (subst_rec M2 (Op Node) 0)))). 
 intro. 
 assert(pattern_normal (pred j) (subst_rec M2 (Op Node) 0)).
@@ -969,29 +969,29 @@ rewrite occurs_false_subst_status. auto.
 simpl; rewrite H6; rewrite H0; auto. 
 (* 2 *) 
 gen3_case H H0 H7 M2. gen3_case H H0 H7 n. 
-gen3_case H H0 H7 (occurs0 t || occurs0 t0). 
+gen3_case H H0 H7 (occurs 0 t || occurs 0 t0). 
 (* 1 *) 
 Set Keep Proof Equalities.
 assert(M2 = Ref 0 \/ M2 <> Ref 0) by repeat decide equality. 
 inversion H0; subst.  
-assert(occurs0 M1 = true \/ occurs0 M1 <> true) by decide equality. 
+assert(occurs 0 M1 = true \/ occurs 0 M1 <> true) by decide equality. 
 inversion H1; subst. 
 (* 3 *) 
 unfold star_opt; fold star_opt. rewrite H4. 
 eapply2 pnf_compound. eapply2 pnf_compound. eapply2 pnf_normal. 
 eapply2 pnf_compound. eapply2 pnf_normal. 
-assert(occurs0 M1 = false). 
-gen_case H4 (occurs0 M1).  assert False by eapply2 H4; noway.  
+assert(occurs 0 M1 = false). 
+gen_case H4 (occurs 0 M1).  assert False by eapply2 H4; noway.  
 unfold star_opt; fold star_opt. rewrite H7.
 eapply2 occurs_false_subst_pattern_normal. 
-assert(occurs0 M1 = true \/ occurs0 M1 <> true) by decide equality. 
+assert(occurs 0 M1 = true \/ occurs 0 M1 <> true) by decide equality. 
 inversion H4; subst. 
 (* 2 *) 
 unfold star_opt; fold star_opt. rewrite H7. 
 eapply2 pnf_compound. eapply2 pnf_compound. eapply2 pnf_normal. 
 eapply2 pnf_compound. eapply2 pnf_normal. 
-assert(occurs0 M1 = false). 
-gen_case H7 (occurs0 M1).  assert False by eapply2 H7; noway.  
+assert(occurs 0 M1 = false). 
+gen_case H7 (occurs 0 M1).  assert False by eapply2 H7; noway.  
 unfold star_opt; fold star_opt. rewrite H8.
 (* 1 *) 
 assert(pattern_normal  (pred j) (star_opt M2)) by eapply2 IHM2. 
@@ -1002,7 +1002,7 @@ assert(pattern_normal (pred j) (star_opt M1)) by eapply2 IHM1.
 unfold subst, subst_rec; fold subst_rec. 
 assert(pattern_normal (pred j) (App (App (Op Node) (App (Op Node) (star_opt M2))) (star_opt M1))). 
 eapply2 pnf_compound. eapply2 pnf_compound. eapply2 pnf_normal.  eapply2 pnf_compound. eapply2 pnf_normal. 
-assert(occurs0 M2 = false -> 
+assert(occurs 0 M2 = false -> 
   pattern_normal (pred j) (App k_op (App (subst_rec M1 (Op Node) 0) (subst_rec M2 (Op Node) 0)))). 
 intro. 
 assert(pattern_normal (pred j) (subst_rec M2 (Op Node) 0)).
@@ -1014,7 +1014,7 @@ eapply2 occurs_false_subst_rec_maxvar_gt0.
 eapply2 occurs_false_subst_rec_maxvar_lt. 
 (* 1 *) 
 gen3_case H10 H12 H13 M2. gen3_case H10 H12 H13 n. 
-gen3_case H10 H12 H13 (occurs0 t || occurs0 t0). 
+gen3_case H10 H12 H13 (occurs 0 t || occurs 0 t0). 
 Qed. 
 
 
@@ -1201,7 +1201,7 @@ inversion H2.  simpl in H4; max_out.
 assert(program (App P1 P2)) by eapply2 program_is_program. 
 inversion H2.  simpl in H4; max_out. 
 unfold_op; auto. 
-unfold occurs0; fold occurs0. 
+unfold occurs; fold occurs 0. 
 unfold lift; rewrite occurs_lift_rec_zero.  auto. 
 eapply2 pnf_normal. unfold swap; unfold_op; nf_out. 
 eapply2 occurs_closed. 
@@ -1372,7 +1372,7 @@ rewrite max_pred. unfold lift in *. auto.
 Qed. 
 
 Lemma occurs0_lift: 
-forall M k, occurs0 (lift (S k) M) = false.
+forall M k, occurs 0 (lift (S k) M) = false.
 Proof.
 induction M; split_all. 
 relocate_lt.  replace (S k + n) with (S (k+n)) by omega. auto.  
@@ -1511,8 +1511,7 @@ rewrite subst_rec_closed. 2: rewrite Fop_closed; omega.
 unfold subst_rec; fold subst_rec. insert_Ref_out. unfold lift, lift_rec; fold lift_rec.
 rewrite subst_rec_lift_rec; try omega. rewrite lift_rec_null. 
 eapply transitive_red. eapply2 factor_leaf.  
-  eval_tac. 
-  (* 1 *) 
+  eval_tac.   (* 1 *) 
   unfold case; fold case. 
 assert(is_program (App P1 P2) = true \/ is_program(App P1 P2) <> true)
 by decide equality. 
@@ -1638,26 +1637,26 @@ eapply2 Fop_normal.
 rewrite Fop_closed; auto. 
 eapply2 Fop_closed. 
 (* 5 *) 
-unfold occurs0. rewrite ! orb_true_r. auto. congruence. 
+unfold occurs. rewrite ! orb_true_r. auto. congruence. 
 (* 3 *) 
-unfold occurs0. rewrite ! orb_true_r. auto. congruence. 
+unfold occurs. rewrite ! orb_true_r. auto. congruence. 
 (* 1 *) 
 case (is_program (App P1 P2)). 
 rewrite star_opt_occurs_true. 
-unfold star_opt at 1.  unfold occurs0. unfold swap. unfold_op. 
+unfold star_opt at 1.  unfold occurs. unfold swap. unfold_op. 
 rewrite ! orb_false_l. 
 all:cycle 1. 
-unfold occurs0. unfold swap; rewrite ! orb_true_r. auto. unfold swap;  congruence.
+unfold occurs. unfold swap; rewrite ! orb_true_r. auto. unfold swap;  congruence.
 (* 2 *) 
 unfold swap. 
 unfold case_app. 
 rewrite star_opt_occurs_true. 
-unfold star_opt at 1. unfold swap. unfold_op.    unfold occurs0.  
+unfold star_opt at 1. unfold swap. unfold_op.    unfold occurs.  
 rewrite ! orb_false_l. unfold subst, subst_rec.
 eapply2 nf_compound. 
 repeat eapply2 nf_compound. 
 all: cycle 1. 
-  unfold occurs0.  
+  unfold occurs.  
 rewrite ! orb_false_l.  rewrite orb_true_r.  auto. 
 unfold swap; congruence. 
 unfold subst, subst_rec.
@@ -1671,16 +1670,16 @@ unfold lift, subst_rec; fold subst_rec.
 rewrite subst_rec_lift_rec; try omega. 
 rewrite lift_rec_null; unfold_op.
 repeat eapply2 nf_compound. 
-unfold occurs0; fold occurs0. 
+unfold occurs; fold occurs. 
 rewrite occurs0_lift. auto.   
 (* 5 *) 
-2: auto. 2: unfold occurs0.  
+2: auto. 2: unfold occurs.  
 2: rewrite ! orb_true_r. 2: cbv; auto. 2: congruence. 
 all: cycle 1. 
 (* 2 *)  
 rewrite  star_opt_occurs_true.
 all: cycle 1. 
-unfold occurs0; rewrite ! orb_true_r; auto.  
+unfold occurs; rewrite ! orb_true_r; auto.  
 match goal with 
 | |- lift 1 ?M <> Ref 0 => 
 case M; unfold lift, lift_rec; try congruence
@@ -1690,7 +1689,7 @@ cbv . discriminate.
 
 (* 2 *) 
 rewrite star_opt_occurs_true.
-2: unfold occurs0; rewrite ! orb_true_r; cbv; auto. 
+2: unfold occurs; rewrite ! orb_true_r; cbv; auto. 
 2: congruence.  
 apply nf_compound. 
 apply nf_compound. auto. 
@@ -1709,9 +1708,9 @@ eapply2 nf_compound.
 eapply2 nf_compound. 
 all: cycle 1. 
 rewrite star_opt_occurs_true. 
-2: unfold occurs0. 
+2: unfold occurs. 
 2: rewrite ! orb_true_r.  2: auto. 2: congruence. 
-unfold star_opt, occurs0.  rewrite ! orb_false_l.
+unfold star_opt, occurs.  rewrite ! orb_false_l.
 rewrite occurs_closed. 
 2: eapply2 Fop_closed. 
 unfold subst; rewrite (subst_rec_closed Fop). 
@@ -1849,10 +1848,10 @@ with case by auto.
 (* 1 *) 
 rewrite star_opt_occurs_true.
 all: cycle 1. 
-unfold occurs0; rewrite ! orb_true_r; cbv; auto. 
+unfold occurs; rewrite ! orb_true_r; cbv; auto. 
 congruence.  
 (* 1 *) 
-unfold star_opt at 4. unfold occurs0. 
+unfold star_opt at 4. unfold occurs. 
 rewrite occurs0_lift.  
 rewrite ! orb_false_l.
 unfold subst, lift. rewrite ! subst_rec_app.
@@ -1861,12 +1860,12 @@ unfold subst_rec; fold subst_rec. insert_Ref_out. unfold pred.
 (* 1 *) 
 rewrite star_opt_occurs_true.
 all: cycle 1. 
-unfold occurs0; rewrite ! orb_true_r; cbv; auto. 
+unfold occurs; rewrite ! orb_true_r; cbv; auto. 
 congruence.  
 (* 1 *) 
 rewrite (star_opt_occurs_true (App (lift_rec _ _ _) _)).
 all: cycle 1. 
-unfold occurs0; rewrite ! orb_true_r; cbv; auto. 
+unfold occurs; rewrite ! orb_true_r; cbv; auto. 
 congruence.  
 (* 1 *) 
 eapply2 star_opt_normal. 
@@ -1880,7 +1879,7 @@ eapply2 nf_compound.
 cbv; repeat eapply2 nf_compound. 
 unfold star_opt. 
 match goal with 
-| |- normal (if occurs0 (lift_rec ?M 0 1) then _ else _) => 
+| |- normal (if occurs 0 (lift_rec ?M 0 1) then _ else _) => 
  replace (lift_rec M 0 1) with (lift 1 M) by auto
 end. 
 rewrite occurs0_lift. 

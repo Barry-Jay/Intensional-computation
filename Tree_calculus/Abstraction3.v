@@ -442,7 +442,7 @@ rewrite (star_opt_occurs_false (App
                     b_op)). 
 all: cycle 1. 
 rewrite ! occurs_app. 
-replace (occurs0 b_op) with false.
+replace (occurs 0 b_op) with false.
 2: rewrite occurs_closed; [auto |eapply2 b_op_closed]. 
 simpl; auto. 
 (* 1 *) 
@@ -453,7 +453,7 @@ rewrite subst_rec_closed.
 rewrite (star_opt_occurs_true).
 all: cycle 1. 
 rewrite ! occurs_app. 
-replace (occurs0 (Ref 0)) with true by auto. 
+replace (occurs 0 (Ref 0)) with true by auto. 
 rewrite ! orb_true_r. 
 simpl; auto. 
 discriminate. 
@@ -480,12 +480,12 @@ unfold ab_fn.
 rewrite star_opt_occurs_true.
 3: discriminate. 
 2: rewrite ! occurs_app.
-2: unfold occurs0 at 2; rewrite orb_true_r; simpl; auto. 
+2: unfold occurs at 2; rewrite orb_true_r; simpl; auto. 
 (* 1 *) 
 rewrite (star_opt_occurs_true (App b_op _)).
 3: discriminate. 
 2: rewrite ! occurs_app.
-2: unfold occurs0 at 2; rewrite orb_true_r; simpl; auto. 
+2: unfold occurs at 2; rewrite orb_true_r; simpl; auto. 
 (* 1 *) 
 unfold star_opt at 3 4 5.
 rewrite occurs_closed. 
@@ -494,7 +494,7 @@ rewrite occurs_closed.
 rewrite star_opt_occurs_true. 
 3: discriminate.
 2: rewrite ! occurs_app.
-2: unfold occurs0 at 4.  2: rewrite  orb_true_r at 1. 
+2: unfold occurs at 4.  2: rewrite  orb_true_r at 1. 
 2: rewrite  orb_true_r at 1. 
 2: rewrite  orb_true_r at 1. 
 2: simpl; auto. 
@@ -503,14 +503,14 @@ rewrite (star_opt_occurs_true (Op Node)).
 2: cbv; auto. 
 2: discriminate. 
 unfold_op; unfold star_opt at 3 4. 
-  unfold occurs0. 
+  unfold occurs. 
 rewrite ! orb_false_l. 
 rewrite star_opt_occurs_true . 
 all: cycle 1.
 2: discriminate.  
 rewrite star_opt_occurs_false.
 2: rewrite ! occurs_app. 
-2: replace (occurs0 (subst b_op (Op Node))) with false. 
+2: replace (occurs 0 (subst b_op (Op Node))) with false. 
 2: cbv; auto. 
 2: unfold subst; rewrite subst_rec_closed. 
 2: rewrite occurs_closed. 2: auto. 
@@ -519,8 +519,8 @@ rewrite star_opt_occurs_false.
 unfold subst_rec; fold subst_rec.
 insert_Ref_out. 
 rewrite ! occurs_app. 
-replace (occurs0 (Ref (pred 1))) with true by auto.
-replace (occurs0 (Op Node)) with false by auto.
+replace (occurs 0 (Ref (pred 1))) with true by auto.
+replace (occurs 0 (Op Node)) with false by auto.
 rewrite occurs_closed. simpl. auto.
 unfold_op; auto. 
 (* 1 *)  
@@ -575,13 +575,13 @@ unfold ab_fn.
 rewrite star_opt_occurs_true.
 all: cycle 1 .
 rewrite ! occurs_app. 
-unfold occurs0 at 2.
+unfold occurs at 2.
 rewrite orb_true_r. simpl . auto. congruence. 
 unfold star_opt at 3. 
 rewrite star_opt_occurs_true.
 all: cycle 1.
 rewrite ! occurs_app.
-unfold occurs0 at 4.
+unfold occurs at 4.
 rewrite orb_true_r at 1. 
 rewrite orb_true_r at 1. 
 rewrite orb_true_r at 1. 
@@ -589,14 +589,14 @@ simpl . auto.
 rewrite star_opt_occurs_true.
 congruence .
 rewrite ! occurs_app.
-unfold occurs0 at 2.
+unfold occurs at 2.
 rewrite orb_true_r at 1. 
 simpl . auto. congruence .
 (* 1 *) 
 rewrite (star_opt_occurs_true (App b_op (Ref 0))).
 all: cycle 1. 
 rewrite ! occurs_app.
-unfold occurs0 at 2.
+unfold occurs at 2.
 rewrite orb_true_r at 1. 
 simpl . auto. congruence .
 (* 1 *) 
@@ -615,12 +615,12 @@ rewrite star_opt_occurs_true.
 eapply2 matchfail_compound_l. 
 eapply2 matchfail_compound_r. 
 eapply2 matchfail_compound_r. 
-unfold_op; unfold star_opt. unfold occurs0. 
+unfold_op; unfold star_opt. unfold occurs. 
 rewrite ! orb_false_l.
 unfold_op; unfold subst, subst_rec. 
 eapply2 matchfail_compound_l.
 rewrite ! occurs_app. 
-unfold_op. unfold pred. unfold occurs0 at 1 2 3 4 5 6 7. simpl. auto. 
+unfold_op. unfold pred. unfold occurs at 1 2 3 4 5 6 7. simpl. auto. 
 rewrite star_opt_occurs_true. congruence . 
 simpl; auto. discriminate.
 Qed.
@@ -641,13 +641,13 @@ unfold ab_fn.
 rewrite star_opt_occurs_true.
 all: cycle 1 .
 rewrite ! occurs_app. 
-unfold occurs0 at 2.
+unfold occurs at 2.
 rewrite orb_true_r. simpl . auto. congruence. 
 unfold star_opt at 3. 
 rewrite star_opt_occurs_true.
 all: cycle 1.
 rewrite ! occurs_app.
-unfold occurs0 at 4.
+unfold occurs at 4.
 rewrite orb_true_r at 1. 
 rewrite orb_true_r at 1. 
 rewrite orb_true_r at 1. 
@@ -655,13 +655,13 @@ simpl . auto.
 rewrite star_opt_occurs_true.
 congruence .
 rewrite ! occurs_app.
-unfold occurs0 at 2.
+unfold occurs at 2.
 rewrite orb_true_r at 1. 
 simpl . auto. congruence .
 rewrite (star_opt_occurs_true (App b_op (Ref 0))).
 all: cycle 1. 
 rewrite ! occurs_app.
-unfold occurs0 at 2.
+unfold occurs at 2.
 rewrite orb_true_r at 1. 
 simpl . auto. congruence .
 unfold star_opt at 3 4. 
@@ -679,12 +679,12 @@ rewrite star_opt_occurs_true.
 eapply2 matchfail_compound_l. 
 eapply2 matchfail_compound_r. 
 eapply2 matchfail_compound_r. 
-unfold_op; unfold star_opt. unfold occurs0. 
+unfold_op; unfold star_opt. unfold occurs. 
 rewrite ! orb_false_l.
 unfold_op; unfold subst, subst_rec. 
 eapply2 matchfail_compound_l.
 rewrite ! occurs_app. 
-unfold_op. unfold pred. unfold occurs0 at 1 2 3 4 5 6 7. simpl. auto. 
+unfold_op. unfold pred. unfold occurs at 1 2 3 4 5 6 7. simpl. auto. 
 rewrite star_opt_occurs_true. congruence . 
 simpl; auto. discriminate.
 Qed.
@@ -705,13 +705,13 @@ unfold ab_fn.
 rewrite star_opt_occurs_true.
 all: cycle 1 .
 rewrite ! occurs_app. 
-unfold occurs0 at 2.
+unfold occurs at 2.
 rewrite orb_true_r. simpl . auto. congruence. 
 unfold star_opt at 3. 
 rewrite star_opt_occurs_true.
 all: cycle 1.
 rewrite ! occurs_app.
-unfold occurs0 at 4.
+unfold occurs at 4.
 rewrite orb_true_r at 1. 
 rewrite orb_true_r at 1. 
 rewrite orb_true_r at 1. 
@@ -719,13 +719,13 @@ simpl . auto.
 rewrite star_opt_occurs_true.
 congruence .
 rewrite ! occurs_app.
-unfold occurs0 at 2.
+unfold occurs at 2.
 rewrite orb_true_r at 1. 
 simpl . auto. congruence .
 rewrite (star_opt_occurs_true (App b_op (Ref 0))).
 all: cycle 1. 
 rewrite ! occurs_app.
-unfold occurs0 at 2.
+unfold occurs at 2.
 rewrite orb_true_r at 1. 
 simpl . auto. congruence .
 unfold star_opt at 3 4. 
@@ -746,7 +746,7 @@ eapply2 matchfail_compound_r.
 cbv.  
 eapply2 matchfail_compound_l.
 rewrite ! occurs_app. 
-unfold_op. unfold pred. unfold occurs0 at 1 2 3 4 5 6 7. simpl. auto. 
+unfold_op. unfold pred. unfold occurs at 1 2 3 4 5 6 7. simpl. auto. 
 rewrite star_opt_occurs_true. congruence . 
 simpl; auto. discriminate.
 Qed.
@@ -765,12 +765,12 @@ rewrite H1.
 cbv; auto.  
 rewrite star_opt_occurs_true.
 2: rewrite ! occurs_app. 
-2: unfold occurs0 at 2 .
+2: unfold occurs at 2 .
 2: rewrite orb_true_r. 2: simpl; auto. 2: congruence. 
 unfold star_opt at 3. 
 rewrite (star_opt_occurs_true (App M _)). 
 2: rewrite ! occurs_app. 
-2: unfold occurs0 at 2.
+2: unfold occurs at 2.
 2: rewrite orb_true_r. 2: simpl; auto. 2: congruence. 
 unfold star_opt at 3 4. 
 rewrite occurs_closed . 2: auto. 
@@ -785,13 +785,13 @@ Lemma yk_not_a: forall k h, matchfail (app_comb (app_comb (omega_k k) (omega_k k
 Proof. 
 unfold ab_fn. 
 rewrite star_opt_occurs_true. 
-2: rewrite ! occurs_app.  2: unfold occurs0 at 2.
+2: rewrite ! occurs_app.  2: unfold occurs at 2.
 2: rewrite orb_true_r; simpl; auto. 
 2: discriminate. 
 unfold star_opt at 3.
 (* 1 *) 
 rewrite (star_opt_occurs_true (App b_op _)). 
-2: rewrite ! occurs_app.  2: unfold occurs0 at 2.
+2: rewrite ! occurs_app.  2: unfold occurs at 2.
 2: rewrite orb_true_r; simpl; auto. 
 2: discriminate. 
 unfold star_opt at 3 4.
@@ -799,8 +799,8 @@ rewrite occurs_closed.
 2: eapply2 b_op_closed.
 (* 1 *)  
 rewrite star_opt_occurs_true. 
-2: rewrite ! occurs_app.  2: unfold occurs0 at 4.
-2: replace (occurs0 (Op Node)) with false by auto. 
+2: rewrite ! occurs_app.  2: unfold occurs at 4.
+2: replace (occurs 0 (Op Node)) with false by auto. 
 2: rewrite ! orb_false_l. 2: simpl; auto. 
 2: congruence. 
 (* 1 *) 
@@ -811,7 +811,7 @@ rewrite (star_opt_occurs_true (Op Node)).
 2: cbv; auto. 2: congruence. 
 (* 1 *) 
 unfold_op; unfold star_opt at 3 4 5. 
-unfold occurs0.  rewrite orb_false_l.
+unfold occurs.  rewrite orb_false_l.
 (* 1 *) 
 rewrite (star_opt_occurs_false (App
                  (App (Op Node)
@@ -856,13 +856,13 @@ Lemma app_comb_not_a: forall M N, matchfail (app_comb M N) (ab_fn b_op).
 Proof. 
 unfold ab_fn. 
 rewrite star_opt_occurs_true. 
-2: rewrite ! occurs_app.  2: unfold occurs0 at 2.
+2: rewrite ! occurs_app.  2: unfold occurs at 2.
 2: rewrite orb_true_r; simpl; auto. 
 2: discriminate. 
 unfold star_opt at 3.
 (* 1 *) 
 rewrite (star_opt_occurs_true (App b_op _)). 
-2: rewrite ! occurs_app.  2: unfold occurs0 at 2.
+2: rewrite ! occurs_app.  2: unfold occurs at 2.
 2: rewrite orb_true_r; simpl; auto. 
 2: discriminate. 
 unfold star_opt at 3 4.
@@ -870,8 +870,8 @@ rewrite occurs_closed.
 2: eapply2 b_op_closed.
 (* 1 *)  
 rewrite star_opt_occurs_true. 
-2: rewrite ! occurs_app.  2: unfold occurs0 at 4.
-2: replace (occurs0 (Op Node)) with false by auto. 
+2: rewrite ! occurs_app.  2: unfold occurs at 4.
+2: replace (occurs 0 (Op Node)) with false by auto. 
 2: rewrite ! orb_false_l. 2: simpl; auto. 
 2: congruence. 
 (* 1 *) 
@@ -882,7 +882,7 @@ rewrite (star_opt_occurs_true (Op Node)).
 2: cbv; auto. 2: congruence. 
 (* 1 *) 
 unfold_op; unfold star_opt at 3 4 5. 
-unfold occurs0.  rewrite orb_false_l.
+unfold occurs.  rewrite orb_false_l.
 (* 1 *) 
 rewrite (star_opt_occurs_false (App
                  (App (Op Node)
