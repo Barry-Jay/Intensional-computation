@@ -39,8 +39,7 @@ Require Import IntensionalLib.Tree_calculus.Wait2.
 Require Import IntensionalLib.Tree_calculus.Abstraction.  
 Require Import IntensionalLib.Tree_calculus.Abstraction2.  
 
-Set
-Keep Proof Equalities.
+Set Keep Proof Equalities.
 
 
 
@@ -167,8 +166,26 @@ rewrite ! pattern_size_app_comb2.
 rewrite ! pattern_size_app_comb. 
 rewrite ! pattern_size_ref.
 rewrite pattern_size_closed. 
-cbv. auto. 
-rewrite A_k_closed. auto. 
+2: eapply2 A_k_closed.
+(* 2 *) 
+rewrite ! maxvar_ref. 
+rewrite maxvar_extension. 
+rewrite ! maxvar_app. 
+rewrite maxvar_ab_op. 
+rewrite pattern_size_ab1. 
+(* 2 *)  
+rewrite maxvar_extension.
+rewrite ! maxvar_app.
+rewrite ! pattern_size_app_comb. 
+rewrite ! pattern_size_ref.
+rewrite ! pattern_size_closed. 
+rewrite ! maxvar_app_comb. 
+rewrite ! maxvar_ref.
+rewrite ! A_k_closed .
+rewrite ! omega_k_closed. 
+simpl. auto.
+cbv; auto. 
+eapply2 omega_k_closed.  
 (* 1 *)  
 rewrite <- H at 1. clear H.  
 apply bind_normal_to_normal.
@@ -210,7 +227,34 @@ rewrite ! maxvar_app.
 rewrite maxvar_ab_op. 
 cbv. omega. 
 unfold_op; auto. 
-(* 1 *) 
+(* 1 *)  
+apply bind_normal_extension. 
+apply bn_app.
+apply bn_normal.
+eapply2 nf_active. 
+unfold ab_op. 
+repeat eapply2 star_opt_normal.
+eapply2 app_comb2_normal. 
+repeat eapply2 app_comb_normal. 
+eapply2 bn_normal.
+rewrite ! maxvar_app.
+rewrite maxvar_ab_op.
+cbv. omega.
+(* 1 *)  
+apply bind_normal_extension. 
+apply bn_app.
+apply bn_normal.
+eapply2 nf_active. 
+repeat eapply2 nf_compound.
+eapply2 bn_normal. 
+rewrite ! maxvar_app.
+rewrite ! maxvar_op.
+rewrite ! omega_k_closed. 
+rewrite A_k_closed. 
+simpl. omega.   
+(* 2 *) 
+apply bn_normal. 
+repeat eapply2 nf_compound.
 apply bn_app.
 apply bn_normal. 
 unfold ab_op. 
@@ -1264,6 +1308,19 @@ eapply2 matchfail_compound_l.
 eapply2 matchfail_compound_r.
 eapply2 matchfail_compound_r.
 eapply2 matchfail_compound_op.
+(* 1 *) 
+eapply transitive_red. 
+eapply2 extensions_by_matchfail. 
+unfold app_comb. 
+eapply2 matchfail_compound_l.
+eapply2 matchfail_compound_r.
+eapply2 matchfail_compound_r.
+eapply2 matchfail_compound_op.
+(* 1 *) 
+eapply transitive_red. 
+eapply2 extensions_by_matchfail. 
+unfold ab1. 
+eapply2 matchfail_compound_l.
 (* 1 *) 
 eapply transitive_red. 
 eapply2 extensions_by_matchfail. 

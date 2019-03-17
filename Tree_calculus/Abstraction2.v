@@ -650,7 +650,7 @@ assert(Nat.max
 assert(maxvar (Ref 2) >0) by (cbv; omega). 
 omega.  
 apply aux9.
-Qed. 
+Qed.
 
 
 

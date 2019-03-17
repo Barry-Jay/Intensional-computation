@@ -174,6 +174,132 @@ unfold lift; rewrite ! lift_rec_null.
   auto. 
 Qed.  
 
+Definition ab1 b' P := 
+  (App
+     (App (Op Node)
+        (App (Op Node)
+           (App
+              (App (Op Node)
+                 (App (Op Node)
+                    (App
+                       (App (Op Node)
+                          (App (Op Node)
+                             (App
+                                (App (Op Node)
+                                   (App (Op Node)
+                                      (App k_op
+                                         (App
+                                            (App (Op Node)
+                                               (App (Op Node) (Op Node)))
+                                            (App (Op Node) (Op Node))))))
+                                (App
+                                   (App (Op Node)
+                                      (App (Op Node)
+                                         (App
+                                            (App (Op Node)
+                                               (App (Op Node)
+                                                  (App (Op Node) (Op Node))))
+                                            (App k_op (Op Node)))))
+                                   (App k_op (Op Node))))))
+                       (App k_op (App (Op Node) (Op Node))))))
+              (App k_op
+                 (App (Op Node)
+                    (App (Op Node)
+                       (App (App (Op Node) (Op Node))
+                          (App
+                             (App (Op Node)
+                                (App (Op Node)
+                                   (App
+                                      (App (Op Node)
+                                         (App (Op Node) (Op Node)))
+                                      (App (Op Node) (Op Node)))))
+                             (App
+                                (App (Op Node)
+                                   (App (Op Node)
+                                      (App (App (Op Node) (Op Node)) P)))
+                                (App (App (Op Node) (Op Node))
+                                   (App
+                                      (App (Op Node)
+                                         (App (Op Node)
+                                            (App
+                                               (App (Op Node)
+                                                  (App (Op Node) (Op Node)))
+                                               (App (Op Node) (Op Node)))))
+                                      (App
+                                         (App (Op Node)
+                                            (App (Op Node)
+                                               (App (App (Op Node) (Op Node))
+                                                  b')))
+                                         (App (App (Op Node) (Op Node))
+                                            (A_k 3))))))))))))))
+     (star_opt
+        (App (Op Node)
+           (App (Op Node)
+              (App (App (Op Node) (App (Op Node) (Op Node)))
+                 (App (Op Node) (Op Node)))))))
+.
+
+Lemma a1_aux : forall b' P, maxvar b' = 0 -> sf_red (App (ab_op b') P) (ab1 b' P).
+Proof.
+intros. 
+unfold ab_op.
+eapply transitive_red. 
+eapply2 star_opt_beta.
+unfold subst; rewrite subst_rec_preserves_star_opt.
+rewrite subst_rec_preserves_app_comb2. 
+rewrite ! subst_rec_preserves_app_comb.
+rewrite ! subst_rec_ref. insert_Ref_out. 
+rewrite ! subst_rec_closed.
+2: rewrite H; auto. 
+2: rewrite A_k_closed; auto.  
+unfold app_comb2, flip.
+unfold app_comb at 1. 
+rewrite star_opt_occurs_true.
+all: cycle 1. 
+rewrite ! occurs_app. 
+replace (occurs 0 (Ref 0)) with true by auto. 
+rewrite orb_true_r at 1. 
+rewrite orb_true_r at 1. 
+rewrite orb_true_r at 1. 
+rewrite orb_true_r at 1. 
+rewrite orb_true_r at 1. 
+auto. 
+discriminate. 
+rewrite star_opt_occurs_true.
+all: cycle 1. 
+rewrite ! occurs_app. 
+replace (occurs 0 (Ref 0)) with true by auto. 
+rewrite orb_true_r at 1. 
+rewrite orb_true_r at 1. 
+rewrite orb_true_r at 1. 
+rewrite orb_true_r at 1. 
+auto. 
+discriminate.
+unfold_op; unfold star_opt at 1. 
+unfold occurs. 
+rewrite ! orb_false_l.
+unfold eqnat. 
+rewrite orb_true_l. 
+repeat eapply2 preserves_app_sf_red. 
+(* 1 *) 
+rewrite star_opt_occurs_false.
+all: cycle 1. 
+rewrite ! occurs_app.
+rewrite ! occurs_op. 
+rewrite occurs0_lift. 
+rewrite occurs_closed. auto. auto. 
+(* 1 *) 
+simpl. 
+repeat eapply2 preserves_app_sf_red. 
+(* 1 *) 
+unfold lift; rewrite subst_rec_lift_rec; try omega.
+rewrite lift_rec_null; auto.
+rewrite subst_rec_closed. 2: rewrite H; omega. 
+auto. 
+Qed. 
+
+
+
 Definition b_fn := 
 star_opt (star_opt (star_opt (
 extension (app_comb (app_comb (app_comb (app_comb (omega_k 4) (omega_k 4)) h_fn) (Ref 0)) (Ref 1))
@@ -188,13 +314,27 @@ extension (app_comb (app_comb (app_comb (omega_k 3) (omega_k 3)) (Ref 0)) (Ref 1
 extension (app_comb (Y_k 2) (Ref 0)) (* J *) 
           (Ref 2)  ( 
 extension (app_comb2 (app_comb (app_comb (A_k 3) (Ref 0)) (Ref 1)) (Ref 2))  (* A B' (Ref 1) (Ref 2) *) 
-                                       (* use (Ref 3) not (Ref 0) because ab_op binds three times *) 
+                                       (* use (Ref 3) not (Ref 1) because ab_op binds two times *) 
           (App (App (ab_op (Ref 3))
                     (App (App (App (Ref 5) (Ref 4)) (Ref 3)) (Ref 2))) 
-               (Ref 0))
+               (Ref 0)) (
                      (* abs_op, as defined below *) 
-i_op)))))))
+extension (ab1 (Ref 0) (Ref 1)) 
+          (App (App (App (App (Ref 4) (Ref 3)) (Ref 2)) (ab_op (Ref 2)))
+               (App (App (App (Ref 4) (Ref 3)) (Ref 2)) (Ref 1))) (
+                                       (* use (Ref 2) not (Ref 0) because ab_op binds two times *) 
+extension (app_comb a_op (app_comb (app_comb (app_comb (omega_k 4) (omega_k 4)) (Ref 0)) (Ref 1)))
+          (App 
+
+(App (App (App (Ref 4) (Ref 3)) (Ref 2)) 
+(app_comb (app_comb (app_comb (A_k 5) (omega_k 4)) (omega_k 4)) (Ref 0)))
+
+(App (App (App (Ref 4) (Ref 3)) (Ref 2)) 
+ (Ref 1)))
+             (* for compounds H x and B x *) 
+i_op)))))))))
 .
+
 
 Definition b_op := app_comb (Y_k 4) b_fn .
 
@@ -208,7 +348,6 @@ Proof.
 intros. unfold app_comb2. rewrite pattern_size_app_comb. 
 unfold flip. unfold_op. simpl. omega. 
 Qed. 
-
 
 Lemma maxvar_ab_fn: forall M, maxvar (ab_fn M) = pred (pred (pred (maxvar M))). 
 Proof. 
@@ -231,16 +370,32 @@ rewrite ! maxvar_ref.
 simpl. rewrite ! max_pred. simpl.  rewrite ! max_zero. auto. 
 Qed. 
 
+Lemma maxvar_ab1: forall b' P, maxvar (ab1 b' P) = max (maxvar P) (maxvar b').
+Proof.
+intros. unfold ab1. unfold_op. 
+rewrite ! maxvar_app.
+rewrite ! maxvar_op.  simpl. 
+rewrite ! max_zero.   auto. 
+Qed. 
+
+Lemma pattern_size_ab1: forall b' P, pattern_size (ab1 b' P) = pattern_size P + pattern_size b'.
+Proof.
+intros. cbv. fold plus. rewrite ! plus_0_r. auto.  
+Qed. 
+
+
 
 Lemma b_fn_closed: maxvar b_fn = 0.
 Proof.
 unfold b_fn. 
 rewrite ! maxvar_star_opt.
-rewrite ! maxvar_extension. 
+rewrite ! maxvar_extension.
+rewrite pattern_size_ab1.  
 rewrite pattern_size_app_comb2. 
 rewrite ! pattern_size_app_comb. 
 rewrite ! pattern_size_ref. 
 rewrite ! pattern_size_closed.
+2: cbv; auto. 
 2: eapply2 A_k_closed.
 2: eapply2 Y_k_closed. 
 2: eapply2 omega_k_closed. 
