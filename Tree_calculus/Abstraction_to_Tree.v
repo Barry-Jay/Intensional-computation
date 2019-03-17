@@ -42,6 +42,8 @@ Require Import IntensionalLib.Tree_calculus.Abstraction.
 Require Import IntensionalLib.Tree_calculus.Abstraction2.  
 Require Import IntensionalLib.Tree_calculus.Abstraction2a.  
 Require Import IntensionalLib.Tree_calculus.Abstraction3.  
+Require Import IntensionalLib.Tree_calculus.Abstraction4.  
+
 
 
 Definition op_to_tree o := 
@@ -53,7 +55,7 @@ match o with
 | Iop => i_op 
 | Bop => b_op
 end.
-
+ 
 
 Fixpoint abs_to_tree M := 
 match M with 
@@ -68,47 +70,30 @@ intros M N r; induction r; intros;
 unfold abs_to_tree; fold abs_to_tree; unfold op_to_tree. 
 (* 14 *) 
 auto. 
-(* 13 *)  
 eapply2 j_red. 
-(* 12 *) 
 eapply2 r_red. 
-(* 11 *) 
 eapply2 h_red. 
-(* 10 *) 
 eapply2 abs_red.
-(* 9 *) 
 unfold_op. repeat eval_tac. 
-(* 8 *) 
 eapply2 b_j_red.
-(* 7 *) 
 eapply2 b_r_red. 
-(* 6 *) 
 eapply2 b_h_red.
-(* 5 *) 
 eapply2 b_a_red. 
-all: cycle 1. 
-(* 5 *) 
 eapply2 b_i_red.
-(* 4 *) 
 eapply2 b_b_red.
-(* 3 *) 
-all: cycle 1. 
-
-
-problems with atoms, compounds and abs_op. 
-
-
-gen_case H o. 
-(* 8 *) 
+(* 2 *) 
+generalize H; case o; intro. 
 congruence. 
-(* 7 *) 
-
-
-
-
-discriminate. 
-
-eapply2 zero_red.     
- 
- 
-
+eapply2 b_r_op_red.
+eapply2 b_h_op_red. 
+eapply2 b_abs_op_red. 
+eapply2 b_i_op_red. 
+eapply2 b_b_op_red. 
+(* 1 *)  
+inversion H; subst; unfold abs_to_tree; fold abs_to_tree; 
+unfold op_to_tree; subst.
+eapply2 b_h1_red.
+eapply2 b_a1_red.
+eapply2 b_b1_red.
+Qed. 
+  
