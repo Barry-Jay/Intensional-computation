@@ -211,7 +211,28 @@ rewrite subst_rec_lift_rec; try omega.  rewrite lift_rec_null. unfold Y_k. auto.
 Qed. 
 
 Lemma omega_3_not_omega_2: omega_k 3 <> omega_k 2. 
-Proof. unfold omega_k; intro H. discriminate. Qed. 
+Proof. 
+unfold omega_k.
+rewrite ! (star_opt_occurs_true (Ref 0)). 2: cbv; auto. 2: discriminate. 
+2: cbv; auto. 2: discriminate.
+unfold app_comb at 1 4. 
+rewrite ! (star_opt_occurs_true (App (Op Node) (App (Op Node) i_op))). 
+2: cbv; auto. 2: discriminate. 
+2: cbv; auto. 2: discriminate.
+rewrite ! (star_opt_occurs_true (App (Op Node) (App (Op Node) (App k_op (Ref 0))))). 
+2: cbv; auto. 2: discriminate. 
+2: cbv; auto. 2: discriminate.
+rewrite ! (star_opt_occurs_false (App k_op _)). 
+2: cbv; auto. 2: cbv; auto. 
+rewrite ! subst_rec_app. 
+rewrite ! subst_rec_preserves_app_comb. 
+rewrite ! subst_rec_ref.  insert_Ref_out. unfold pred. 
+rewrite ! (star_opt_occurs_true (App (Op _) _)). 
+2: cbv; auto. 2: discriminate. 
+2: cbv; auto. 2: discriminate.
+intro H. inversion H; subst. 
+Qed. 
+
 
 
 Lemma Y_k_program: forall k, k<5 -> program (Y_k k).
@@ -242,7 +263,7 @@ eapply transitive_red. eapply preserves_app_sf_red. eapply preserves_app_sf_red.
 eapply2 app_comb_red. auto. auto. 
 unfold A_k; fold A_k.
 eapply transitive_red. eapply preserves_app_sf_red. eapply preserves_app_sf_red. 
-eapply2 star_beta2. auto. auto. 
+eapply2 star_opt_beta2. auto. auto. 
 unfold subst; rewrite ! subst_rec_preserves_app_comb. 
 rewrite ! subst_rec_ref. insert_Ref_out. 
 rewrite ! subst_rec_ref. insert_Ref_out. 
