@@ -159,7 +159,6 @@ sf_red1 (left_component M) (left_component N) /\
 sf_red1(right_component M) (right_component N). 
 Proof. 
 induction M; split_all; inv1 compound; subst; inv sf_red1.
-case o; auto. case o; auto. 
  Qed. 
 
 Hint Resolve preserves_compound_sf_red1 .
@@ -224,7 +223,6 @@ inversion H; clear H; subst; inv sf_red1; inv sf_red1; eauto.
 elim(IHOR1 M'0); elim(IHOR2 N'0); split_all; 
 inversion H; inversion H0; eauto.
 (* 6 *)
-case o; case o0.
 elim(IHOR1 (App (App (Op Node) (App (Op Node) M'0)) N'0)); 
 elim(IHOR2 P'); split_all;
 inversion H; inversion H0; eauto; split_all. inv sf_red1. 
@@ -232,36 +230,30 @@ invsub. exist(App (App N'2 x) (App N'5 x)).
 (* 5 *) 
 elim (IHOR1 (App (App (Op Node) (Op o)) P)); split_all. 
 inversion H. inv sf_red1. invsub. exist N'1.
-case o1; case o0. auto.  
 (* 4 *) 
 elim (IHOR1 (App (App (Op Node) (App (App (Op Node) P') Q')) N'1)); 
 elim (IHOR2 N'0); 
 split_all;  inversion H; inversion H0; eauto. 
 inv sf_red1.  invsub. 
 exist(App (App x N'7) N'6). 
-case o0; case o; split; auto.
 (* 3 *)  
 inversion H; subst. clear H. inv sf_red1. 
 elim(IHOR1 N'3); elim(IHOR2 N'1); elim(IHOR3 N'0); split_all. 
 inversion H; inversion H0; inversion H1. 
 exist (App (App x0 x) (App x1 x)).
-split; auto.
-case o0; case o. auto.   
 elim(IHOR1 M'0); elim(IHOR2 N'0); elim(IHOR3 P'0); split_all. 
 inversion H0; inversion H1; inversion H2. 
 exist (App (App x0 x) (App x1 x)).
 (* 2 *) 
 inversion H; subst. clear H. inv sf_red1. 
 elim(IHOR N'0); split_all. inversion H. 
-case o0; case o1.
 exist x.
 elim(IHOR P); split_all.  
 (* 1 *)  
 inversion H; subst; clear H; inv sf_red1. 
 elim(IHOR1 N'4); elim(IHOR2 N'3); elim(IHOR3 N'0); split_all. 
 inversion H; inversion H0; inversion H1. 
-exist(App (App x x1) x0). split; auto.
-case o0; case o; auto.  
+exist(App (App x x1) x0). 
 elim(IHOR1 P'0); elim(IHOR2 Q'0); elim(IHOR3 N'0); split_all. 
 inversion H; inversion H0; inversion H1. 
 exist(App (App x x1) x0). 

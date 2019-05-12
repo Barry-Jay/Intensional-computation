@@ -19,7 +19,7 @@
 (*                                                                    *)
 (*                     Barry Jay                                      *)
 (*                                                                    *)
-(* adapted from Substitution.v of Project Coq  to act on Tree-terms     *)
+(* adapted from Substitution.v of Project Coq  to act on Tree-terms   *)
 (**********************************************************************)
 
 Require Import Arith Omega List.
@@ -269,7 +269,6 @@ Lemma lift_rec_reflects_compound : forall M n k, compound (lift_rec M n k) -> co
 Proof. 
 induction M; split_all; inversion H; subst; split_all. 
 gen_case H1 M1; try discriminate.  invsub.
-case o; auto.  
 gen_case H1 M1; try discriminate. inversion H1. 
 gen_case H2 t; try discriminate. case o; auto. 
 Qed. 

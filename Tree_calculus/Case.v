@@ -676,13 +676,13 @@ rewrite orb_false_iff in H. inversion H.
 inversion H0; subst. 
 gen2_case H1 H4 M1.  gen2_case H1 H4 n. discriminate. 
 generalize H4; insert_Ref_out; intro. discriminate. 
-inversion H4; subst; auto. case o; auto.   discriminate.
+inversion H4; subst; auto.  discriminate.
 gen2_case H1 H4 M1.  gen2_case H1 H4 n. discriminate. 
 generalize H4; insert_Ref_out; intro. discriminate. 
 discriminate.  
 gen2_case H1 H4 t.  gen2_case H1 H4 n. discriminate. 
 generalize H4; insert_Ref_out; intro. discriminate. 
-inversion H4; subst; auto. case o; auto.   discriminate.
+inversion H4; subst; auto.   discriminate.
 Qed. 
 
 

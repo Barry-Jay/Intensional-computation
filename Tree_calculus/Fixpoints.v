@@ -43,10 +43,204 @@ Require Import IntensionalLib.Tree_calculus.Tree_Eval.
 Require Import IntensionalLib.Tree_calculus.Star.  
 Require Import IntensionalLib.Tree_calculus.Wait.  
 
+Lemma eqnat_equal: forall n k,  eqnat n k >0 -> n = k.
+Proof. induction n; split_all; gen_case H k;   omega. Qed.
+
+Lemma occurs_implies_mono:
+  forall k M, occurs k M >0 -> forall N1 N2,  subst_rec M N1 k = subst_rec M N2 k -> N1 = N2.
+Proof.
+  induction M; split_all.
+  assert(n=k) by eapply2 eqnat_equal. subst. 
+  generalize H0; clear H0; insert_Ref_out.
+  unfold lift. generalize N1 N2; clear; induction N1; split_all.
+  gen_case H0 N2. 
+  assert(n = n0) by (inversion H0; subst; eapply relocate_mono; eauto).
+  congruence.
+  all: try discriminate.
+  gen_case H0 N2. 
+  all: try discriminate.
+  gen_case H0 N2;  try discriminate.
+inversion H0; subst. rewrite (IHN1_1 t); auto. rewrite (IHN1_2 t0); auto. 
+omega. 
+inversion H0.
+assert(occurs k M1 >0 \/ occurs k M2 >0) by omega. 
+inversion H1. eapply2 IHM1. eapply2 IHM2. 
+Qed.
+
+Lemma occurs_subst: forall M k, occurs k (subst_rec M (Op Node) 0) = occurs (S k) M.
+Proof. induction M; split_all; subst_tac. case n; split_all.  Qed. 
+
+
+Lemma star_opt_mono:
+  forall M, occurs 1 M >0 -> forall N1 N2,  subst (star_opt M) N1 = subst (star_opt M) N2 -> N1 = N2.
+Proof.
+  induction M; intros. 
+  gen2_case H H0 n.   omega. 
+  gen2_case H H0 n0. 
+  unfold subst in *; simpl in *; inversion H0. 
+  generalize H2; insert_Ref_out; unfold lift; rewrite ! lift_rec_null; auto. 
+  omega.
+  simpl in *. omega.
+  (* 1 *)
+  assert(occurs 0 M1 >0 \/ occurs 0 M1 = 0) by omega.
+  inversion H1. 
+  unfold star_opt in H0.
+  replace (occurs 0 M1) with (S (pred (occurs 0 M1))) in H0 by omega.
+  fold star_opt in *.
+  unfold subst in H0; simpl in H0. inversion H0. 
+  simpl in H. 
+  assert(occurs 1 M1 >0 \/ occurs 1 M2 >0) by omega.
+  inversion H3.  eapply2 IHM1. eapply2 IHM2. 
+  (* 1 *)
+  assert(star_opt M1 = App k_op (subst M1 (Op Node))). 
+  eapply2 star_opt_occurs_false. 
+  rewrite H3 in *. 
+  assert(M2 = Ref 0 \/ M2 <> Ref 0) by repeat decide equality.
+  inversion H4; subst.
+  assert( star_opt (App M1 (Ref 0)) = subst M1 (Op Node)).
+  unfold star_opt. rewrite H2. auto. 
+  rewrite H5 in *.
+  unfold subst in *. eapply2 (occurs_implies_mono 0 (subst_rec M1 (Op Node) 0)). 
+  simpl in H.   assert(occurs 1 M1 >0) by omega.
+  generalize H6; clear. induction M1; split_all.
+  assert(n = 1) by eapply2 eqnat_equal.   subst. 
+  insert_Ref_out.   simpl. omega.
+  assert(occurs 1 M1_1 >0 \/ occurs 1 M1_2 >0) by omega.
+  inversion H.   
+  assert(occurs 0 (subst_rec M1_1 (Op Node) 0) >0) . eapply2 IHM1_1.   omega.
+  assert(occurs 0 (subst_rec M1_2 (Op Node) 0) >0) . eapply2 IHM1_2.   omega.
+  (* 1  M2 <> Ref 0 *)
+  assert(occurs 0 M2 > 0 \/ occurs 0 M2 = 0) by omega.
+  inversion H6.  
+  assert(star_opt (App M1 M2) = App (App (Op Node) (App (Op Node) (star_opt M2))) (star_opt M1)).
+  unfold star_opt at 1.   rewrite H2. fold star_opt. 
+  assert (match M2 with
+  | Ref 0 => subst M1 (Op Node)
+  | _ =>
+      match occurs 0 M2 with
+      | 0 => App k_op (subst (App M1 M2) (Op Node))
+      | S _ => App (App (Op Node) (App (Op Node) (star_opt M2))) (star_opt M1)
+      end
+  end = match occurs 0 M2 with
+      | 0 => App k_op (subst (App M1 M2) (Op Node))
+      | S _ => App (App (Op Node) (App (Op Node) (star_opt M2))) (star_opt M1)
+        end).
+gen_case H5 M2.   
+gen_case H5 n. 
+congruence.       
+rewrite H8. clear H8. 
+replace (occurs 0 M2) with (S (pred (occurs 0 M2))) by omega.
+auto.
+rewrite H8 in *.
+generalize H0; clear H0. subst_tac. intro H0; inversion H0; subst.
+simpl in H.
+assert(occurs 1 M1 >0 \/ occurs 1 M2 >0) by omega.
+inversion H9. eapply2 IHM1. rewrite H3 in *. auto. eapply2 IHM2.
+(* 1 *)
+rewrite star_opt_occurs_false in H0. 2: simpl; omega.
+eapply (occurs_implies_mono 0 (App k_op (subst_rec (App M1 M2) (Op Node) 0))).
+rewrite occurs_app. replace (occurs 0 k_op) with 0 by (unfold_op; simpl; auto).
+unfold plus.
+rewrite occurs_subst.  auto. 
+unfold subst in *. auto.
+Qed.
+
+(* Waiting revisited *)
+
+
+Lemma A_k_alt :
+  forall k,  subst (star_opt (star_opt (app_comb (Ref 2) (app_comb (Ref 1) (Ref 0)))))
+                   (A_k (S (S k))) = A_k (S(S(S k)))
+. 
+Proof.
+  intros; unfold A_k; fold A_k. case k. 
+  unfold subst; rewrite ! subst_rec_preserves_star_opt. 
+  rewrite ! subst_rec_preserves_app_comb. subst_tac.   
+  unfold lift; rewrite lift_rec_closed. auto. 
+  cbv; auto. 
+  intro; case n. 
+  unfold subst; rewrite ! subst_rec_preserves_star_opt. 
+  rewrite ! subst_rec_preserves_app_comb. subst_tac.   
+  unfold lift; rewrite lift_rec_closed. auto. 
+  cbv; auto. 
+  intro. 
+  unfold subst; rewrite ! subst_rec_preserves_star_opt. 
+  rewrite ! subst_rec_preserves_app_comb. subst_tac.   
+  unfold lift; rewrite lift_rec_closed. auto.
+  rewrite ! maxvar_star_opt. 
+  rewrite maxvar_app_comb.
+  rewrite ! maxvar_star_opt. 
+  rewrite maxvar_app_comb.
+  rewrite A_k_closed. cbv; auto. 
+Qed.
+
+Lemma A_k_mono:
+  forall k1 k2,  A_k (S (S (S k1))) = A_k (S (S (S k2))) -> k1 = k2 \/ (k1 <=2 /\ k2 <= 2).
+Proof.
+  induction k1; induction k2;  rewrite <- ! A_k_alt.
+  (* 4 *)
+  auto.
+  (* 3 *)
+  intro. assert(A_k 2 = subst (star_opt (star_opt (app_comb (Ref 2) (app_comb (Ref 1) (Ref 0))))) (A_k (S (S k2)))). 
+ eapply2 star_opt_mono.  cbv.   auto. 
+ generalize H0; clear. 
+ unfold A_k at 1.  case k2. auto. 
+ intro . unfold a_op.
+ unfold app_comb, star_opt, occurs, eqnat. fold star_opt. 
+
+
+ 
+      unfold A_k; intros.
+  generalize H; clear H; case k1. case k2. auto. intro n. 
+  case n. 
+  (* 3 *)
+  replace (star_opt
+    (star_opt
+       (app_comb (star_opt (star_opt (app_comb a_op (app_comb (Ref 1) (Ref 0)))))
+                 (app_comb (Ref 1) (Ref 0)))))
+    with (subst (star_opt
+    (star_opt
+       (app_comb (Ref 2)
+                 (app_comb (Ref 1) (Ref 0)))))
+                (star_opt (star_opt (app_comb a_op (app_comb (Ref 1) (Ref 0)))))).
+  replace (star_opt (star_opt (app_comb a_op (app_comb (Ref 1) (Ref 0))))) with
+      (subst (star_opt (star_opt (app_comb (Ref 2) (app_comb (Ref 1) (Ref 0))))) a_op).
+  intro.
+  assert(a_op=   (subst (star_opt (star_opt (app_comb (Ref 2) (app_comb (Ref 1) (Ref 0))))) a_op)).
+  eapply star_opt_mono.
+  2: eexact H.   cbv; auto.
+  generalize H0; clear.
+  unfold a_op.
+  unfold app_comb, star_opt, occurs, eqnat; unfold_op.
+  unfold subst; rewrite ! subst_rec_app. rewrite ! subst_rec_op. rewrite ! subst_rec_ref. 
+  insert_Ref_out. unfold pred, plus; fold plus. subst_tac.   subst_tac.
+  intro. discriminate. 
+  unfold subst. rewrite ! subst_rec_preserves_star_opt.
+  rewrite ! subst_rec_preserves_app_comb.
+  subst_tac. 
+  unfold lift; rewrite lift_rec_closed. 2: cbv; auto. auto. 
+  unfold subst. rewrite ! subst_rec_preserves_star_opt.
+  rewrite ! subst_rec_preserves_app_comb.
+  subst_tac. 
+  unfold lift; rewrite lift_rec_closed. 2: cbv; auto. auto. 
+  (* 2 *)
+  intro; case n0. 
+  
+
+
+  unfold app_comb; unfold_op.   unfold star_opt at 2; unfold occurs; unfold_op.
+  unfold plus. fold plus. unfold eqnat. unfold plus.
+  unfold subst; rewrite ! subst_rec_app. rewrite ! subst_rec_op. rewrite ! subst_rec_ref. 
+  insert_Ref_out. unfold pred. 
+  
+  subst_tac.
+
+  rewrite star_opt_occurs_true. 2: cbv; auto. 2: discriminate. star_opt, occurs in H0. fold star_opt in H0.
+  gen_case H k1. 
 
 (* fixpoints that wait *) 
 
-(* delete ? 
+
 
 (* Y2 *) 
 
@@ -154,7 +348,7 @@ auto. auto.
 eapply transitive_red. eapply preserves_app_sf_red. eapply2 omega3_omega3. auto. auto. 
 Qed. 
 
-*) 
+
 
 Definition omega_k k := 
 star_opt(star_opt (App (Ref 0) (app_comb (app_comb (app_comb (A_k (S k)) (Ref 1)) (Ref 1)) 
@@ -183,7 +377,8 @@ Hint Resolve A_k_closed A_k_normal omega_k_normal.
 
 Lemma omega_k_closed: forall k, maxvar(omega_k k) = 0. 
 Proof. 
-induction k; split_all. 
+induction k; intros. 
+cbv; auto.
 unfold omega_k; fold omega_k. 
 rewrite ! maxvar_star_opt. 
 rewrite maxvar_app. 
@@ -210,8 +405,28 @@ unfold lift. rewrite ! lift_rec_null.
 rewrite subst_rec_lift_rec; try omega.  rewrite lift_rec_null. unfold Y_k. auto. 
 Qed. 
 
+
+
+
+Lemma omega_k_alt:
+  forall k,
+    subst (star_opt
+             (star_opt (App (Ref 0) (app_comb (app_comb (app_comb (Ref 2) (Ref 1)) (Ref 1)) (Ref 0)))))
+             (A_k (S k)) =
+    (omega_k k).
+Proof.
+  intros. unfold subst; rewrite ! subst_rec_preserves_star_opt. subst_tac.
+  rewrite ! subst_rec_preserves_app_comb. repeat subst_tac.
+  unfold lift; rewrite lift_rec_closed. unfold omega_k. congruence. apply A_k_closed.
+Qed.
+
+
 Lemma omega_3_not_omega_2: omega_k 3 <> omega_k 2. 
-Proof. 
+Proof.
+  rewrite <- ! omega_k_alt. intro.
+  assert(A_k 4 = A_k 3). eapply star_opt_mono.
+  2: eexact H.   cbv; auto. 
+  
 unfold omega_k.
 rewrite ! (star_opt_occurs_true (Ref 0)). 2: cbv; auto. 2: discriminate. 
 2: cbv; auto. 2: discriminate.

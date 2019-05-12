@@ -412,7 +412,7 @@ Proof. cbv. auto. Qed.
 
 Lemma b_fn_size : size b_fn >50 . 
 Proof.
-unfold b_fn.
+unfold b_fn. 
 assert(forall M, size M + 1  >= 52 -> size M > 50). 
 split_all; omega. 
 apply H. clear H. 
@@ -438,36 +438,10 @@ assert(forall m, 45 <= m -> 54 <= S(S(S(S(S(S(S(S(S m))))))))) by (intros; omega
 assert(45 <= (size
      (app_comb (app_comb (app_comb (A_k 5) (omega_k 4)) (omega_k 4)) (Ref 0)))). 
 2: omega.
-unfold app_comb. rewrite ! size_app.
-replace (size (Op Node)) with 1 by auto. 
-unfold_op. unfold size at 1 2 3 4 5.  unfold size at 1 3 4 5 7.
-assert(size (A_k 5) >= 5). 
-2: omega.
-unfold A_k.
-
-assert(forall M, size (star M) >= size M + 1). 
-induction M; split_all.
-case n; split_all. 
-omega. 
-eapply le_trans. 2: eapply2 H0. 
-assert(4 <= size
-  (star
-     (app_comb
-        (star
-           (star
-              (app_comb
-                 (star (star (app_comb a_op (app_comb (Ref 1) (Ref 0)))))
-                 (app_comb (Ref 1) (Ref 0))))) (app_comb (Ref 1) (Ref 0))))). 
-2: omega. 
-eapply le_trans. 2: eapply2 H0. 
-unfold app_comb. 
-rewrite ! size_app.
-replace (size (Op Node)) with 1 by auto. 
-omega.
+cbv. omega. 
 Qed. 
  
  
-
 Lemma b_not_h: b_fn <> h_fn.
 Proof. 
 intro. 

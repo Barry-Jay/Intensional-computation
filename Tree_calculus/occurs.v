@@ -318,14 +318,155 @@ Proof. intros. intro. inversion H0. eapply2 H. Qed.
 Lemma app_comb_vs_I : forall M N, matchfail (app_comb M N) i_op. 
 Proof. intros. unfold_op. eapply2 matchfail_compound_l. Qed. 
 
+Lemma star_opt_app_comb1:
+  forall M N, maxvar M = 0 -> occurs 0 N = true -> 
+              star_opt (app_comb M  N) =
+              App
+    (App (Op Node)
+       (App (Op Node)
+          (App (App (Op Node) (App (Op Node) (App k_op (App k_op M))))
+             (App
+                (App (Op Node)
+                   (App (Op Node)
+                      (App (App (Op Node) (App (Op Node) (star_opt (App k_op N))))
+                         (App k_op (Op Node))))) (App k_op (Op Node))))))
+    (App k_op (App (Op Node) (App (Op Node) i_op))).
+Proof.
+  intros.
+  unfold app_comb. 
+  rewrite star_opt_occurs_true. 
+  2: simpl; rewrite H0; auto. 2: congruence. 
+  rewrite star_opt_occurs_true. 
+  2: simpl; rewrite H0; auto. 2: congruence. 
+  rewrite star_opt_closed. 
+  2: cbv; auto.
+  rewrite star_opt_occurs_true. 
+  2: simpl; rewrite H0; auto. 2: congruence. 
+  rewrite star_opt_occurs_true. 
+  2: simpl; rewrite H0; auto. 2: congruence. 
+  rewrite (star_opt_closed  (App (Op Node) (App (Op Node) i_op))).
+  2: cbv; auto.
+  rewrite ! (star_opt_closed (Op Node)).
+  2: cbv; auto. auto. 
+Qed.
+
+
+
+Lemma subst_star_opt:
+  forall M N1 N2,  occurs 1 M = true -> subst(star_opt M) N1 = subst(star_opt M) N2 -> N1 = N2. 
+Proof.
+  induction M; split_all.
+  gen2_case H H0 n.   discriminate.
+  gen2_case H H0 n0. 
+  unfold subst in *; simpl in *. inversion H0. generalize H2; insert_Ref_out; auto.
+  unfold lift; rewrite ! lift_rec_null; auto.
+  discriminate.
+  (* 1 *)
+gen2_case IHM1 H (occurs 1 M1). 
+gen2_case IHM1 H (occurs 1 M1). 
+
+  unfold eqnat in *. 
+  
+Lemma size_subst_star_opt : forall M N,  size (subst (star_opt M) N) = size M + size N.
+Proof.
+  intros. unfold subst; rewrite subst_rec_preserves_star_opt. 
+  induction M; intros; auto. 
+case n; intros; simpl; auto. 
+
+
+
+  Lemma A_k_size :
+  forall k, size (A_k (S (S (S k)))) =
+            size (star_opt (star_opt (app_comb (Ref 2) (app_comb (Ref 1) (Ref 0))))) +
+            size (A_k (S (S k)))
+.
+Proof.
+  intros. rewrite <- A_k_alt at 1. 
+
+
+       cbv. 
+
+  
+  forall k, A_k (S (S (S k))) = k_op.
+Proof.
+  intros. rewrite <- A_k_alt.
+  unfold app_comb; unfold_op.
+  unfold star_opt at 2. unfold_op; unfold occurs; fold occurs.
+  rewrite ! orb_false_l. unfold eqnat; fold eqnat.
+  rewrite ! orb_true_l.
+  unfold subst; rewrite ! subst_rec_preserves_star_opt. subst_tac. subst_tac. 
+
+  simpl. 
+  ; fold star_opt. unfold_op. 
+
+
+Lemma size_A_k : forall k,  size (A_k (S(S(S k)))) = size (A_k (S(S k))) + 142.
+Proof.
+  intros. unfold A_k; fold A_k. case k.
+  (* 2 *)
+  cbv; auto. intro. case n. cbv. auto. intro. unfold plus. intro.
+
+ *)
+
 
 Lemma  A_k_vs_A_k_3: forall k n, A_k (S (S (S k))) <> A_k (S (S (S (S k)) +n)). 
 Proof. 
 induction k; intros. 
 (* 2 *) 
-discriminate.
-(* 1 *) 
-unfold A_k; fold A_k.
+unfold A_k; fold A_k. unfold plus.
+rewrite ! star_opt_app_comb.
+2: apply A_k_closed.
+2: cbv; auto. 2: cbv; auto. 2: cbv; auto.
+rewrite ! (star_opt_occurs_true k_op).
+2: cbv; auto. 2: discriminate.
+
+rewrite ! star_opt_app_comb.
+2: cbv; auto. 2: cbv; auto. 2: cbv; auto.
+
+
+2: cbv; auto. 2: cbv; auto.
+
+
+
+
+intro. inversion H; subst. 
+assert(
+
+unfold app_comb at 1. 
+rewrite star_opt_occurs_true. 
+rewrite (star_opt_occurs_true (App (Op Node) (App (Op Node) (App k_op (app_comb (Ref 1) (Ref 0)))))).
+2: cbv; auto.  2: congruence. 
+2: cbv; auto. 2: congruence.
+rewrite star_opt_occurs_true. 
+2: cbv; auto.  2: simpl; congruence.
+rewrite (star_opt_closed (App (Op Node) (App (Op Node) i_op))).
+2: cbv; auto.
+rewrite (star_opt_closed (App k_op (App (Op Node) (App (Op Node) i_op)))).
+2: cbv; auto.
+rewrite star_opt_occurs_true. 
+2: cbv; auto. 
+2: congruence.
+rewrite (star_opt_closed (App k_op a_op)). 
+2: cbv; auto.
+rewrite star_opt_closed.
+unfold app_comb at 1.
+
+
+unfold star_opt at 1.
+2: cbv; auto. 
+unfold_op. 
+
+unfold app_comb at 2.
+
+
+
+
+
+at 2. 
+unfold star_opt at 1 2. 
+
+
+
 repeat eapply2 star_mono2.
 eapply2 app_comb_mono2.
 Qed. 

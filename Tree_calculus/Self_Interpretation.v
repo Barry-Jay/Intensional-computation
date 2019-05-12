@@ -17,7 +17,7 @@
 
 (**********************************************************************)
 (*                Self_Interpretation.v                               *)
-(*                                                                    *)
+(*                                                                b    *)
 (*                     Barry Jay                                      *)
 (*                                                                    *)
 (**********************************************************************)
@@ -26,20 +26,22 @@
 Require Import Omega Max Bool List.
 Require Import IntensionalLib.SF_calculus.Test.  
 Require Import IntensionalLib.SF_calculus.General.  
-Require Import IntensionalLib.Wave_as_SF.SF_Terms.  
-Require Import IntensionalLib.Wave_as_SF.SF_Tactics.  
-Require Import IntensionalLib.Wave_as_SF.SF_reduction.  
-Require Import IntensionalLib.Wave_as_SF.SF_Normal.  
-Require Import IntensionalLib.Wave_as_SF.SF_Closed.  
-Require Import IntensionalLib.Wave_as_SF.Substitution.  
-Require Import IntensionalLib.Wave_as_SF.SF_Eval.  
-Require Import IntensionalLib.Wave_as_SF.Star.  
-Require Import IntensionalLib.Wave_as_SF.Wait.  
-Require Import IntensionalLib.Wave_as_SF.Fixpoints.  
-Require Import IntensionalLib.Wave_as_SF.Wave_Factor.  
-Require Import IntensionalLib.Wave_as_SF.Wave_Factor2.  
-Require Import IntensionalLib.Wave_as_SF.Equal.  
-Require Import IntensionalLib.Wave_as_SF.Extensions.  
+Require Import IntensionalLib.Tree_calculus.Tree_Terms.  
+Require Import IntensionalLib.Tree_calculus.Tree_Tactics.  
+Require Import IntensionalLib.Tree_calculus.Tree_reduction.  
+Require Import IntensionalLib.Tree_calculus.Tree_Normal.  
+Require Import IntensionalLib.Tree_calculus.Tree_Closed.  
+Require Import IntensionalLib.Tree_calculus.Substitution.  
+Require Import IntensionalLib.Tree_calculus.Tree_Eval.  
+Require Import IntensionalLib.Tree_calculus.Star.  
+Require Import IntensionalLib.Tree_calculus.Wait.  
+Require Import IntensionalLib.Tree_calculus.Fixpoints.  
+Require Import IntensionalLib.Tree_calculus.Wave_Factor.  
+Require Import IntensionalLib.Tree_calculus.Wave_Factor2.  
+Require Import IntensionalLib.Tree_calculus.Equal.  
+Require Import IntensionalLib.Tree_calculus.Case.  
+Require Import IntensionalLib.Tree_calculus.Extensions.  
+Require Import IntensionalLib.Tree_calculus.Wait2.  
 
 (* 
 
@@ -79,7 +81,6 @@ Qed.
 
 Definition eager_app p a:= App (App (Y3 eval_fn) a) p. (* the argument have been swapped *) 
 
-
 Lemma eager_kernel : forall x y, sf_red (eager_app (App k_op x) y) x.
 Proof. 
 intros. unfold eager_app. 
@@ -115,6 +116,9 @@ unfold factorable. right. auto. congruence.
 (* 1 *)  
 eapply transitive_red. 
 eapply2 extensions_by_matching.
+Check match_app.
+
+
 eapply2 match_app.  
 unfold subst.
 rewrite ! app_nil_r.
@@ -283,10 +287,10 @@ auto.
 Qed.
 
 
-(* stick with small step semantics 
+(* stick with small step semantics *) 
 
 
-Inductive eager : SF -> SF -> SF -> Prop := 
+Inductive eager : Tree -> Tree -> Tree -> Prop := 
 | eag_kernel : forall M, eager (Op Node) M (App (Op Node) M)
 | eag_stem : forall M N, eager (App (Op Node) M) N (App (App (Op Node) M) N) 
 | eag_fork_kernel : forall M N, eager (App (App (Op Node) (Op Node)) M) N M
