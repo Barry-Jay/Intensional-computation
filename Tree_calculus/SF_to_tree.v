@@ -71,7 +71,7 @@ Qed.
 Definition trans_F0 := 
 extension  (A31 (Ref 0)) k_op (
 extension (A33 (Ref 0) (Ref 1) (Ref 2)) (App k_op (star_opt (App (App (Ref 0) (App (A31 (Ref 1)) (Ref 2))) (Ref 3)))) (
-extension (A32 (Ref 0) (Ref 1)) (App k_op (star_opt (App (App (Ref 0) (App (A_k 3) (Ref 1))) (Ref 2)))) (
+extension (A32 (Ref 0) (Ref 1)) (App k_op (star_opt (App (App (Ref 0) (App (A_k 1) (Ref 1))) (Ref 2)))) (
 i_op)))
 .
 
@@ -97,7 +97,7 @@ unfold app_comb at 1 3.
 rewrite star_opt_occurs_true.
 2: cbv; auto. 2: discriminate. 
 rewrite (star_opt_occurs_true (App (Op Node) (App (Op Node) i_op))). 
-2: cbv; auto. 2: discriminate. 
+2: cbv; auto. 2: omega. 2: discriminate.  
 eapply2 match_app. 2: unfold_op; repeat eapply2 match_app. all: unfold_op; auto. 
 eapply2 match_app. eapply2 match_app.
 rewrite star_opt_occurs_true.
@@ -115,7 +115,7 @@ rewrite (star_opt_occurs_true (App (Op Node)
                           (App (Op Node)
                              (App (App (Op Node) (Op Node)) (Ref 0))))
                        (App (App (Op Node) (Op Node)) (lift 1 P)))))))). 
-2: cbv; auto. 2: discriminate. 
+2: cbv; omega. 2: discriminate. 
 eapply2 match_app. eapply2 match_app. eapply2 match_app.
 repeat eapply2 match_app. 
 all: unfold_op; auto.
@@ -123,7 +123,7 @@ all: unfold_op; auto.
 rewrite star_opt_occurs_true.
 2: cbv; auto. 2: discriminate. 
 rewrite ! (star_opt_occurs_true (Op Node)).
-2: cbv; auto. 2: discriminate. 
+2: cbv; omega. 2:discriminate. 
 eapply2 match_app. 2: unfold_op; repeat eapply2 match_app. all: unfold_op; auto. 
 eapply2 match_app. eapply2 match_app.
 eapply2 match_app. eapply2 match_app.
@@ -140,7 +140,7 @@ simpl. unfold_op; repeat eapply2 match_app.
 unfold_op; repeat eapply2 match_app.
 left; unfold_op; auto. 
 all: unfold_op; auto. 
-discriminate. discriminate. 
+simpl. omega. discriminate. discriminate. 
 (* 2 *) 
 unfold length; fold length. 
 rewrite ! map_lift0. 
@@ -192,7 +192,7 @@ simpl. unfold lift; simpl. rewrite ! lift_rec_null.  auto.
 Qed. 
 
 
-Lemma trans_F2_red: forall P Q M N, sf_red (App (App (App trans_F (A32 P Q)) M) N) (App (App N (App (A_k 3) P)) Q).
+Lemma trans_F2_red: forall P Q M N, sf_red (App (App (App trans_F (A32 P Q)) M) N) (App (App N (App (A_k 1) P)) Q).
 Proof.
 intros. 
 eapply transitive_red. eapply preserves_app_sf_red.  eapply preserves_app_sf_red.  
@@ -243,14 +243,19 @@ eapply2 match_app_comb.
 unfold length; fold length. 
 rewrite ! map_lift0. 
 unfold app, map, fold_left.
-unfold_op; unfold subst.  simpl. 
+unfold_op; unfold subst.  subst_tac.
+rewrite ! subst_rec_preserves_star_opt.
+eapply transitive_red. eapply preserves_app_sf_red. 
+eapply succ_red. eapply k_red. auto. auto. auto. 
+eapply transitive_red. eapply star_opt_beta.
+unfold subst. rewrite ! subst_rec_app. rewrite ! subst_rec_ref.
+insert_Ref_out. rewrite ! subst_rec_ref.
+insert_Ref_out. rewrite ! subst_rec_ref.
 insert_Ref_out. 
-unfold lift; rewrite ! lift_rec_null.
-rewrite subst_rec_lift_rec; try omega. 
-rewrite ! lift_rec_null.  eval_tac. eval_tac. eval_tac.
-eapply2 preserves_app_sf_red. 
-eapply2 preserves_app_sf_red. 
- eval_tac. eval_tac. eval_tac.
+rewrite ! (subst_rec_closed (A_k 1)).
+2: cbv; auto. 
+unfold lift; rewrite ! lift_rec_null. rewrite ! lift_rec_lift_rec; try omega. 
+subst_tac. auto. 
 Qed. 
  
  
@@ -348,7 +353,7 @@ replace (maxvar (lift 1 trans_F0)) with 0.
 cbv; auto.
 unfold trans_F0. 
 unfold lift; rewrite ! lift_rec_preserves_extension. rewrite ! maxvar_extension.
-unfold_op; simpl. auto.   
+cbv; auto.   
 (* 1 *) 
 rewrite IHM1; rewrite IHM2; auto. 
 Qed. 
@@ -403,8 +408,8 @@ eapply transitive_red. eapply preserves_app_sf_red. eapply preserves_app_sf_red.
 auto. eapply2 A3_red2. auto. auto. 
 eapply transitive_red. eapply2 trans_F2_red. 
 eapply2 preserves_app_sf_red. 
-eapply2 preserves_app_sf_red. 
-eapply2 A3_red1. 
+eapply2 preserves_app_sf_red.
+apply A3_red1. 
 (* 3 *) 
 eapply transitive_red. eapply preserves_app_sf_red. eapply preserves_app_sf_red. eapply preserves_app_sf_red.
 auto. eapply preserves_app_sf_red. eapply2 A3_red2. auto. auto. auto. 

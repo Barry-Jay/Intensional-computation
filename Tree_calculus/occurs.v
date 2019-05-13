@@ -46,13 +46,15 @@ Require Import IntensionalLib.Tree_calculus.Extensions.
 Require Import IntensionalLib.Tree_calculus.Wait2.  
 
 
-Lemma occurs_subst : forall M k, occurs k (subst M (Op Node)) = occurs (S k) M.
+Lemma occurs_subst : forall M k, occurs k (subst_rec M (Op Node) 0) = occurs (S k) M.
 Proof. 
 induction M; intros. 
-case n; intros; unfold subst; simpl; auto.
+case n; intros;  simpl; auto.
 cbv; auto.
-unfold subst; simpl. rewrite IHM1. rewrite IHM2. auto. 
+simpl. rewrite IHM1. rewrite IHM2. auto. 
 Qed. 
+
+
 
 Lemma occurs_star_opt : forall M k, occurs k (star_opt M) = occurs (S k) M. 
 Proof.
@@ -62,143 +64,37 @@ case n; intros; unfold_op; simpl; auto.
 (* 2 *) 
 cbv; auto. 
 (* 1 *) 
-case (occurs 0 M1). 
-simpl. rewrite IHM1. rewrite IHM2. 
-case (occurs (S k) M2); simpl; auto.
-rewrite orb_true_r; auto. 
-rewrite orb_false_r; auto. 
+case (occurs 0 M1).
+all: cycle 1. 
+intro.
+simpl. rewrite IHM1. rewrite IHM2. omega.
 (* 1 *) 
 gen_case IHM2 M2.
 (* 3 *) 
-gen_case IHM2 n.
-rewrite orb_false_r. 
-clear.
-induction M1; intros. 
-case n; intros; unfold subst; simpl; auto.
-cbv; auto. 
-unfold subst in *; simpl.
-rewrite IHM1_1. rewrite IHM1_2. auto.
-replace (subst_rec M1 (Op Node) 0) with (subst M1 (Op Node)) by auto. 
-rewrite occurs_subst. auto. 
-replace (subst_rec M1 (Op Node) 0) with (subst M1 (Op Node)) by auto. 
-rewrite occurs_subst. auto. 
-(* 1 *) 
+gen_case IHM2 n; unfold subst; rewrite occurs_subst; omega.
+rewrite occurs_subst; omega.
+(* 1 *)
 gen_case IHM2 (occurs 0 t).
-rewrite IHM1. rewrite IHM2. 
-case (occurs (S k) t); case (occurs (S k) t0); simpl; auto. 
-all: try (rewrite orb_true_r; auto).
-rewrite orb_false_r; auto.
-(* 1 *) 
 gen_case IHM2 (occurs 0 t0).
-gen_case IHM2 t0. 
-(* 4 *) 
-gen_case IHM2 n. 
-rewrite occurs_subst.  rewrite IHM1. 
-case (occurs (S k) t). simpl. rewrite orb_true_r; auto.
-simpl. rewrite orb_false_r; auto.
-rewrite IHM2.  rewrite IHM1. 
-case (occurs (S k) t); simpl; try discriminate.  
-rewrite orb_true_r. auto.
-case (eqnat n0 k); simpl; auto. 
-rewrite orb_true_r; auto.
-rewrite orb_false_r; auto. 
-(* 3 *) 
-rewrite IHM1.
-rewrite <- IHM2. 
-case (occurs k (star_opt t)).      
-simpl. rewrite orb_true_r; auto. 
-simpl. rewrite orb_false_r; auto.
-(* 2 *) 
-gen_case IHM2 (occurs 0 t1).
- rewrite IHM1. rewrite IHM2.  
-case (occurs (S k) t). simpl. rewrite orb_true_r; auto.
-simpl. 
-case (occurs (S k) t1); simpl; try discriminate.  
-rewrite orb_true_r. auto.
-case (occurs (S k) t2); simpl; try discriminate.  
-rewrite orb_true_r. auto.
-rewrite orb_false_r; auto. 
-(* 2 *) 
-gen_case IHM2 t2.
-gen_case IHM2 n.
-rewrite IHM1.
-rewrite <- IHM2. 
-case (occurs k (subst t1 (Op Node))); simpl; try discriminate.
-rewrite orb_true_r; auto.
-case (occurs k (star_opt t)).  
-simpl. rewrite orb_true_r; auto. 
-simpl; rewrite orb_false_r; auto.
-rewrite IHM1. rewrite IHM2.
-case (occurs (S k) t). simpl. rewrite orb_true_r; auto.
-simpl. 
-case (occurs (S k) t1); simpl; try discriminate.  
-rewrite orb_true_r. auto.
-case (eqnat n0 k); simpl; try discriminate.  
-rewrite orb_true_r. auto.
-rewrite orb_false_r; auto. 
-rewrite IHM1. rewrite IHM2.
-case (occurs (S k) t). simpl. rewrite orb_true_r; auto.
-simpl. 
-case (occurs (S k) t1); simpl; try discriminate.  
-rewrite orb_true_r. auto.
-rewrite orb_false_r. auto.
-(* 2 *) 
-gen_case IHM2 (occurs 0 t3).
- rewrite IHM1. rewrite IHM2.  
-case (occurs (S k) t). simpl. rewrite orb_true_r; auto.
-simpl. 
-case (occurs (S k) t1); simpl; try discriminate.  
-rewrite orb_true_r. auto.
-case (occurs (S k) t3); simpl; try discriminate.  
-rewrite orb_true_r. auto.
-case (occurs (S k) t4); simpl; try discriminate.  
-rewrite orb_true_r. auto.
-rewrite orb_false_r; auto. 
-(* 2 *) 
-gen_case IHM2 (occurs 0 t4).
- rewrite IHM1. rewrite IHM2.  
-case (occurs (S k) t). simpl. rewrite orb_true_r; auto.
-simpl. 
-case (occurs (S k) t1); simpl; try discriminate.  
-rewrite orb_true_r. auto.
-case (occurs (S k) t3); simpl; try discriminate.  
-rewrite orb_true_r. auto.
-case (occurs (S k) t4); simpl; try discriminate.  
-rewrite orb_true_r. auto.
-rewrite orb_false_r; auto. 
-(* 2 *) 
-rewrite IHM1.
-rewrite <- IHM2. 
-case (occurs k (subst_rec t1 (Op Node)0 )); simpl; try discriminate.
-rewrite orb_true_r; auto.
-case (occurs k (subst_rec t3 (Op Node)0 )); simpl; try discriminate.
-rewrite orb_true_r; auto.
-case (occurs k (subst_rec t4 (Op Node)0 )); simpl; try discriminate.
-rewrite orb_true_r; auto.
-case (occurs k (star_opt t)); simpl; try discriminate.
-rewrite orb_true_r; auto.
-rewrite orb_false_r; auto. 
-(* 1 *) 
-replace (subst_rec M1 (Op Node) 0) with (subst M1 (Op Node)) by auto. 
-replace (subst_rec t0 (Op Node) 0) with (subst t0 (Op Node)) by auto. 
-replace (subst_rec t (Op Node) 0) with (subst t (Op Node)) by auto. 
 rewrite ! occurs_subst. auto. 
+rewrite IHM2. rewrite IHM1. omega. 
+rewrite IHM2. rewrite IHM1. omega. 
 Qed.
- 
+
 
 Lemma occurs_lift: forall M k n, occurs (k +n) (lift n M) = occurs k M. 
 Proof. 
-induction M; intros; unfold lift; simpl.
+induction M; intros; unfold lift; simpl. 2: auto. 
 relocate_lt. replace (k+n0) with (n0+k) by omega.
-generalize k; induction n0; intros.
+generalize k; clear k. induction n0; intros.
 simpl; auto. 
-replace (S n0 + k0) with (S (n0+k0)) by omega. 
-simpl. auto. auto. 
+replace (S n0 + n) with (S(n0 + n)) by omega. 
+replace (S n0 + k) with (S(n0+ k)) by omega. 
+unfold eqnat; fold eqnat.
+eapply2 IHn0.
 unfold lift in *. 
 rewrite IHM1. rewrite IHM2. auto.   
 Qed.   
-
-
 
 
 Lemma occurs_case : 
@@ -212,11 +108,11 @@ unfold swap, pattern_size; unfold_op; rewrite ! occurs_app.
 rewrite ! occurs_op. 
 rewrite occurs_closed. 
 2: eapply2 Fop_closed. 
-unfold occurs at 1. unfold eqnat. 
-rewrite ! orb_false_l. rewrite orb_false_r. 
-replace (k+0) with k by omega. 
-replace (S k) with (k+1) by omega. 
-rewrite occurs_lift.  auto. 
+unfold occurs at 1. unfold eqnat.
+unfold occurs; fold occurs. unfold eqnat. 
+replace (k+0) with k by omega.
+replace (S k) with (k+1) by omega. rewrite occurs_lift.
+omega. 
 (* 1 *) 
 assert(is_program (App P1 P2) = true \/ is_program (App P1 P2) <> true) by decide equality.
 inversion H. rewrite H0.  
@@ -234,9 +130,8 @@ rewrite ! pattern_size_closed.
 replace (k+ (0+0)) with k by omega. 
 all: auto. 
 simpl; auto. 
-rewrite orb_false_r; auto.
 replace (S k) with (k+1) by omega. 
-eapply2 occurs_lift. 
+rewrite occurs_lift. omega. 
 (* 1 *) 
 assert(is_program (App P1 P2) = false). 
 gen_case H0 (is_program (App P1 P2)). congruence. 
@@ -246,58 +141,44 @@ rewrite occurs_star_opt.
 rewrite ! occurs_app. 
 rewrite occurs_closed. 
 2: eapply2 Fop_closed. 
-unfold_op; simpl.
-replace (S k) with (k+1) by omega. 
+replace (S k) with (k+1) by omega.
+unfold occurs; fold occurs. 
+unfold eqnat. replace (k+1) with (S k) at 1 by omega.
+replace (S k) with (k+1) by omega. rewrite occurs_lift.
+rewrite ! occurs_star_opt.
+rewrite occurs_closed. 2: cbv; auto. 
+rewrite ! occurs_app.
+replace (S (S k)) with (k+2) by omega.
 rewrite ! occurs_lift.
-rewrite occurs0_lift. simpl. 
-rewrite orb_true_r. 
-simpl. 
-unfold lift; rewrite subst_rec_lift_rec; try omega.
-replace (lift_rec
-            (case P1
-               (case P2
-                  (App (App (Op Node) (Op Node))
-                     (App (App (Op Node) (Op Node)) M)))) 0 1) with 
-(lift 1
-            (case P1
-               (case P2
-                  (App (App (Op Node) (Op Node))
-                     (App (App (Op Node) (Op Node)) M))))) by auto. 
-rewrite occurs0_lift.
-unfold subst, lift; rewrite subst_rec_lift_rec; try omega.
-rewrite ! orb_false_r. 
-rewrite lift_rec_null. 
-rewrite IHP1.  rewrite IHP2. 
-rewrite ! occurs_app. 
-rewrite ! occurs_op. simpl. 
+rewrite IHP1. rewrite IHP2. 
+unfold_op; simpl. replace (k+2) with (S (S k)) by omega.
+replace (k+1) with (S k) by omega.
 replace (k+ (pattern_size P1 + pattern_size P2)) with 
 (k + (pattern_size P1) + (pattern_size P2)) by omega. 
-auto. 
+omega.
 Qed. 
   
  
 
-Lemma occurs_false_1 : forall M, occurs 0 M = false -> maxvar M <= 1 -> maxvar M = 0.
+
+Lemma occurs_false_1 : forall M, occurs 0 M = 0 -> maxvar M <= 1 -> maxvar M = 0.
 Proof.
 induction M; intros. 
-gen2_case H H0 n.
-discriminate. 
-omega.
+gen2_case H H0 n. omega. 
 auto.  
 simpl in *. 
 rewrite IHM1. rewrite IHM2. auto.
-gen_case H (occurs 0 M2). 
-rewrite orb_true_r in *. discriminate. 
-assert(max (maxvar M1) (maxvar M2) >= maxvar M2) by eapply2 max_is_max. 
-omega. 
-gen_case H (occurs 0 M1). 
-assert(max (maxvar M1) (maxvar M2) >= maxvar M1) by eapply2 max_is_max. 
 omega.
+assert(max (maxvar M1) (maxvar M2) >= maxvar M2) by eapply2 max_is_max.
+omega.
+omega.
+assert(max (maxvar M1) (maxvar M2) >= maxvar M1) by eapply2 max_is_max.
+omega. 
 Qed. 
 
 
 Lemma occurs_extension : 
-forall k P M N, occurs k (extension P M N) = occurs k N || occurs (k+ pattern_size P) M.
+forall k P M N, occurs k (extension P M N) = occurs k N + occurs (k+ pattern_size P) M.
 Proof.
 intros; unfold extension.  unfold_op. 
 rewrite ! occurs_app. rewrite ! occurs_op. simpl.
@@ -318,8 +199,10 @@ Proof. intros. intro. inversion H0. eapply2 H. Qed.
 Lemma app_comb_vs_I : forall M N, matchfail (app_comb M N) i_op. 
 Proof. intros. unfold_op. eapply2 matchfail_compound_l. Qed. 
 
+(* restore as needed 
+
 Lemma star_opt_app_comb1:
-  forall M N, maxvar M = 0 -> occurs 0 N = true -> 
+  forall M N, maxvar M = 0 -> occurs 0 N >0 -> 
               star_opt (app_comb M  N) =
               App
     (App (Op Node)
@@ -406,7 +289,7 @@ Proof.
   (* 2 *)
   cbv; auto. intro. case n. cbv. auto. intro. unfold plus. intro.
 
- *)
+ 
 
 
 Lemma  A_k_vs_A_k_3: forall k n, A_k (S (S (S k))) <> A_k (S (S (S (S k)) +n)). 
@@ -862,5 +745,5 @@ unfold omega_k; fold omega_k.
 eapply2 omega_k_vs_omega_k_aux. eapply2 A_k_vs_A_k.
 Qed. 
  
-
+*) 
 

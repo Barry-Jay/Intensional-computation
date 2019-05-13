@@ -213,7 +213,10 @@ Proof.
 induction M; split_all. 
 case n; split_all.  omega. 
 case (occurs 0 M1).
-unfold size; fold size. omega. 
+all: cycle 1.
+unfold size; fold size. 
+intro. omega.
+(* 1 *)
 gen_case IHM2 M2. 
 (* 3 *) 
 gen_case IHM2 n.
@@ -221,14 +224,17 @@ rewrite size_subst. omega.
 all: replace (subst_rec M1 (Op Node) 0) with (subst M1 (Op Node)) by auto.  
 all: try rewrite size_subst. omega. omega. 
 (* 1 *) 
-gen_case IHM2 (occurs 0 t). omega. 
+gen_case IHM2 (occurs 0 t). 
+2:omega.
 gen_case IHM2 (occurs 0 t0). 
-gen_case IHM2 t0; try omega.   
-(* 1 *) 
 all: replace (subst_rec M1 (Op Node) 0) with (subst M1 (Op Node)) by auto.  
 all: replace (subst_rec t (Op Node) 0) with (subst t (Op Node)) by auto.  
 all: replace (subst_rec t0 (Op Node) 0) with (subst t0 (Op Node)) by auto.  
 rewrite ! size_subst. omega.
+gen_case IHM2 t0. 
+gen_case IHM2 n0. 
+rewrite size_subst. omega.
+omega. omega. omega. 
 Qed.
 
 
@@ -409,42 +415,43 @@ Qed.
 Lemma h_fn_size:   size h_fn = 50.
 Proof. cbv. auto. Qed.
 
-
-Lemma b_fn_size : size b_fn >50 . 
+Lemma star_opt_size2 : forall M n, size M >= S n -> size (star_opt M) >= n.
 Proof.
-unfold b_fn. 
-assert(forall M, size M + 1  >= 52 -> size M > 50). 
-split_all; omega. 
-apply H. clear H. 
-eapply le_trans.
-2: eapply2 star_opt_size.
-assert(forall M, 53 <= size M + 1 -> 52 <= size M) by (split_all; omega).
-apply H; clear H.  
-eapply le_trans.
-2: eapply2 star_opt_size.
-assert(forall M, 54 <= size M + 1 -> 53 <= size M) by (split_all; omega).
-apply H; clear H.  
-eapply le_trans.
-2: eapply2 star_opt_size.
-eapply le_trans.
-2: eapply2 extension_size.
-rewrite ! size_app. unfold size; fold size. unfold plus; fold plus. 
-assert(forall m, 45 <= m -> 54 <= S(S(S(S(S(S(S(S(S m))))))))) by (intros; omega).
-apply H; clear H. 
-eapply le_trans. 
-2: eapply2 extension_size.
-rewrite ! size_app. unfold size; fold size. unfold plus; fold plus. 
-assert(forall m, 45 <= m -> 54 <= S(S(S(S(S(S(S(S(S m))))))))) by (intros; omega).
-assert(45 <= (size
-     (app_comb (app_comb (app_comb (A_k 5) (omega_k 4)) (omega_k 4)) (Ref 0)))). 
-2: omega.
-cbv. omega. 
-Qed. 
- 
+  intros. assert(size(star_opt M) +1 >= size M) by  eapply2 star_opt_size. 
+  omega.
+Qed.
+
+
+Lemma extension_size2 : forall P M R n, size M + size R >= n -> size (extension P M R) >= n.
+Proof. intros. elim(extension_size P M R); intros. omega. omega. Qed. 
+
+
+Lemma gt_succ: forall m n,  m >n -> S m > S n. Proof. intros; omega. Qed.
+
+Lemma size_ref : forall i, size (Ref i) = 1. Proof. auto. Qed. 
+
+  Lemma b_fn_size : size b_fn >50 . 
+Proof.
+  unfold b_fn.  repeat apply star_opt_size2. apply extension_size2. 
+  unfold size; fold size. unfold plus; fold plus.
+  apply gt_succ.   apply gt_succ.  apply gt_succ.  apply gt_succ.  apply gt_succ.
+    apply gt_succ.  apply gt_succ.    apply gt_succ.
+   apply extension_size2. 
+assert(size  (App
+       (App (app_comb (app_comb (app_comb (A_k 3) (omega_k 2)) (omega_k 2)) (Ref 0))
+          (App (App (App (Ref 5) (Ref 4)) (Ref 3)) (Ref 1)))
+       (App (App (App (Ref 5) (Ref 4)) (Ref 3)) (Ref 2))) >= 46).
+2: omega. 
+unfold app_comb; unfold_op.  rewrite ! size_app.
+replace (size (Op Node)) with 1 by auto. 
+rewrite ! size_ref.
+assert(size (omega_k 2) >= 46). cbv. omega. omega.
+Qed.
+
  
 Lemma b_not_h: b_fn <> h_fn.
 Proof. 
-intro. 
+  intro. 
 assert(size b_fn = size h_fn) by congruence.
 rewrite h_fn_size in *.
 assert(size b_fn > 50) by eapply2 b_fn_size. 
@@ -456,18 +463,18 @@ Lemma b_fn_body_maxvar :
 maxvar
   (extension
         (app_comb
-           (app_comb (app_comb (app_comb (omega_k 4) (omega_k 4)) h_fn)
+           (app_comb (app_comb (app_comb (omega_k 2) (omega_k 2)) h_fn)
               (Ref 0)) (Ref 1))
         (App (App (App (App (Ref 4) (Ref 3)) (Ref 2)) (Ref 0))
            (App (App (App (Ref 4) (Ref 3)) (Ref 2)) (Ref 1)))
         (extension
            (app_comb
-              (app_comb (app_comb (app_comb (omega_k 4) (omega_k 4)) (Ref 0))
+              (app_comb (app_comb (app_comb (omega_k 2) (omega_k 2)) (Ref 0))
                  (Ref 1)) (Ref 2))
            (App
               (App
                  (app_comb
-                    (app_comb (app_comb (A_k 5) (omega_k 4)) (omega_k 4))
+                    (app_comb (app_comb (A_k 5) (omega_k 2)) (omega_k 2))
                     (Ref 0))
                  (App (App (App (Ref 5) (Ref 4)) (Ref 3)) (Ref 1)))
               (App (App (App (Ref 5) (Ref 4)) (Ref 3)) (Ref 2)))
@@ -533,13 +540,13 @@ Qed.
 Lemma aux7: 
 bind_normal
   (extension
-     (app_comb (app_comb (app_comb (omega_k 3) (omega_k 3)) (Ref 0)) (Ref 1))
+     (app_comb (app_comb (app_comb (omega_k 1) (omega_k 1)) (Ref 0)) (Ref 1))
      (App (Ref 2) (Ref 1))
-     (extension (app_comb (Y_k 2) (Ref 0)) (Ref 2)
+     (extension (app_comb (Y_k 0) (Ref 0)) (Ref 2)
         (extension
-           (app_comb (app_comb (Ref 0) (app_comb (A_k 3) (Ref 1))) (Ref 2))
+           (app_comb (app_comb (Ref 0) (app_comb (A_k 1) (Ref 1))) (Ref 2))
            (App
-              (App (app_comb (A_k 3) (Ref 1))
+              (App (app_comb (A_k 1) (Ref 1))
                  (App (App (App (Ref 5) (Ref 4)) (Ref 3)) (Ref 0))) (Ref 2))
            i_op))).
 Proof. 
@@ -563,12 +570,14 @@ Qed.
 
 Lemma aux9: bind_normal
   (App
-     (app_comb (app_comb (app_comb (A_k 5) (omega_k 4)) (omega_k 4)) (Ref 0))
+     (app_comb (app_comb (app_comb (A_k 3) (omega_k 2)) (omega_k 2)) (Ref 0))
      (App (App (App (Ref 5) (Ref 4)) (Ref 3)) (Ref 1))).
 Proof.
 apply bn_app.
 apply bn_normal. 
-repeat eapply2 app_comb_normal. 
+eapply2 app_comb_normal. eapply2 app_comb_normal. eapply2 app_comb_normal. 
+eapply2 omega_k_normal.
+eapply2 omega_k_normal.
 eapply2 bn_normal.
 rewrite maxvar_app. rewrite ! maxvar_app_comb. 
 rewrite A_k_closed.
@@ -582,28 +591,28 @@ Lemma aux8:
 bind_normal
   (extension
      (app_comb
-        (app_comb (app_comb (app_comb (omega_k 4) (omega_k 4)) h_fn) (Ref 0))
+        (app_comb (app_comb (app_comb (omega_k 2) (omega_k 2)) h_fn) (Ref 0))
         (Ref 1))
      (App (App (App (App (Ref 4) (Ref 3)) (Ref 2)) (Ref 0))
         (App (App (App (Ref 4) (Ref 3)) (Ref 2)) (Ref 1)))
      (extension
         (app_comb
-           (app_comb (app_comb (app_comb (omega_k 4) (omega_k 4)) (Ref 0))
+           (app_comb (app_comb (app_comb (omega_k 2) (omega_k 2)) (Ref 0))
               (Ref 1)) (Ref 2))
         (App
            (App
-              (app_comb (app_comb (app_comb (A_k 5) (omega_k 4)) (omega_k 4))
+              (app_comb (app_comb (app_comb (A_k 3) (omega_k 2)) (omega_k 2))
                  (Ref 0)) (App (App (App (Ref 5) (Ref 4)) (Ref 3)) (Ref 1)))
            (App (App (App (Ref 5) (Ref 4)) (Ref 3)) (Ref 2)))
         (extension
-           (app_comb (app_comb (app_comb (omega_k 3) (omega_k 3)) (Ref 0))
+           (app_comb (app_comb (app_comb (omega_k 1) (omega_k 1)) (Ref 0))
               (Ref 1)) (App (Ref 2) (Ref 1))
-           (extension (app_comb (Y_k 2) (Ref 0)) (Ref 2)
+           (extension (app_comb (Y_k 0) (Ref 0)) (Ref 2)
               (extension
-                 (app_comb (app_comb (Ref 0) (app_comb (A_k 3) (Ref 1)))
+                 (app_comb (app_comb (Ref 0) (app_comb (A_k 1) (Ref 1)))
                     (Ref 2))
                  (App
-                    (App (app_comb (A_k 3) (Ref 1))
+                    (App (app_comb (A_k 1) (Ref 1))
                        (App (App (App (Ref 5) (Ref 4)) (Ref 3)) (Ref 0)))
                     (Ref 2)) i_op))))).
 Proof.

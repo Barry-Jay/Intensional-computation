@@ -139,7 +139,7 @@ Qed.
 
 
 
-(* optimising star *) 
+(* counting occurrences  *) 
 
 Fixpoint eqnat n k := 
 match n with 
@@ -287,6 +287,161 @@ assert(occurs 0 M1 = 0 /\ occurs 0 M2 = 0). omega.
 split_all. inversion H0. rewrite (IHM1 N P); auto; rewrite (IHM2 N P); auto. 
 Qed. 
 
+
+Lemma occurs_maxvar_1: forall M, maxvar M = 1 -> occurs 0 M >0.
+Proof.
+  induction M; split_all. inversion H; subst. auto. noway.
+gen3_case IHM1 IHM2 H (maxvar M1). 
+assert(occurs 0 M2 >0) by auto. omega.
+gen2_case IHM2 H (maxvar M2).
+assert(occurs 0 M1 >0) by auto. omega.
+assert(max n n0 = 0) by omega.
+max_out.
+Qed. 
+ 
+
+
+Lemma occurs_false_subst_compound: 
+forall M N, occurs 0 M = 0 -> compound (subst_rec M N 0) -> compound M. 
+Proof.
+induction M; split_all.
+gen2_case H H0 n.  discriminate. generalize H0; insert_Ref_out; intro. 
+inversion H1.
+assert(occurs 0 M1 = 0 /\ occurs 0 M2 = 0) by omega.
+inversion H1; subst. 
+gen2_case H0 H2 M1.
+gen2_case H0 H2 n.
+omega. 
+generalize H0; insert_Ref_out. simpl. intro c; inversion c. case o; auto.
+gen2_case H0 H2 t.
+gen2_case H0 H2 n.
+omega. 
+generalize H0; insert_Ref_out. simpl. intro c; inversion c. case o; auto.
+gen2_case H0 H2 t1.
+gen2_case H0 H2 n.
+omega. 
+generalize H0; insert_Ref_out. simpl. intro c; inversion c.
+gen_case H0 o; auto. inversion H0. inversion H0. 
+Qed. 
+
+
+Lemma occurs_false_subst_active: 
+forall M N, occurs 0 M = 0 -> status (subst_rec M N 0) = status M. 
+Proof.
+rank_tac. 
+induction p; split_all. assert (rank M >0) by eapply2 rank_positive. noway. 
+generalize H H0; clear H H0; case M; intros. 
+(* 3 *) 
+gen_case H0 n.  discriminate.
+(* 2 *) 
+split_all.
+(* 1 *)  
+simpl in H0.  
+assert(occurs 0 t = 0 /\ occurs 0 t0 = 0) by omega.
+inversion H1. 
+generalize H H2; clear H H2; case t; intros. 
+(* 3 *) 
+gen_case H2 n.  discriminate.
+(* 2 *) 
+split_all.
+(* 1 *)  
+simpl in H2.  
+assert(occurs 0 t1 = 0 /\ occurs 0 t2 = 0) by omega.
+inversion H4.
+generalize H H5; clear H H5; case t1; intros. 
+(* 3 *) 
+gen_case H5 n.  discriminate.
+(* 2 *) 
+split_all.
+(* 1 *)
+simpl in H5.
+assert(occurs 0 t3 = 0 /\ occurs 0 t4 = 0) by omega.
+inversion H7.
+generalize H H8; clear H H8; case t3; intros. 
+(* 3 *) 
+gen_case H8 n.  discriminate.
+(* 2 *) 
+gen_case H o. eapply2 IHp. simpl in *; omega. 
+(* 1 *)  
+simpl in H8.  
+assert(occurs 0 t5 = 0 /\ occurs 0 t6 = 0) by omega.
+inversion H10.
+unfold subst_rec; fold subst_rec.
+replace (status (App (App (App (App t5 t6) t4) t2) t0))
+with (status (App (App (App t5 t6) t4) t2)) by auto. 
+replace (status
+  (App (App (App (App (subst_rec t5 N 0) (subst_rec t6 N 0)) (subst_rec t4 N 0)) (subst_rec t2 N 0))
+ (subst_rec t0 N 0)))
+with (status  (subst_rec (App (App (App t5 t6) t4) t2) N 0)) by auto. 
+eapply2 IHp. simpl in *; omega.  simpl in *; auto. omega. 
+Qed. 
+ 
+
+
+Lemma occurs_false_subst_normal2: 
+forall M N, occurs 0 M = 0 -> normal (subst_rec M N 0) -> normal M. 
+Proof.
+induction M; split_all.
+inversion H0; subst.
+assert(occurs 0 M1 = 0 /\ occurs 0 M2 = 0) by omega.
+inversion H1.
+eapply2 nf_active.      
+replace(App (subst_rec M1 N 0) (subst_rec M2 N 0)) with (subst_rec (App M1 M2) N 0)  in H5 by auto. 
+rewrite occurs_false_subst_status in H5. auto. split_all.
+assert(occurs 0 M1 = 0 /\ occurs 0 M2 = 0) by omega.
+inversion H1.
+apply nf_compound. eapply2 IHM1. eapply2 IHM2. 
+replace(App (subst_rec M1 N 0) (subst_rec M2 N 0)) with (subst_rec (App M1 M2) N 0)  in H5 by auto. 
+apply occurs_false_subst_compound in H5. auto. 
+simpl. auto. 
+Qed.
+
+
+Lemma occurs_false_subst_rec_maxvar_gt0 : 
+forall M, occurs 0 M = 0 -> 0< maxvar M -> 
+forall N, 0 < maxvar (subst_rec M N 0). 
+Proof.
+induction M; split_all; subst.  
+simpl in *. gen_case H n. discriminate. omega. 
+simpl in *. 
+assert(occurs 0 M1 = 0 /\ occurs 0 M2 = 0) by omega.  
+inversion H1. 
+assert(0< maxvar M1 \/ 0< maxvar M2). 
+gen_case H0 (maxvar M1). left; omega. 
+inversion H4; subst. 
+assert(0< (maxvar (subst_rec M1 N 0))) by eapply2 IHM1. 
+assert(Nat.max (maxvar (subst_rec M1 N 0)) (maxvar (subst_rec M2 N 0)) >= 
+maxvar (subst_rec M1 N 0)) by eapply2 max_is_max.  omega.  
+assert(0< (maxvar (subst_rec M2 N 0))) by eapply2 IHM2. 
+assert(Nat.max (maxvar (subst_rec M1 N 0)) (maxvar (subst_rec M2 N 0)) >= 
+maxvar (subst_rec M2 N 0)) by eapply2 max_is_max.  omega.
+Qed. 
+
+Lemma occurs_false_subst_rec_maxvar_lt : 
+forall M, occurs 0 M = 0 ->  forall j, maxvar M <= j -> 
+forall N, maxvar (subst_rec M N 0) <= pred j.  
+Proof.
+induction M; split_all; subst.  simpl in *.
+ gen2_case H H0 n. discriminate. omega. omega. 
+ simpl in *. 
+assert(occurs 0 M1 = 0 /\ occurs 0 M2 = 0) by omega. 
+inversion H1. 
+assert (Nat.max (maxvar M1) (maxvar M2)  >= maxvar M1) by eapply2 max_is_max. 
+assert (Nat.max (maxvar M1) (maxvar M2)  >= maxvar M2) by eapply2 max_is_max. 
+assert(maxvar M1 <= j /\ maxvar M2 <= j). 
+split; omega.  inversion H6.
+assert(pred j >=  Nat.max (maxvar (subst_rec M1 N 0)) (maxvar (subst_rec M2 N 0))). 
+eapply2 max_max2.  omega. 
+Qed. 
+
+
+Lemma occurs0_lift: 
+forall M k, occurs 0 (lift (S k) M) = 0.
+Proof.
+induction M; split_all. 
+relocate_lt.  replace (S k + n) with (S (k+n)) by omega. auto.  
+unfold lift in *. rewrite IHM1; auto. rewrite IHM2; auto. 
+Qed.
 
 
 (* Star abstraction optimised *) 
@@ -1040,4 +1195,108 @@ eapply2 bn_app.
 simpl. 
 assert(maxvar(lift_rec (App M1 M2) n k) >0) by eapply2 lift_rec_preserves_variables. 
 simpl in *; auto. 
+Qed.
+
+
+
+Lemma eqnat_equal: forall n k,  eqnat n k >0 -> n = k.
+Proof. induction n; split_all; gen_case H k;   omega. Qed.
+
+Lemma occurs_implies_mono:
+  forall k M, occurs k M >0 -> forall N1 N2,  subst_rec M N1 k = subst_rec M N2 k -> N1 = N2.
+Proof.
+  induction M; split_all.
+  assert(n=k) by eapply2 eqnat_equal. subst. 
+  generalize H0; clear H0; insert_Ref_out.
+  unfold lift. generalize N1 N2; clear; induction N1; split_all.
+  gen_case H0 N2. 
+  assert(n = n0) by (inversion H0; subst; eapply relocate_mono; eauto).
+  congruence.
+  all: try discriminate.
+  gen_case H0 N2. 
+  all: try discriminate.
+  gen_case H0 N2;  try discriminate.
+inversion H0; subst. rewrite (IHN1_1 t); auto. rewrite (IHN1_2 t0); auto. 
+omega. 
+inversion H0.
+assert(occurs k M1 >0 \/ occurs k M2 >0) by omega. 
+inversion H1. eapply2 IHM1. eapply2 IHM2. 
+Qed.
+
+Lemma occurs_subst: forall M k, occurs k (subst_rec M (Op Node) 0) = occurs (S k) M.
+Proof. induction M; split_all; subst_tac. case n; split_all.  Qed. 
+
+
+Lemma star_opt_mono:
+  forall M, occurs 1 M >0 -> forall N1 N2,  subst (star_opt M) N1 = subst (star_opt M) N2 -> N1 = N2.
+Proof.
+  induction M; intros. 
+  gen2_case H H0 n.   omega. 
+  gen2_case H H0 n0. 
+  unfold subst in *; simpl in *; inversion H0. 
+  generalize H2; insert_Ref_out; unfold lift; rewrite ! lift_rec_null; auto. 
+  omega.
+  simpl in *. omega.
+  (* 1 *)
+  assert(occurs 0 M1 >0 \/ occurs 0 M1 = 0) by omega.
+  inversion H1. 
+  unfold star_opt in H0.
+  replace (occurs 0 M1) with (S (pred (occurs 0 M1))) in H0 by omega.
+  fold star_opt in *.
+  unfold subst in H0; simpl in H0. inversion H0. 
+  simpl in H. 
+  assert(occurs 1 M1 >0 \/ occurs 1 M2 >0) by omega.
+  inversion H3.  eapply2 IHM1. eapply2 IHM2. 
+  (* 1 *)
+  assert(star_opt M1 = App k_op (subst M1 (Op Node))). 
+  eapply2 star_opt_occurs_false. 
+  rewrite H3 in *. 
+  assert(M2 = Ref 0 \/ M2 <> Ref 0) by repeat decide equality.
+  inversion H4; subst.
+  assert( star_opt (App M1 (Ref 0)) = subst M1 (Op Node)).
+  unfold star_opt. rewrite H2. auto. 
+  rewrite H5 in *.
+  unfold subst in *. eapply2 (occurs_implies_mono 0 (subst_rec M1 (Op Node) 0)). 
+  simpl in H.   assert(occurs 1 M1 >0) by omega.
+  generalize H6; clear. induction M1; split_all.
+  assert(n = 1) by eapply2 eqnat_equal.   subst. 
+  insert_Ref_out.   simpl. omega.
+  assert(occurs 1 M1_1 >0 \/ occurs 1 M1_2 >0) by omega.
+  inversion H.   
+  assert(occurs 0 (subst_rec M1_1 (Op Node) 0) >0) . eapply2 IHM1_1.   omega.
+  assert(occurs 0 (subst_rec M1_2 (Op Node) 0) >0) . eapply2 IHM1_2.   omega.
+  (* 1  M2 <> Ref 0 *)
+  assert(occurs 0 M2 > 0 \/ occurs 0 M2 = 0) by omega.
+  inversion H6.  
+  assert(star_opt (App M1 M2) = App (App (Op Node) (App (Op Node) (star_opt M2))) (star_opt M1)).
+  unfold star_opt at 1.   rewrite H2. fold star_opt. 
+  assert (match M2 with
+  | Ref 0 => subst M1 (Op Node)
+  | _ =>
+      match occurs 0 M2 with
+      | 0 => App k_op (subst (App M1 M2) (Op Node))
+      | S _ => App (App (Op Node) (App (Op Node) (star_opt M2))) (star_opt M1)
+      end
+  end = match occurs 0 M2 with
+      | 0 => App k_op (subst (App M1 M2) (Op Node))
+      | S _ => App (App (Op Node) (App (Op Node) (star_opt M2))) (star_opt M1)
+        end).
+gen_case H5 M2.   
+gen_case H5 n. 
+congruence.       
+rewrite H8. clear H8. 
+replace (occurs 0 M2) with (S (pred (occurs 0 M2))) by omega.
+auto.
+rewrite H8 in *.
+generalize H0; clear H0. subst_tac. intro H0; inversion H0; subst.
+simpl in H.
+assert(occurs 1 M1 >0 \/ occurs 1 M2 >0) by omega.
+inversion H9. eapply2 IHM1. rewrite H3 in *. auto. eapply2 IHM2.
+(* 1 *)
+rewrite star_opt_occurs_false in H0. 2: simpl; omega.
+eapply (occurs_implies_mono 0 (App k_op (subst_rec (App M1 M2) (Op Node) 0))).
+rewrite occurs_app. replace (occurs 0 k_op) with 0 by (unfold_op; simpl; auto).
+unfold plus.
+rewrite occurs_subst.  auto. 
+unfold subst in *. auto.
 Qed.

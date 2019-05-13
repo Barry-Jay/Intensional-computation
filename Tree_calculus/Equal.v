@@ -68,7 +68,7 @@ Definition equal_fn := star_opt (star_opt (star_opt equal_body)).
 Lemma equal_fn_closed: maxvar equal_fn = 0.
 Proof. cbv; auto.   Qed. 
 
-Definition equal_comb := app_comb (Y_k 3) equal_fn. 
+Definition equal_comb := app_comb (Y_k 1) equal_fn. 
 
 Lemma equal_comb_closed : maxvar equal_comb = 0.
 Proof. cbv; omega. Qed. 
@@ -79,7 +79,7 @@ Proof.
 intros. 
 eapply transitive_red.  unfold equal_comb.
 eapply transitive_red. eapply preserves_app_sf_red.  eapply2 app_comb_red. all: auto. 
-eapply transitive_red.   eapply2 Y3_fix.
+eapply transitive_red.   eapply2 Y1_fix.
 unfold equal_fn at 1.
 eapply transitive_red. eapply2 star_opt_beta3.  
 unfold equal_body, lift, subst.
@@ -106,7 +106,7 @@ Proof.
 split_all. 
 eapply transitive_red.  unfold equal_comb. 
 eapply preserves_app_sf_red. eapply2 app_comb_red. auto. 
-eapply transitive_red. eapply2 Y3_fix. 
+eapply transitive_red. eapply2 Y1_fix. 
 unfold equal_fn at 1.
 eapply transitive_red. eapply2 star_opt_beta3.
 unfold equal_body, lift, subst.
@@ -146,7 +146,7 @@ Proof.
 split_all. 
 eapply transitive_red. unfold equal_comb.
 eapply transitive_red. eapply preserves_app_sf_red. eapply2 app_comb_red. auto.   
-  eapply2 Y3_fix. 
+  eapply2 Y1_fix. 
 unfold equal_fn at 1.
 eapply transitive_red. eapply2 star_opt_beta3.
 unfold equal_body, lift, subst.
@@ -219,8 +219,8 @@ Proof.
 split_all. 
 eapply transitive_red. unfold equal_comb.   eapply preserves_app_sf_red. 
 eapply2 app_comb_red. auto.  
-eapply transitive_red. eapply2 Y3_fix. 
-replace (app_comb (Y_k 3) equal_fn) with equal_comb by auto. 
+eapply transitive_red. eapply2 Y1_fix. 
+replace (app_comb (Y_k 1) equal_fn) with equal_comb by auto. 
 unfold equal_fn.
 eapply transitive_red. eapply2 star_opt_beta3.
 unfold equal_body, lift, subst.
@@ -535,7 +535,7 @@ unfold equal_comb.  eapply transitive_red. eapply preserves_app_sf_red.
  eapply preserves_app_sf_red. 
 eapply transitive_red.  eapply preserves_app_sf_red. 
 eapply2 app_comb_red. auto.
-eapply transitive_red.  eapply2 Y3_fix.  
+eapply transitive_red.  eapply2 Y1_fix.  
 replace (app_comb (Y_k 3) equal_fn) with equal_comb by auto. 
 unfold equal_fn. 
 eapply transitive_red. eapply2 star_opt_beta3. 

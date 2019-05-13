@@ -156,41 +156,24 @@ Qed.
 
 Fixpoint A_k k := 
 match k with 
-| 0 => i_op 
-| 1 => i_op 
-| 2 => a_op 
+| 0 => a_op 
 | S k1 => star_opt (star_opt (app_comb (A_k k1) (app_comb (Ref 1) (Ref 0))))
 end.
 
-Lemma A3_closed: forall k, maxvar (A_k (S (S (S k)))) = 0.
-Proof. 
-induction k; intros. split_all.  
-replace (A_k (S (S (S (S k))))) with 
-(star_opt (star_opt (app_comb (A_k (S (S (S k)))) (app_comb (Ref 1) (Ref 0))))).
-2: unfold A_k; auto.  
-rewrite ! maxvar_star_opt.
-rewrite ! maxvar_app_comb.
-rewrite IHk. split_all. 
-Qed.
 
 Lemma A_k_closed: forall k, maxvar (A_k k) = 0. 
 Proof.
-induction k; intros. split_all. clear IHk.   
-induction k; intros. split_all.  clear IHk.
-induction k; intros. split_all. 
-eapply2 A3_closed. 
+  induction k; intros. split_all.
+  unfold A_k; fold A_k.
+  rewrite ! maxvar_star_opt. unfold app_comb; simpl. rewrite IHk. auto.
 Qed. 
 
 
 Lemma A_k_normal: forall k, normal (A_k k). 
 Proof. 
-induction k; unfold A_k; fold A_k; unfold_op. auto.  
-generalize IHk; clear IHk. case k; intros. auto. 
-generalize IHk; clear IHk. case n; intros. 
-repeat eapply2 star_opt_normal.
-repeat eapply2 nf_compound; unfold_op; auto.
-repeat eapply2 star_opt_normal.
-repeat eapply2 nf_compound; unfold_op; auto.
+  induction k; unfold A_k; fold A_k; unfold_op.
+  repeat apply star_opt_normal. repeat apply nf_compound; auto.  
+  repeat apply star_opt_normal. repeat apply nf_compound; auto.  
 Qed.
 
 
@@ -198,43 +181,22 @@ Qed.
 Hint Resolve A_k_closed A_k_normal.
 
 
-Lemma A3_red: forall k M N, sf_red (App (App (A_k (S(S(S k)))) M) N) (app_comb (A_k (S(S k))) (app_comb M N)).
+Lemma A3_red: forall k M N, sf_red (App (App (A_k (S k)) M) N) (app_comb (A_k k) (app_comb M N)).
 Proof. 
 intros.  
 unfold A_k at 1; fold A_k.
 eapply transitive_red. 
 eapply2 star_opt_beta2. 
 unfold subst; rewrite ! subst_rec_preserves_app_comb.
-eapply2 app_comb_preserves_sf_red.
-all: cycle 1.
-(* 2 *)  
-eapply2 app_comb_preserves_sf_red.
-cbv. rewrite lift_rec_null. auto. 
-simpl. insert_Ref_out. unfold lift; rewrite lift_rec_null.
-rewrite subst_rec_lift_rec; try omega.  
-rewrite lift_rec_null. auto.
-(* 1 *)  
-case k; intros; auto.
-rewrite ! subst_rec_preserves_star_opt. 
-rewrite ! subst_rec_preserves_app_comb. 
-unfold subst_rec; fold subst_rec. insert_Ref_out.
-unfold subst_rec; fold subst_rec. insert_Ref_out.
-case n; intros. 
-rewrite ! subst_rec_closed. 2: cbv; auto. 2: cbv; auto. 
-unfold A_k. eapply2 zero_red.
-(* 1 *) 
-rewrite ! subst_rec_preserves_star_opt. 
-rewrite ! subst_rec_preserves_app_comb. 
-unfold subst_rec; fold subst_rec. insert_Ref_out.
-unfold subst_rec; fold subst_rec. insert_Ref_out.
-rewrite ! (subst_rec_closed (A_k _)). 2: rewrite A_k_closed; auto. 2: rewrite A_k_closed; auto. 
-unfold A_k. eapply2 zero_red.
-Qed. 
-
+rewrite ! (subst_rec_closed (A_k k)). 2, 3: rewrite A_k_closed; omega.
+repeat subst_tac. 
+unfold lift; rewrite ! lift_rec_null. 
+subst_tac. auto.
+Qed.
 
 Definition A31 M := star_opt (app_comb a_op (app_comb (lift 1 M) (Ref 0))).
 
-Lemma A3_red1: forall M, sf_red (App (A_k 3) M) (A31 M).
+Lemma A3_red1: forall M, sf_red (App (A_k 1) M) (A31 M).
 Proof.
 intros; unfold A_k. 
 eapply transitive_red. 
@@ -288,162 +250,6 @@ eapply preserves_app_sf_red.
 eapply2 app_comb_red. auto.  auto.  
 Qed. 
 
-(*
-(* A4 *) 
-
-
-Definition A41 M := (star_opt (app_comb (A_k 3) (app_comb (lift 1 M) (Ref 0)))).
-
-
-Lemma A4_red1: forall M, sf_red (App (A_k 4) M) (A41 M).
-Proof.
-intros. 
-replace (A_k 4) with (star_opt (star_opt (app_comb (A_k 3) (app_comb (Ref 1) (Ref 0)))))
-by (unfold A_k; auto).
-eapply transitive_red. 
-eapply2 star_opt_beta. 
-unfold subst. 
-rewrite subst_rec_preserves_star_opt.
-rewrite ! subst_rec_preserves_app_comb.
-rewrite subst_rec_closed. 
-2: rewrite A_k_closed; split_all.
-unfold subst_rec.  insert_Ref_out. 
-eapply2 zero_red. 
-Qed. 
-
-
-Definition A42 M N := app_comb (A_k 3) (app_comb M N).
- 
-Lemma A4_red2: forall M N, sf_red (App (A41 M) N) (A42 M N).
-Proof.
-intros; unfold A41.  
-eapply transitive_red. 
-eapply2 star_opt_beta.
-unfold subst; rewrite ! subst_rec_preserves_app_comb.
-unfold lift; 
-rewrite subst_rec_lift_rec; try omega.
-rewrite subst_rec_ref. 
-rewrite subst_rec_closed. 
-2: rewrite A_k_closed; auto. 
-insert_Ref_out. 
-unfold lift; rewrite ! lift_rec_null.
-eapply2 zero_red.
-Qed. 
-
- 
-Definition A43 M N P :=  A32 (app_comb M N) P. 
-
-Lemma A4_red3: forall M N P, sf_red (App (A42 M N) P) (A43 M N P).
-Proof.
-intros; unfold A42.
-eapply transitive_red.
-eapply2 app_comb_red. 
-eapply transitive_red. 
-eapply preserves_app_sf_red.
-eapply2 A3_red1. auto. 
-eapply2 A3_red2.   
-Qed. 
-
-  
-Definition A44 M N P Q := A33 (app_comb M N) P Q.
-
-Lemma A4_red4 : forall M N P Q, 
-sf_red (App (A43 M N P) Q) (A44 M N P Q). 
-Proof. 
-intros. unfold A43. 
-eapply2 A3_red3. 
-Qed. 
-
-Lemma A4_red5 : forall M N P Q R, 
-sf_red (App (A44 M N P Q) R) (App (App (App (App M N) P) Q) R).
-Proof. 
-intros. unfold A44.
-eapply transitive_red.
-eapply2 A3_red4.  
-eapply transitive_red. eapply preserves_app_sf_red. eapply preserves_app_sf_red. 
-eapply2 app_comb_red. auto. auto. auto. 
-Qed. 
-
-Lemma A5_red: forall M N P Q R, 
-sf_red (App (App (App (App (App (A_k 5) M) N) P) Q) R) (App (App (App (App M N) P) Q) R) .
-Proof. 
-intros. 
-eapply transitive_red. 
-eapply preserves_app_sf_red. 
-eapply preserves_app_sf_red. 
-eapply preserves_app_sf_red. 
-instantiate(1:= app_comb (A_k 4) (app_comb M N)).
-unfold A_k; auto.
-eapply transitive_red.  
-eapply star_opt_beta2. 
-unfold subst; 
-rewrite ! subst_rec_preserves_app_comb.
-rewrite ! subst_rec_preserves_star_opt.
-rewrite ! subst_rec_preserves_app_comb.
-rewrite ! subst_rec_preserves_star_opt.
-rewrite ! subst_rec_preserves_app_comb.
-unfold subst_rec; fold subst_rec. 
-insert_Ref_out. 
-unfold subst_rec; fold subst_rec. 
-insert_Ref_out. 
-unfold lift; rewrite ! lift_rec_null. 
-rewrite subst_rec_lift_rec; try omega. 
-rewrite ! subst_rec_closed. 
-2: unfold_op; simpl; auto. 
-2: unfold_op; simpl; auto. 
-all: auto. 
-rewrite lift_rec_null. auto. 
-(* 1 *) 
-eapply transitive_red. 
-eapply preserves_app_sf_red. 
-eapply preserves_app_sf_red. 
-eapply2 app_comb_red. 
-all: auto. 
-eapply transitive_red. 
-eapply preserves_app_sf_red. 
-eapply preserves_app_sf_red. 
-eapply preserves_app_sf_red. 
-eapply2 A4_red1.
-all: auto. 
-eapply transitive_red. 
-eapply preserves_app_sf_red. 
-eapply preserves_app_sf_red. 
-eapply2 A4_red2.
-all: auto. 
-eapply transitive_red. 
-eapply preserves_app_sf_red. 
-eapply2 A4_red3.  all: auto. 
-eapply transitive_red.
- eapply2 A4_red4.
-unfold A44. unfold A33.  preserves_app_sf_red. 
-instantiate(1:= app_comb (A_k 4) (app_comb M N)).
-unfold A_k; auto.
-eapply transitive_red.  
-eapply star_opt_beta2. 
-unfold subst; 
-rewrite ! subst_rec_preserves_app_comb.
-rewrite ! subst_rec_preserves_star_opt.
-rewrite ! subst_rec_preserves_app_comb.
-rewrite ! subst_rec_preserves_star_opt.
-rewrite ! subst_rec_preserves_app_comb.
-unfold subst_rec; fold subst_rec. 
-insert_Ref_out. 
-unfold subst_rec; fold subst_rec. 
-insert_Ref_out. 
-unfold lift; rewrite ! lift_rec_null. 
-rewrite subst_rec_lift_rec; try omega. 
-rewrite ! subst_rec_closed. 
-2: unfold_op; simpl; auto. 
-2: unfold_op; simpl; auto. 
-all: auto. 
-rewrite lift_rec_null. auto. 
-
-
-
-
-unfold A_k; fold A_k. 
-
-*) 
 
 Ltac nf_out :=
   unfold a_op; unfold_op;
@@ -461,3 +267,40 @@ Ltac nf_out :=
     | _ => auto
         end.
 
+
+
+Lemma A_k_alt :
+  forall k,  subst (star_opt (star_opt (app_comb (Ref 2) (app_comb (Ref 1) (Ref 0)))))
+                   (A_k k) = A_k (S k)
+. 
+Proof.
+  intros; unfold A_k; fold A_k. 
+  unfold subst; rewrite ! subst_rec_preserves_star_opt. 
+  rewrite ! subst_rec_preserves_app_comb. subst_tac.   
+  unfold lift; rewrite lift_rec_closed. auto. 
+  cbv; auto. 
+Qed.
+
+Lemma A_k_mono:
+  forall k1 k2,  A_k k1 = A_k k2 -> k1 = k2.
+Proof.
+  induction k1; induction k2.
+  (* 4 *)
+  auto.
+  (* 3 *)
+  rewrite <- ! A_k_alt. clear.
+  unfold app_comb, star_opt; unfold_op; unfold occurs, eqnat.
+  unfold subst; rewrite ! subst_rec_app; rewrite ! subst_rec_op; rewrite ! subst_rec_ref.
+  unfold plus; fold plus. insert_Ref_out. unfold plus, pred. 
+  subst_tac. discriminate. 
+  (* 2 *)
+  rewrite <- ! A_k_alt. clear.
+  unfold app_comb, star_opt; unfold_op; unfold occurs, eqnat.
+  unfold subst; rewrite ! subst_rec_app; rewrite ! subst_rec_op; rewrite ! subst_rec_ref.
+  unfold plus; fold plus. insert_Ref_out. unfold plus, pred. 
+  subst_tac. discriminate. 
+  (* 1 *)
+  rewrite <- ! A_k_alt.
+  intro. assert(A_k k1 = A_k k2). eapply star_opt_mono. 2: eauto. cbv; auto.
+  rewrite (IHk1 k2); auto. 
+Qed.
