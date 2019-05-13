@@ -79,7 +79,8 @@ Qed.
 
 
 
-Definition eager_app p a:= App (App (Y3 eval_fn) a) p. (* the argument have been swapped *) 
+Definition eager_app p a:= App (App (Y3 eval_fn) a) p.
+(* the argument have been swapped *) 
 
 Lemma eager_kernel : forall x y, sf_red (eager_app (App k_op x) y) x.
 Proof. 
@@ -116,40 +117,18 @@ unfold factorable. right. auto. congruence.
 (* 1 *)  
 eapply transitive_red. 
 eapply2 extensions_by_matching.
-Check match_app.
-
-
 eapply2 match_app.  
-unfold subst.
+subst_tac.
 rewrite ! app_nil_r.
 unfold pattern_size.  
-rewrite ! subst_rec_app.
-rewrite ! subst_rec_ref.
-insert_Ref_out. 
-rewrite ! subst_rec_ref.
-insert_Ref_out. 
 repeat (replace (length nil) with 0 at 1 by auto).
 unfold map; fold map. 
 unfold lift; rewrite ! lift_rec_null.
 rewrite lift_rec_lift_rec; try omega. 
-unfold app. unfold length.
-rewrite ! (lift_rec_closed (Y3 eval_fn)).
-2: eapply2 Y3_eval_fn_closed. 
-unfold fold_left. 
-rewrite ! subst_rec_app.
-rewrite ! subst_rec_ref. 
-insert_Ref_out. 
-unfold lift; rewrite ! lift_rec_null.  
-rewrite ! subst_rec_lift_rec; try omega.
-rewrite  ! subst_rec_ref. 
-insert_Ref_out. 
-unfold lift; rewrite ! lift_rec_null.  
-rewrite ! (subst_rec_closed (Y3 eval_fn)).
-simpl. 
-rewrite ! subst_rec_lift_rec; try omega.
-rewrite ! lift_rec_null. 
+unfold app, length, plus, fold_left.
+unfold lift. subst_tac.  unfold lift; subst_tac. subst_tac. 
+unfold lift; rewrite ! lift_rec_null. subst_tac. 
 auto.
-rewrite Y3_eval_fn_closed. omega. 
 Qed. 
  
 
@@ -299,32 +278,75 @@ Inductive eager : Tree -> Tree -> Tree -> Prop :=
 | eag_fork_fork : forall M N P Q v1 v, eager Q M v1 -> eager v1 N v -> eager (App (App (App (Op Node) M) N) P) Q v 
 .
 
-Theorem eager_is_definable:
-forall M N v, program M -> program N -> eager M N v -> sf_red (eager_app M N) v.
+Lemma program_components:
+  forall M, program M -> program (left_component M) /\ program (right_component M).
+intros. 
+inversion H; subst. 
+inversion H0; subst. 
+simpl; split; auto. unfold_op; auto. 
+split; auto.
+simpl; split; auto. unfold_op; auto. 
+split; auto.
+simpl; split; auto.  
+split; auto. simpl in *; max_out. 
+split; auto. simpl in *; max_out. 
+simpl; split; auto. split; auto. simpl in *; max_out. 
+split; auto. simpl in *; max_out.
+Qed.
+
+
+Lemma eager_preserves_programs:
+  forall M N v, eager M N v -> program M -> program N -> program v.
 Proof.
-induction M; split_all. 
-(* 3 *) 
-inversion H. simpl in *. omega. 
-(* 2 *) 
-gen2_case H H1 o.
-inversion H1; subst. 
-eapply2 eager_dud1.
-(* 1 *) 
-inversion H1; subst. 
-(* 4 *) 
-eapply2 eager_dud2.
-(* 3 *) 
-eapply2 eager_kernel.
-(* 2 *) 
-eapply transitive_red. 
-eapply2 eager_stem.
-eapply transitive_red. 
-2: eexact H8. 
+  intros M N v e; induction e; split_all.
+  (* 5 *)
+  split; auto. 
+  eapply2 nf_compound. inversion H0; auto. simpl; inversion H0; auto. 
+  split; auto.
+  repeat eapply2 nf_compound. inversion H0; auto. simpl; inversion H; auto. 
+  inversion H3; auto. inversion H0; auto. simpl. 
+  inversion H0. inversion H. simpl in *; auto. rewrite H2; rewrite H4; auto. 
+  replace M with (right_component (App (App (Op Node) (Op Node)) M)) by auto.
+  eapply2 program_components. 
+  (* 2 *)
+  eapply2 IHe3. eapply2 IHe1.
+  elim(program_components _ H); intros. simpl in *. auto.
+  eapply2 IHe2. 
+  elim(program_components _ H); intros. simpl in *.
+  elim(program_components _ H1); intros. simpl in *.
+  elim(program_components _ H4); intros. simpl in *. auto.
+  (* 1 *)
+  elim(program_components _ H); intros. simpl in *.
+  elim(program_components _ H1); intros. simpl in *.
+  elim(program_components _ H3); intros. simpl in *. 
+  eapply2 IHe2.
+Qed.
 
 
- 
- 
- 
-unfold eager_app.  
- 
-*) 
+
+  Theorem eager_is_definable:
+forall M N v, eager M N v -> program M -> program N -> sf_red (eager_app M N) v.
+Proof.
+  intros M N v e; induction e; split_all.
+  (* 5 *)
+  eapply2 eager_dud1.
+  (* 4 *)
+  eapply2 eager_dud2.
+  (* 3 *)
+  eapply2 eager_kernel. 
+  (* 2 *)
+  elim(program_components _ H); intros. simpl in *. 
+  elim(program_components _ H1); intros; simpl in *.
+  elim(program_components _ H4); intros; simpl in *.
+  eapply transitive_red. eapply2 eager_stem.
+  eapply transitive_red. eapply eager_app_preserves_sf_red.
+  eapply2 IHe1. eapply2 IHe2. eapply2 IHe3.
+  eapply2 eager_preserves_programs. 
+  eapply2 eager_preserves_programs. 
+  (* 1 *)
+  inversion H. inversion H1. subst; simpl.
+  inversion H7.
+  assert(maxvar M = 0 -> False) by eapply2 active_not_closed.
+  simpl in *. assert False. apply H3. max_out. max_out. omega. 
+  inversion H7. 
+Qed.
