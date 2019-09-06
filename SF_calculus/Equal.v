@@ -182,39 +182,20 @@ Lemma equal_comb_closed : maxvar equal_comb = 0.
 Proof. cbv; omega. Qed. 
 
 Lemma equal_comb_normal: normal equal_comb.
-Proof.
-  unfold equal_comb; unfold_op. 
-unfold Y3, omega3, equal_fn, equal_body; unfold_op; 
-unfold subst, subst_rec; fold subst_rec; nf_out.
-(* 3 *) 
-  eapply2 nf_active. eapply2 nf_active. 
-repeat (unfold subst, subst_rec; fold subst_rec; insert_Ref_out). 
-unfold_op; nf_out. 
-(* 2 *) 
-  eapply2 nf_active.   eapply2 nf_active. 
-repeat (unfold subst, subst_rec; fold subst_rec; insert_Ref_out). 
-unfold_op; nf_out. 
-(* 1 *) 
-unfold_op; unfold lift, subst, lift_rec; fold lift_rec; unfold subst_rec; fold subst_rec. 
-unfold lift_rec; fold lift_rec. nf_out. 
-Qed.
-
+Proof. cbv;  nf_out. Qed. 
+ 
 Lemma equal_comb_op : forall o, sf_red (App (App equal_comb (Op o)) (Op o)) k_op.
 Proof. 
-split_all. 
-eapply transitive_red.  unfold equal_comb; unfold_op. eapply2 Y3_fix. 
-unfold equal_fn at 1.
-eapply transitive_red. eapply2 star_opt_beta3.
-unfold equal_body, lift, lift_rec, subst, subst_rec; fold subst_rec.  
-insert_Ref_out. unfold pred, subst_rec; fold subst_rec. insert_Ref_out. 
-unfold_op; unfold lift, lift_rec, subst, subst_rec; fold subst_rec.  
-eval_tac.  eval_tac. 
-case o; repeat eval_tac.
-eapply transitive_red. eapply preserves_app_sf_red. 
-eapply preserves_app_sf_red. 
-eapply succ_red. eapply2 f_compound_red. eval_tac. eval_tac. eval_tac. 
-repeat eval_tac. 
-eapply succ_red. eapply2 f_compound_red. eval_tac. eval_tac.
+  intros; cbv.
+  do 131 eval_tac. case o; eval_tac.
+  (* 2 *)
+  eval_tac.
+  eapply transitive_red. eapply preserves_app_sf_red. 
+  eapply preserves_app_sf_red. eapply succ_red. eapply2 f_compound_red.
+  all: eval_tac. repeat eval_tac. 
+  eapply succ_red. eapply2 f_compound_red. repeat eval_tac.
+  (* 1 *)
+  repeat eval_tac. 
 Qed.
 
 
@@ -222,46 +203,43 @@ Lemma unequal_op_compound :
 forall M o, compound M -> 
               sf_red (App (App equal_comb (Op o)) M) (App k_op i_op). 
 Proof. 
-split_all. 
-eapply transitive_red.  unfold equal_comb; unfold_op. 
-eapply transitive_red. eapply2 Y3_fix. 
-unfold equal_fn at 1.
-eapply transitive_red. eapply2 star_opt_beta3.
-unfold equal_body, lift, lift_rec; fold lift_rec.
- unfold subst, subst_rec; fold subst_rec.  
-insert_Ref_out. unfold pred, subst_rec; fold subst_rec. insert_Ref_out. 
-unfold lift; rewrite ! lift_rec_null. unfold subst_rec; fold subst_rec.
-rewrite ! subst_rec_lift_rec; try omega. rewrite ! lift_rec_null. 
-eval_tac.
-(* 1 *)  
-eapply succ_red. eapply2 f_compound_red. eval_tac. 
-Qed. 
+  intros; cbv.
+  do 102 eval_tac.
+ eapply transitive_red. eapply preserves_app_sf_red. 
+eapply preserves_app_sf_red. eapply preserves_app_sf_red. 
+auto. eval_tac. eval_tac. eval_tac.
+eapply succ_red. eapply2 f_compound_red.
+repeat eval_tac. 
+Qed.
+
 
 Lemma unequal_op : 
 forall M o, factorable M-> M <> (Op o) -> 
               sf_red (App (App equal_comb (Op o)) M) (App k_op i_op). 
 Proof. 
-split_all. unfold factorable in *. inversion H. inversion H1; subst. 
-2: eapply2 unequal_op_compound. 
-eapply transitive_red.  unfold equal_comb; unfold_op. eapply2 Y3_fix. 
-unfold equal_fn at 1.
-eapply transitive_red. eapply2 star_opt_beta3.
-unfold equal_body, lift, lift_rec, subst, subst_rec; fold subst_rec.  
-insert_Ref_out. unfold pred, subst_rec; fold subst_rec. insert_Ref_out. 
-unfold equal_body, lift, lift_rec, subst, subst_rec; fold subst_rec.  
-eval_tac.  eval_tac. 
-(* 1 *) 
-gen_case H0 o; eval_tac.
-eapply transitive_red. eapply preserves_app_sf_red.  eapply preserves_app_sf_red. 
-eapply succ_red. eapply2 f_compound_red. eval_tac. 
-gen_case H0 x; eval_tac.
-gen_case H0 x; eval_tac. eval_tac.
-gen_case H0 x; eval_tac. 
-assert False by (apply H0; auto); noway. 
-gen_case H0 x; eval_tac. eval_tac. 
-eapply transitive_red. eapply preserves_app_sf_red.  eapply preserves_app_sf_red. 
-eapply succ_red. eapply2 f_compound_red. eval_tac. auto. auto.  eval_tac. 
-assert False by (apply H0; auto); noway. 
+  intros.
+  unfold factorable in *. inversion H. inversion H1; subst. 
+  2: eapply2 unequal_op_compound. 
+  (* 1 *)
+  cbv. do 130 eval_tac.
+  gen_case H0 o.
+  (* 2 *)
+  do 20 eval_tac.   
+ eapply transitive_red. eapply preserves_app_sf_red. 
+ eapply preserves_app_sf_red.
+ eapply succ_red. eapply2 f_compound_red. all: eval_tac. 
+ do 16 eval_tac.
+ gen_case H0 x; eval_tac.
+ congruence. 
+ repeat eval_tac.  
+ (* 1 *)
+ do 20 eval_tac. eval_tac. eval_tac. 
+ gen_case H0 x; eval_tac.
+ 2: congruence. 
+ repeat eval_tac.  
+ eapply transitive_red. eapply preserves_app_sf_red.  eapply preserves_app_sf_red. 
+ eapply succ_red. eapply2 f_compound_red. 
+ all: repeat eval_tac.
 Qed. 
 
 
@@ -270,24 +248,14 @@ Lemma unequal_compound_op :
 forall M o, compound M -> 
               sf_red (App (App equal_comb M) (Op o))(App k_op i_op).
 Proof.
-split_all. 
-eapply transitive_red.  unfold equal_comb; unfold_op. eapply2 Y3_fix. 
-unfold equal_fn at 1.
-eapply transitive_red. eapply2 star_opt_beta3.
-unfold equal_body, lift, lift_rec; fold lift_rec. 
-unfold subst, subst_rec; fold subst_rec.  
-insert_Ref_out. unfold pred, subst_rec; fold subst_rec. insert_Ref_out. 
-unfold equal_body, lift, lift_rec; fold lift_rec. 
-unfold subst, subst_rec; fold subst_rec.
-rewrite ! lift_rec_null. rewrite ! subst_rec_lift_rec; try omega. 
-rewrite ! lift_rec_null. 
-eapply succ_red. eapply2 f_compound_red. 
-rewrite ! subst_rec_preserves_star_opt. 
-eapply transitive_red. eapply2 star_opt_beta2.
-unfold subst, subst_rec; fold subst_rec. insert_Ref_out. 
-unfold_op; unfold lift, lift_rec; fold lift_rec; unfold subst_rec; fold subst_rec.
-eval_tac.  
-Qed.
+  intros. cbv.  do 91 eval_tac.
+ eapply transitive_red. eapply preserves_app_sf_red. 
+ eapply preserves_app_sf_red. eapply preserves_app_sf_red. 
+ auto.  eval_tac. eval_tac. eval_tac.
+  eapply succ_red. eapply2 f_compound_red. repeat eval_tac. 
+Qed. 
+
+
 
 Lemma unequal_op2 : 
 forall M o, normal M -> maxvar M = 0 -> M <> (Op o) -> 
@@ -315,37 +283,14 @@ sf_red (App (App equal_comb M) N)
              (App k_op i_op))
 .
 Proof.
-split_all. 
+  split_all. 
 eapply transitive_red.  unfold equal_comb; unfold_op.  eapply2 Y3_fix. 
 replace (Y3 equal_fn) with equal_comb by auto. 
-unfold equal_fn.
-eapply transitive_red. eapply2 star_opt_beta3.
-unfold equal_body, lift, lift_rec; fold lift_rec. 
-unfold subst, subst_rec; fold subst_rec.  
-insert_Ref_out. unfold pred, subst_rec; fold subst_rec. insert_Ref_out. 
-unfold equal_body, lift, lift_rec; fold lift_rec. 
-unfold subst, subst_rec; fold subst_rec.
-rewrite ! lift_rec_lift_rec; try omega. unfold plus. 
-rewrite ! subst_rec_lift_rec; try omega. 
-rewrite ! lift_rec_null. 
-eapply succ_red. eapply2 f_compound_red. 
-rewrite ! subst_rec_preserves_star_opt.
-repeat (unfold subst_rec; fold subst_rec; insert_Ref_out). 
-unfold lift; rewrite ! lift_rec_lift_rec; try omega. unfold plus. 
-rewrite ! subst_rec_lift_rec; try omega. 
-eapply transitive_red. eapply2 star_opt_beta2. 
-unfold subst, subst_rec; fold subst_rec. insert_Ref_out. 
-unfold_op; unfold lift, lift_rec; fold lift_rec; unfold subst_rec; fold subst_rec.
-rewrite ! subst_rec_lift_rec; try omega. rewrite ! lift_rec_null. 
-eapply succ_red. eapply2 f_compound_red.
-rewrite ! subst_rec_preserves_star_opt. 
-eapply transitive_red. eapply2 star_opt_beta2. 
-unfold subst; rewrite ! subst_rec_app. 
-repeat (rewrite ! subst_rec_ref;  insert_Ref_out). 
-unfold_op; unfold lift. 
-rewrite ! lift_rec_lift_rec; try omega. unfold plus. 
-rewrite ! subst_rec_lift_rec; try omega. rewrite ! lift_rec_null.
-unfold subst_rec; fold subst_rec.  auto. 
+unfold equal_fn, equal_body, star_opt, occurs0, eq_op, subst; simpl.
+do 13 eval_tac. eapply succ_red. eapply2 f_compound_red. 
+do 19 eval_tac. eapply succ_red. eapply2 f_compound_red. 
+do 59 eval_tac. 
+eapply2 preserves_app_sf_red. eapply2 preserves_app_sf_red. all: repeat eval_tac.
 Qed.
 
 Theorem equal_programs : forall M, program M -> sf_red (App (App equal_comb M) M) k_op.
@@ -472,120 +417,8 @@ unfold_op; auto. unfold_op; auto.
 assert(maxvar (left_component N) <= maxvar N) by 
 (eapply2 left_component_preserves_maxvar). 
 omega.  
-eval_tac.  eval_tac. 
+repeat eval_tac.  
 Qed. 
-
-(* delete ? 
-
-Fixpoint equal_pattern P M := (* assumes that the pattern is a program *) 
-match P with 
-| Ref _ => star_opt M 
-| Op Sop =>  (App (App (App (Op Fop) M) 
-  (App (App (App (App M (Op Fop)) k_op) k_op) i_op))
-     (App k_op (App k_op (App k_op i_op))))
-| Op F => (App(App (App (Op Fop) M)
-        (App
-           (App
-              (App (App (App (App M (Op Fop)) k_op) k_op) i_op)
-              (App k_op i_op)) k_op))
-     (App k_op (App k_op (App k_op i_op))))
-| App P1 P2 => App (App (App (Op Fop) M) (App k_op i_op)) 
-  (star_opt (star_opt (App (App (equal_pattern P1 (Ref 1)) 
-  (equal_pattern P2 (Ref 0))) (App k_op i_op))))
-end.
-
-Lemma equal_comb_to_equal_pattern :
-forall P M Q R, program P -> sf_red (App (App (App (App equal_comb P) M) Q) R) 
-(App (App (equal_pattern P M) Q) R).
-Proof.
-unfold program; intros P M Q R p; inversion p;  fold equal_pattern.  
-eapply transitive_red. 
-unfold equal_comb.  eapply transitive_red. eapply preserves_app_sf_red. 
- eapply preserves_app_sf_red. 
-eapply transitive_red.  eapply preserves_app_sf_red. 
-eapply2 app_comb_red. auto.
-eapply transitive_red.  eapply2 Y3_fix.  
-replace (app_comb (Y_k 3) equal_fn) with equal_comb by auto. 
-unfold equal_fn. 
-eapply transitive_red. eapply2 star_opt_beta3. 
-unfold equal_body, subst, subst_rec; fold subst_rec. insert_Ref_out. 
-unfold subst_rec; fold subst_rec; insert_Ref_out. 
-unfold lift, lift_rec; fold lift_rec; unfold subst_rec; fold subst_rec.
-rewrite ! lift_rec_null. rewrite ! subst_rec_lift_rec; try omega.
-unfold_op. 
-rewrite ! lift_rec_null.  insert_Ref_out.    
-unfold lift, lift_rec; fold lift_rec; unfold subst_rec; fold subst_rec.
-assert(forall P Q N k, subst_rec (eq_op P Q) N k = eq_op (subst_rec P N k) (subst_rec Q N k)). 
-intros. unfold eq_op, iff, not, S_not_F; unfold_op; unfold subst_rec; fold subst_rec. auto. 
-rewrite ! H1.  
-repeat (unfold subst_rec; fold subst_rec; insert_Ref_out). 
-unfold lift; rewrite ! lift_rec_null. rewrite ! subst_rec_lift_rec; try omega.
-rewrite ! lift_rec_null.
-rewrite ! subst_rec_preserves_star_opt. 
-repeat (unfold subst_rec; fold subst_rec; insert_Ref_out). 
-rewrite ! subst_rec_preserves_star_opt. 
-repeat (unfold subst_rec; fold subst_rec; insert_Ref_out). 
-unfold lift; rewrite ! lift_rec_lift_rec; try omega. unfold plus. 
-rewrite ! subst_rec_lift_rec; try omega.
-rewrite (lift_rec_closed equal_comb); auto. auto. auto. auto. 
-(* 1 *) 
-induction P; intros. 
-(* 3 *) 
-simpl in  H0; discriminate.
-(* 2 *)
-eval_tac. case o. 
-(* 3 *) 
-eapply2 preserves_app_sf_red. eapply2 preserves_app_sf_red. 
-  eapply2 preserves_app_sf_red. eapply2 preserves_app_sf_red. 
-unfold eq_op, iff, not, S_not_F; unfold_op. eval_tac. 
-eapply transitive_red. eapply preserves_app_sf_red. eapply preserves_app_sf_red. 
-eapply succ_red. eapply2 f_compound_red. eval_tac.  auto. auto.  eval_tac. 
-(* 2 *) 
- eapply2 preserves_app_sf_red. eapply2 preserves_app_sf_red. 
-  eapply2 preserves_app_sf_red. eapply2 preserves_app_sf_red. 
-unfold eq_op, iff, not, S_not_F; unfold_op. eval_tac. eval_tac. 
-(* 1 *) 
-eapply transitive_red. eapply preserves_app_sf_red. eapply preserves_app_sf_red. 
-eapply succ_red. eapply2 f_compound_red. 
-assert(status (App P1 P2) = Passive) by eapply2 closed_implies_passive.  
-inversion H; auto. 
-rewrite H6 in H1; discriminate. 
-eapply2 star_opt_beta2. auto. auto. 
-unfold_op. 
-unfold subst; rewrite ! subst_rec_app.  
-unfold left_component, right_component. 
-rewrite ! subst_rec_op. rewrite ! subst_rec_preserves_star_opt. 
-unfold subst_rec; fold subst_rec.  insert_Ref_out. 
-unfold lift; rewrite lift_rec_lift_rec; try omega. unfold plus. 
-rewrite ! subst_rec_lift_rec; try omega. 
-rewrite ! (subst_rec_closed equal_comb). 2: auto. 
-unfold subst_rec; fold subst_rec; insert_Ref_out. 
-rewrite lift_rec_null. 
-unfold lift; rewrite ! lift_rec_closed. 2: simpl in H0; max_out. 
-2: simpl in H0; max_out.
-unfold equal_pattern; fold equal_pattern. 
-do 3 eapply2 preserves_app_sf_red. 
- 
-
-
-2: simpl in *; max_out. 
-2: simpl in *; max_out. 
-2: auto. 
-eapply2 preserves_app_sf_red. 
-
-
-  
-
-repeat eval_tac.  auto.  auto. 
-eapply transitive_red. eval_tac. auto. auto. auto. auto. 
-
-
-repeat eapply2 preserves_app_sf_red. 
-  insert_Ref_out.    
-
-
-
-*) 
 
 
 Fixpoint size M := 
@@ -595,6 +428,6 @@ match M with
 | App M1 M2 => S(size M2 + size M1)
 end . 
 
-Lemma size_equal_comb : size equal_comb = 1293. 
+Lemma size_equal_comb : size equal_comb = 1709. 
 Proof. cbv; auto. Qed. 
 

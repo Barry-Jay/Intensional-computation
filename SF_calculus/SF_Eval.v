@@ -68,9 +68,21 @@ eapply preserves_app_sf_red. auto. eapply2 IHM2.
 Qed. 
 
 
-Ltac eval_tac := unfold_op; 
+Ltac eval_tac := unfold_op;
 match goal with 
 | |-  sf_red ?M _ => red; eval_tac
+| |- multi_step sf_red1 (App (App (Op Sop) _) _) (App (App (Op Sop) _) _) =>
+  apply preserves_app_sf_red; [ eapply2 preserves_app_sf_red |]; eval_tac
+| |- multi_step sf_red1 (App (Op Sop) _) (App (Op Sop) _) =>
+  eapply2 preserves_app_sf_red; eval_tac
+| |- multi_step sf_red1 (App (App (Op Fop) _) _) (App (App (Op Fop) _) _) =>
+  apply preserves_app_sf_red; [ eapply2 preserves_app_sf_red |]; eval_tac
+| |- multi_step sf_red1 (App (Op Fop) _) (App (Op Fop) _) =>
+  eapply2 preserves_app_sf_red; eval_tac
+| |- multi_step sf_red1 (App (App (App (Op Fop) (Op _)) _) _) _ =>
+    eapply succ_red ; [ eapply2 f_op_red | auto]
+| |- multi_step sf_red1 (App (App (App (App _ _) _) _) _) _ =>
+    eapply transitive_red;  [eapply preserves_app_sf_red; [eval_tac|auto] |auto]
 | |-  multi_step sf_red1 ?M _ =>
   (apply transitive_red with (eval0 M); 
 [eapply2 eval0_from_SF |  

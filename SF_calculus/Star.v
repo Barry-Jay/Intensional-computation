@@ -502,9 +502,9 @@ gen2_case H IHM2 M2. gen2_case H IHM2 n.
 unfold subst, subst_rec; fold subst_rec. insert_Ref_out. unfold lift. rewrite lift_rec_null; auto.
 rewrite H0;  auto. 
 (* 3 *) 
-eval_tac. insert_Ref_out. eapply2 preserves_app_sf_red. rewrite H0; auto. 
+eval_tac. subst_tac. eapply2 preserves_app_sf_red. rewrite H0; auto. 
 (* 2 *) 
-eval_tac. eapply2 preserves_app_sf_red. rewrite H0; auto. 
+eval_tac. subst_tac. eapply2 preserves_app_sf_red. rewrite H0; auto. 
 (* 1 *) 
 assert(occurs0 s = false -> subst_rec s N 0 = subst_rec s (Op Sop) 0) by eapply2 no_subst. 
 gen2_case H1 IHM2 (occurs0 s). eval_tac. 
@@ -520,9 +520,9 @@ gen3_case H2 H IHM2 s0. gen3_case H H2 IHM2 n.
  eval_tac. insert_Ref_out. unfold lift. rewrite lift_rec_null. eapply2 preserves_app_sf_red. 
 unfold subst in *. eapply2 IHM1. omega. rewrite H1; auto. 
 (* 3 *) 
-eval_tac. insert_Ref_out. rewrite H1; auto. rewrite H0; auto. 
+eval_tac. subst_tac.  rewrite H1; auto. rewrite H0; auto. 
 (* 2 *) 
-eval_tac. eapply2 preserves_app_sf_red. rewrite H0; auto. rewrite H1; auto. 
+eval_tac. subst_tac. eapply2 preserves_app_sf_red. rewrite H0; auto. rewrite H1; auto. 
 (* 1 *) 
 assert(occurs0 s1 = false -> subst_rec s1 N 0 = subst_rec s1 (Op Sop) 0) by eapply2 no_subst. 
 assert(occurs0 s2 = false -> subst_rec s2 N 0 = subst_rec s2 (Op Sop) 0) by eapply2 no_subst. 
@@ -535,7 +535,7 @@ unfold subst in *; eapply2 IHp. omega.
 gen2_case IHM2 H4 (occurs0 s2).  eval_tac. eapply2 preserves_app_sf_red. 
 unfold subst in *; eapply2 IHM1. omega.
 unfold subst in *. eapply2 IHM2. omega. 
-eval_tac.  eapply2 preserves_app_sf_red. rewrite H0; auto. 
+eval_tac. subst_tac.   eapply2 preserves_app_sf_red. rewrite H0; auto. 
 rewrite H1; auto. rewrite H3; auto. rewrite H4; auto. 
 Qed. 
 

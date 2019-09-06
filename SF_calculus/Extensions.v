@@ -235,11 +235,51 @@ Definition case_app_nf case (P1 P2 M: SF) :=
                     (App k_op  (App k_op  (App k_op  i_op )))))))
         (App (App (Op Sop) (App k_op  (App (Op Sop) i_op ))) k_op )). 
 
+(* 
 Lemma case_app_val : 
 forall case P1 P2 M, sf_red (case_app case P1 P2 M) (case_app_nf case P1 P2 M).
 Proof. 
-intros; unfold case_app. 
-unfold star_opt at 3;  unfold occurs0; fold occurs0. 
+  intros; unfold case_app.
+  rewrite star_opt_occurs_true; auto.  2: unfold swap; congruence. 
+  rewrite star_opt_occurs_true; auto.
+  2: case ((star_opt
+      (star_opt
+         (App
+            (App
+               (App (App (lift 2 (case P1 (case P2 (App k_op (App k_op M))))) (Ref 1))
+                    (App k_op (App k_op (App k_op i_op)))) (Ref 0)) (App k_op i_op))))); intros;
+    unfold lift; simpl; try congruence; case n; unfold relocate; simpl; congruence.
+  eapply2 preserves_app_sf_red. 
+  eapply2 preserves_app_sf_red. 
+  eapply2 preserves_app_sf_red. 
+  rewrite star_opt_lift.
+  eapply2 preserves_app_sf_red. 
+  rewrite (star_opt_occurs_true); auto. 2: simpl; rewrite ! orb_true_r; auto. 2: discriminate.
+  rewrite star_opt_eta. 2: simpl; unfold lift; rewrite occurs_lift_rec_zero; auto.
+  unfold subst, lift, subst_rec; fold subst_rec. rewrite subst_rec_lift_rec; try omega.  
+  rewrite (star_opt_occurs_true); auto. 3: cbv; congruence.
+  2: simpl; rewrite ! orb_true_r; auto. 
+  eapply2 preserves_app_sf_red. 
+  eapply2 preserves_app_sf_red.
+  rewrite star_opt_closed. 
+  2: simpl. 
+  
+unfold_op; simpl.   eapply2 preserves_app_sf_red. 
+  rewrite star_opt_lift.
+  eapply2 preserves_app_sf_red. 
+  rewrite (star_opt_occurs_true); auto. 2: simpl; rewrite ! orb_true_r; auto. 2: discriminate.
+  rewrite star_opt_eta. 2: simpl; unfold lift; rewrite occurs_lift_rec_zero; auto.
+  unfold subst, lift, subst_rec; fold subst_rec. rewrite subst_rec_lift_rec; try omega.  
+  rewrite (star_opt_occurs_true); auto. 3: cbv; congruence.
+
+  unfold star_opt at 1; simpl. rewrite star_opt_occurs_true; auto.  2: unfold_op; congruence. 
+
+
+
+  2: intro; congruence
+  congruence.  split_all.
+  cbv; auto. unfold swap; congruence. 
+  unfold star_opt at 1. ;  unfold occurs0; fold occurs0. 
 unfold lift; rewrite ! occurs_lift_rec_zero. simpl. 
 rewrite subst_rec_lift_rec; try omega. 
 rewrite ! occurs_lift_rec_zero. simpl. 
@@ -250,6 +290,7 @@ rewrite ! lift_rec_null.
 eapply2 zero_red. 
 Qed. 
  
+*) 
 
 
 
@@ -351,19 +392,43 @@ Fixpoint case P M :=
 *)   
  match P with
   | Ref _ => star_opt (App k_op M)               
-  | Op Sop => star_opt (App (App (App (Op Fop) (Ref 0))
+  | Op Sop => App (App s_op 
+                       (App (App s_op f_op)
+                            (App (App s_op (App (App s_op
+                                                     (star_opt (App (App (App (App (Ref 0) f_op) k_op)
+                                                                         k_op) i_op)))
+                                                (App k_op (App k_op M))))
+                                 (star_opt (swap (Ref 0))))))
+                  (star_opt (App k_op (App k_op (swap (Ref 0)))))
+    (* star_opt (App (App (App (Op Fop) (Ref 0))
                                  (App (App (App (App (App (App (Ref 0) f_op) k_op) k_op) i_op)
                                            (App k_op (lift 1 M))) 
                                       (swap (Ref 0))))
+
+ 
                             (App k_op (App k_op (swap (Ref 0)))))
-  | Op Fop => star_opt (App (App (App (Op Fop) (Ref 0))
+*) 
+  | Op Fop => App (App s_op 
+                       (App (App s_op f_op)
+                            (App (App s_op (App (App s_op
+                                                     (star_opt (App (App (App (App (Ref 0) f_op) k_op)
+                                                                         k_op) i_op)))
+                                                (star_opt (swap (Ref 0)))))
+                                 (App k_op (App k_op M))))) 
+                  (star_opt (App k_op (App k_op (swap (Ref 0)))))
+(* 
+
+                  star_opt (App (App (App (Op Fop) (Ref 0))
                                  (App (App (App (App (App (App (Ref 0) f_op) k_op) k_op) i_op)
                                            (swap (Ref 0)))
                                       (App k_op (lift 1 M))))
                             (App k_op (App k_op (swap (Ref 0)))))
+ *)
   | App P1 P2 => 
 if is_program P 
-then star_opt (App (App (App (App equal_comb (Ref 0)) P) (App k_op (lift 1 M))) (swap (Ref 0)))
+then App (App s_op (App (App s_op (App (App s_op equal_comb) (App k_op P)))
+                        (App k_op (App k_op M))))
+         (star_opt (swap (Ref 0)))
 else case_app_nf case P1 P2 M            
                 end
 .
@@ -371,58 +436,34 @@ else case_app_nf case P1 P2 M
 
 Lemma case_S_S: forall M R, sf_red (App (App (case (Op Sop) M) (Op Sop)) R) M.
 Proof. 
-intros; unfold case.  
-eapply transitive_red. eapply preserves_app_sf_red. 
-eapply2 star_opt_beta. auto.  unfold_op. 
-unfold subst, subst_rec; fold subst_rec. insert_Ref_out.
-unfold lift;  rewrite subst_rec_lift_rec; try omega. rewrite ! lift_rec_null.  
-eval_tac. eval_tac. 
-eapply transitive_red. eapply preserves_app_sf_red. eapply preserves_app_sf_red. 
- eapply preserves_app_sf_red. 
-eapply succ_red. eapply2 f_compound_red. eval_tac. auto. auto.  auto. eval_tac.  
-Qed.   
+intros; cbv; repeat eval_tac. 
+eapply transitive_red. eapply preserves_app_sf_red.
+ eapply preserves_app_sf_red.  eapply preserves_app_sf_red. 
+ eapply succ_red. eapply2 f_compound_red. all: repeat eval_tac. 
+Qed.
 
 Lemma case_S_F: forall M R, sf_red (App (App (case (Op Sop) M) (Op Fop)) R) (App R (Op Fop)).
 Proof. 
-intros; unfold case.  
-eapply transitive_red. eapply preserves_app_sf_red. 
-eapply2 star_opt_beta. auto.  unfold_op. 
-unfold subst, subst_rec; fold subst_rec. insert_Ref_out.
-unfold lift;  rewrite subst_rec_lift_rec; try omega. rewrite ! lift_rec_null.  
-eval_tac. eval_tac. eval_tac. eval_tac. 
-eapply transitive_red. eapply preserves_app_sf_red. 
-eapply succ_red. eapply2 f_op_red. auto.  eval_tac.
-insert_Ref_out. unfold lift; rewrite lift_rec_null. auto.
-Qed. 
+intros; cbv. do 22 eval_tac. eapply2 preserves_app_sf_red. repeat eval_tac. 
+Qed.
 
 
 Lemma case_F_F: forall M R, sf_red (App (App (case (Op Fop) M) (Op Fop)) R) M.
 Proof. 
-intros; unfold case.  
-eapply transitive_red. eapply preserves_app_sf_red. 
-eapply2 star_opt_beta. auto.  unfold_op. 
-unfold subst, subst_rec; fold subst_rec. insert_Ref_out.
-unfold lift;  rewrite subst_rec_lift_rec; try omega. rewrite ! lift_rec_null.  
-eval_tac. eval_tac. eval_tac. 
+intros; cbv; repeat eval_tac. 
 Qed.   
 
 Lemma case_F_S: forall M R, sf_red (App (App (case (Op Fop) M) (Op Sop)) R) (App R (Op Sop)).
 Proof. 
-intros; unfold case.  
-eapply transitive_red. eapply preserves_app_sf_red. 
-eapply2 star_opt_beta. auto.  unfold_op. 
-unfold subst, subst_rec; fold subst_rec. insert_Ref_out.
-unfold lift;  rewrite subst_rec_lift_rec; try omega. rewrite ! lift_rec_null.  
-eval_tac. eval_tac. eval_tac. eval_tac. 
-eapply transitive_red. eapply preserves_app_sf_red. 
-eapply preserves_app_sf_red. eapply preserves_app_sf_red. 
-eapply succ_red. eapply2 f_compound_red. eval_tac. auto. auto.  auto. eval_tac. 
-eval_tac.  
-eapply transitive_red. eapply preserves_app_sf_red. 
-eapply succ_red. eapply2 f_op_red. auto.  eval_tac. insert_Ref_out. 
-unfold lift; rewrite lift_rec_null. auto.
-Qed. 
+intros; cbv; repeat eval_tac. 
+eapply transitive_red. eapply preserves_app_sf_red.
+ eapply preserves_app_sf_red.  eapply preserves_app_sf_red. 
+ eapply succ_red. eapply2 f_compound_red.
+ all: auto. do 9 eval_tac. eapply2 preserves_app_sf_red. repeat eval_tac. 
+Qed.
 
+
+(* 
 Fixpoint pattern_size P :=
   match P with
     | Ref _ => 1
@@ -460,6 +501,7 @@ Proof.
 intros. rewrite (lift_rec_lift_rec (lift_rec M (p + n) k)); try omega. auto. 
 Qed. 
 
+(* 
 Lemma lift_rec_preserves_case:
   forall P M n k, lift_rec (case P M) n k = case P (lift_rec M (pattern_size P +n) k).
 Proof.
@@ -469,18 +511,13 @@ Proof.
   unfold lift_rec; fold lift_rec.  unfold pattern_size. auto.
   (* 2 *)
     unfold case, maxvar, pattern_size, swap, lift_rec; fold lift_rec.
-  case o; unfold_op. 
-    rewrite lift_rec_preserves_star_opt. 
- unfold lift, lift_rec; fold lift_rec. relocate_lt. unfold plus. 
-    rewrite  ! lift_lift_rec; try omega.  auto. 
-    rewrite lift_rec_preserves_star_opt. 
- unfold lift, lift_rec; fold lift_rec. relocate_lt. unfold plus. 
-    rewrite  ! lift_lift_rec; try omega.  auto. 
+  case o; unfold_op; simpl; auto. 
     (* 1 *) 
     unfold case; fold case. 
 assert(is_program (App P1 P2) = true \/ is_program (App P1 P2) <> true) by decide equality. 
 inversion H. rewrite H0. 
-(* 2 *) 
+(* 2 *)
+unfold_op; simpl. 
 assert(program (App P1 P2)) by eapply2 program_is_program.  inversion H1.   
 rewrite lift_rec_preserves_star_opt. 
 unfold swap; unfold_op. rewrite ! lift_rec_app. 
@@ -503,7 +540,7 @@ replace (pattern_size P2 + (pattern_size P1 + n)) with
 (pattern_size P1 + pattern_size P2 + n) by omega. 
 auto. 
 Qed.
-
+*) 
 
 Lemma aux2 : forall M N p k, subst_rec (lift_rec M p (1 + 2)) N
      (S (S (S k)) + p) =
@@ -515,36 +552,28 @@ rewrite subst_rec_lift_rec1; try omega. auto.
 Qed. 
 
 Lemma subst_rec_preserves_case:
-  forall P M N k, subst_rec (case P M) N k = case P (subst_rec M N (k+ pattern_size P)).
+  forall P M N k, subst_rec (case P M) N k = case P (subst_rec M N (pattern_size P + k)).
 Proof.
   induction P; intros. 
   (* 3 *)
   unfold case, maxvar, pattern_size. rewrite subst_rec_preserves_star_opt.
-  unfold_op; unfold subst_rec; fold subst_rec.  replace (k+1) with (S k) by omega; auto. 
+  unfold_op; unfold subst_rec; fold subst_rec; auto.  
   (* 2 *)
-  unfold case, maxvar, swap. case o; unfold_op.  
- rewrite subst_rec_preserves_star_opt. 
-  unfold subst_rec; fold subst_rec.  unfold pattern_size.
-  insert_Ref_out. unfold_op; unfold lift. replace (k+0) with k by omega. 
-rewrite subst_rec_lift_rec1; try omega. auto. 
- rewrite subst_rec_preserves_star_opt. 
-  unfold subst_rec; fold subst_rec.  unfold pattern_size.
-  insert_Ref_out. unfold_op; unfold lift. replace (k+0) with k by omega. 
-rewrite subst_rec_lift_rec1; try omega. auto. 
-  (* 1 *) 
+  unfold case, maxvar, swap. case o; unfold_op; unfold subst; simpl; auto. 
+  (* 1 *)
   unfold case; fold case.
-assert(is_program (App P1 P2) = true \/ is_program (App P1 P2) <> true) by decide equality. 
-inversion H. rewrite H0. 
-(* 2 *) 
-assert(program (App P1 P2)) by eapply2 program_is_program.  inversion H1.   
-rewrite subst_rec_preserves_star_opt. 
-unfold swap; unfold_op; rewrite ! subst_rec_app. 
-rewrite subst_rec_closed. 2: rewrite equal_comb_closed; omega. 
-unfold subst_rec; fold subst_rec. insert_Ref_out.  
-rewrite 2? subst_rec_closed. 2: simpl in H3; max_out. 2: simpl in H3; max_out. 
-rewrite pattern_size_closed. 2: auto.  
-unfold lift; rewrite subst_rec_lift_rec1; try omega. 
-replace (k+0) with k by omega; auto.  
+  assert(is_program (App P1 P2) = true \/ is_program (App P1 P2) <> true) by decide equality. 
+  inversion H. rewrite H0. 
+  (* 2 *) 
+  assert(program (App P1 P2)) by eapply2 program_is_program.  inversion H1.   
+  rewrite subst_rec_preserves_star_opt. 
+  unfold swap; unfold_op; rewrite ! subst_rec_app. 
+  rewrite subst_rec_closed. 2: rewrite equal_comb_closed; omega. 
+  unfold subst_rec; fold subst_rec. insert_Ref_out.  
+  rewrite 2? subst_rec_closed. 2: simpl in H3; max_out. 2: simpl in H3; max_out. 
+  rewrite pattern_size_closed. 2: auto.  
+  unfold lift; rewrite subst_rec_lift_rec1; try omega. 
+  replace (k+0) with k by omega; auto.  
 (* 1 *) 
 assert(is_program (App P1 P2) = false).
 eapply2 not_true_iff_false. 
@@ -1185,7 +1214,7 @@ eapply2 pnf_compound. eapply2 pnf_normal.
 Qed. 
  
 
- 
+end experiment  *) 
 
 
 
@@ -1268,7 +1297,7 @@ split_all; subst. inversion H2; inversion H7; subst; split; auto.
 Qed. 
 
 
-
+(* 
 Lemma maxvar_case_app : 
 forall P1 P2, 
 (forall M : SF, maxvar (case P1 M) = maxvar M - pattern_size P1) -> 
@@ -1411,6 +1440,8 @@ unfold_op; simpl. rewrite ! max_zero.
 rewrite IHP1. rewrite IHP2. simpl. omega. 
 Qed. 
 
+ *)
+
 
 Lemma program_matching3: 
 forall P M sigma, matching P M sigma -> maxvar P = 0 -> M = P /\ sigma = nil. 
@@ -1433,32 +1464,21 @@ Proof.
   inversion H; subst. unfold fold_left.  unfold case; unfold_op.  eapply2 star_opt_beta.
   (* 2 *)
   inversion H; subst. unfold fold_left.  unfold case; unfold_op. case o. 
-  eapply transitive_red. eapply2 star_opt_beta. 
-  unfold subst, subst_rec; fold subst_rec. insert_Ref_out. unfold lift, lift_rec; fold lift_rec. 
-  eval_tac. eval_tac. 
+  cbv.   repeat eval_tac. 
   eapply transitive_red. eapply preserves_app_sf_red.  eapply preserves_app_sf_red.
-  eapply succ_red. eapply2 f_compound_red. eval_tac. auto. auto.  eval_tac.  
-  rewrite subst_rec_lift_rec; try omega. rewrite lift_rec_null; auto. 
-  eapply transitive_red. eapply2 star_opt_beta. 
-  unfold subst, subst_rec; fold subst_rec. insert_Ref_out. unfold lift, lift_rec; fold lift_rec. 
-  eval_tac. eval_tac. eval_tac. 
-  rewrite subst_rec_lift_rec; try omega. rewrite lift_rec_null; auto. 
-  (* 1 *) 
+  eapply succ_red. eapply2 f_compound_red. 1,2,3,4,5: repeat eval_tac.
+  (* 1 *)
   unfold case; fold case. 
-assert(is_program (App P1 P2) = true \/ is_program(App P1 P2) <> true)
+  assert(is_program (App P1 P2) = true \/ is_program(App P1 P2) <> true)
 by decide equality. 
 inversion H0. 
 rewrite H1. 
 assert(program (App P1 P2)) by eapply2 program_is_program. 
-eapply transitive_red. 
-eapply2 star_opt_beta. 
-unfold swap; unfold_op. unfold subst; rewrite ! subst_rec_app.  
-rewrite subst_rec_closed; auto. insert_Ref_out. 
-unfold subst, subst_rec; fold subst_rec. insert_Ref_out. 
-unfold lift; rewrite subst_rec_lift_rec; try omega. rewrite ! lift_rec_null.
-rewrite ! subst_rec_closed.  
-2: inversion H2; simpl in H4; max_out; omega. 
-2: inversion H2; simpl in H4; max_out; omega. 
+eval_tac. eval_tac. eval_tac.
+eapply transitive_red. eapply preserves_app_sf_red. 
+eapply preserves_app_sf_red. 
+eapply preserves_app_sf_red. 
+auto.  eval_tac. eval_tac. eval_tac. 
 assert(N = App P1 P2 /\ sigma = nil). 
 eapply2 program_matching3.  inversion H2; auto. 
 inversion H3; subst. 
@@ -1471,24 +1491,16 @@ assert(is_program (App P1 P2) = false) by
 eapply2 not_true_iff_false. 
 rewrite H2. 
 (* 1 *) 
-  unfold case_app_nf. eval_tac. eval_tac. 
-  eapply transitive_red. eapply preserves_app_sf_red.  eapply preserves_app_sf_red.  
-  eapply succ_red. eapply2 s_red. auto. eval_tac. eval_tac. 
+  unfold case_app_nf. eval_tac. eval_tac. eval_tac. 
   eapply transitive_red. eapply preserves_app_sf_red.  
   eapply succ_red. eapply2 f_compound_red. 
   inversion H. subst; auto. 
-eval_tac. eval_tac. eval_tac. eval_tac.
-  eapply transitive_red. eapply preserves_app_sf_red.  eapply preserves_app_sf_red.   
-eapply preserves_app_sf_red.  
-  eapply succ_red. eapply2 s_red. auto. auto.  eval_tac. auto.  
+  all: eval_tac. eval_tac. eval_tac. eval_tac. eval_tac.  
 (* 1 *) 
 inversion H; subst. simpl. 
   eapply transitive_red. eapply preserves_app_sf_red. eapply preserves_app_sf_red. 
 eapply preserves_app_sf_red.  eapply preserves_app_sf_red.  
-eapply2 IHP1. eval_tac. auto. auto. auto. unfold_op. 
- eapply transitive_red. eapply preserves_app_sf_red. eapply preserves_app_sf_red. 
-eapply preserves_app_sf_red. 
-  eapply succ_red. eapply2 f_op_red. auto. auto. auto. auto.  
+eapply2 IHP1. eval_tac. auto. eval_tac. eval_tac. eval_tac. 
  (* 1 *) 
 rewrite fold_subst_list. rewrite fold_subst_list. rewrite fold_subst_list.
 eapply transitive_red. eapply list_subst_preserves_sf_red. 
@@ -1496,8 +1508,7 @@ eapply preserves_app_sf_red. eapply preserves_app_sf_red.
 eapply IHP2. eapply2 matching_lift. 
 unfold lift; simpl. auto. unfold lift; simpl. auto. 
 eapply transitive_red. eapply list_subst_preserves_sf_red. 
-unfold_op.  eapply transitive_red. eapply preserves_app_sf_red. 
-eapply succ_red. eapply2 f_op_red.  auto. auto. auto. 
+eval_tac. 
 repeat rewrite list_subst_preserves_app. repeat rewrite list_subst_preserves_op. 
 eval_tac.   repeat eapply2 preserves_app_sf_red.
 rewrite fold_left_app. auto. 
@@ -1517,7 +1528,7 @@ Proof.
 Qed.
 
 
-
+(* 
 Lemma lift_rec_preserves_extension: 
   forall P M R n k, lift_rec (extension P M R) n k =
                     extension P (lift_rec M (pattern_size P +n) k) (lift_rec R n k).
@@ -1541,6 +1552,7 @@ Lemma maxvar_extension :
 forall P M R, maxvar (extension P M R) = max (maxvar M - (pattern_size P)) (maxvar R).
 Proof.  intros. unfold extension; simpl. rewrite maxvar_case. auto. Qed. 
 
+ *)
 
 Lemma extension_ref: forall i M R N, sf_red (App (extension (Ref i) M R) N)  (subst_rec M N 0).
 Proof.
@@ -1554,62 +1566,42 @@ Proof.
   intros. unfold extension, case; unfold_op.  
 eapply succ_red. eapply2 s_red. 
 case o. 
-eapply transitive_red. eapply preserves_app_sf_red. 
-eapply2 star_opt_beta. eval_tac.
-unfold subst, subst_rec; fold subst_rec.  insert_Ref_out. 
-unfold lift, lift_rec; fold lift_rec. eval_tac. eval_tac.   
+repeat eval_tac.   
 eapply transitive_red. eapply preserves_app_sf_red. eapply preserves_app_sf_red.
  eapply preserves_app_sf_red.
-eapply succ_red. eapply2 f_compound_red.  eval_tac. 
-auto. auto. auto.  eval_tac.  rewrite subst_rec_lift_rec; try omega.
-rewrite lift_rec_null. auto. 
-eapply transitive_red. eapply preserves_app_sf_red. 
-eapply2 star_opt_beta. eval_tac.
-unfold subst, subst_rec; fold subst_rec.  insert_Ref_out. 
-unfold lift, lift_rec; fold lift_rec. eval_tac. eval_tac. eval_tac. 
-rewrite subst_rec_lift_rec; try omega. rewrite lift_rec_null. auto. 
+eapply succ_red. eapply2 f_compound_red.  all: repeat eval_tac. 
 Qed.
+
 
 
 Lemma extension_op_fail : 
 forall o M R N, factorable N -> Op o <> N -> sf_red (App (extension (Op o) M R) N) (App R N).
 Proof.
-  intros. unfold extension, case; unfold_op; unfold maxvar.
-  eapply succ_red. apply s_red. auto. auto. auto. 
-generalize H0; case o; intro.
-eapply transitive_red. eapply preserves_app_sf_red. eapply2 star_opt_beta. 
-eval_tac. 
-unfold swap; unfold_op. unfold subst, subst_rec; fold subst_rec. insert_Ref_out. 
-unfold lift; rewrite lift_rec_null. 
-inversion H. inversion H2; subst. 
-assert (x = Fop) . 
-gen_case H1 x; try discriminate. 
-assert False by eapply2 H1; noway. subst. eval_tac. eval_tac. eval_tac. 
-eval_tac.  
- eapply transitive_red. eapply preserves_app_sf_red. eapply succ_red. eapply2 f_op_red. 
- auto. eval_tac. auto. 
- eapply transitive_red. eapply preserves_app_sf_red. eapply succ_red. 
-eapply2 f_compound_red. eval_tac.  auto. eval_tac. eval_tac.
- eapply transitive_red. eapply preserves_app_sf_red. eapply succ_red. eapply2 f_op_red. 
- auto. eval_tac. auto. 
-
-eapply transitive_red. eapply preserves_app_sf_red. eapply2 star_opt_beta. 
-eval_tac. 
-unfold swap; unfold_op. unfold subst, subst_rec; fold subst_rec. insert_Ref_out. 
-unfold lift; rewrite lift_rec_null. 
-inversion H. inversion H2; subst. 
-assert (x = Sop) . 
-gen_case H1 x; try discriminate. 
-assert False by eapply2 H1; noway. subst. eval_tac. eval_tac. 
- eapply transitive_red. eapply preserves_app_sf_red.
- eapply preserves_app_sf_red. eapply preserves_app_sf_red. eapply succ_red. 
-eapply2 f_compound_red. eval_tac.  auto. auto. auto.  eval_tac. eval_tac. 
- eapply transitive_red. eapply preserves_app_sf_red. eapply succ_red. 
-eapply2 f_op_red. auto.  eval_tac.  auto. 
- eapply transitive_red. eapply preserves_app_sf_red. eapply succ_red. eapply2 f_compound_red. 
- eval_tac. auto. eval_tac. eval_tac. 
- eapply transitive_red. eapply preserves_app_sf_red. eapply succ_red. eapply2 f_op_red. 
- auto. eval_tac. auto. 
+  intros. unfold extension, case; unfold_op. eval_tac. 
+  generalize H0; case o; intro. unfold subst; unfold_op; simpl.
+  (* 2 *) 
+  eval_tac. eval_tac. 
+  inversion H. inversion H2; subst. 
+  assert (x = Fop) . 
+  gen_case H1 x; try discriminate. 
+  assert False by eapply2 H1; noway. subst. do 21 eval_tac. 
+  eapply2 preserves_app_sf_red. eval_tac. 
+  eapply transitive_red. eapply preserves_app_sf_red. eapply succ_red. 
+  eapply2 f_compound_red. do 12 eval_tac.
+  eapply2 preserves_app_sf_red. do 11 eval_tac.
+  eapply2 preserves_app_sf_red. do 11 eval_tac.
+  (* 1 *) 
+  eval_tac. eval_tac. 
+  inversion H. inversion H2; subst. 
+  assert (x = Sop) . 
+  gen_case H1 x; try discriminate. 
+  assert False by eapply2 H1; noway. subst. do 21 eval_tac.
+  eapply transitive_red. eapply preserves_app_sf_red.  eapply preserves_app_sf_red.
+  eapply preserves_app_sf_red. eapply succ_red. eapply2 f_compound_red. 
+  1,2,3,4,5: eval_tac. do 6 eval_tac.   eapply2 preserves_app_sf_red. eval_tac. 
+  eapply transitive_red. eapply preserves_app_sf_red. eapply succ_red. 
+  eapply2 f_compound_red. do 12 eval_tac. eval_tac. 
+  do 10 eval_tac.   eapply2 preserves_app_sf_red. eval_tac.
 Qed. 
 
 Lemma subst_rec_preserves_compound: 
@@ -1628,39 +1620,27 @@ Qed.
 Lemma extension_compound_op: forall P1 P2 M R o, compound (App P1 P2) -> 
 sf_red (App (extension (App P1 P2) M R) (Op o)) (App R (Op o)). 
 Proof. 
-  intros. unfold extension, case; fold case. unfold case_app_nf. unfold_op. 
+  intros. unfold extension, case; fold case. 
 assert(is_program (App P1 P2) = true \/ is_program(App P1 P2) <> true)
 by decide equality. 
 inversion H0. 
 rewrite H1. 
-assert(program (App P1 P2)) by eapply2 program_is_program. 
-eapply succ_red. eapply2 s_red. 
-eapply transitive_red.  eapply preserves_app_sf_red. 
-eapply2 star_opt_beta. eval_tac.  
-unfold subst; rewrite ! subst_rec_app. rewrite subst_rec_closed. 
-unfold  subst_rec; fold subst_rec. 
-insert_Ref_out. 2: rewrite equal_comb_closed; omega. 
-unfold lift; rewrite subst_rec_lift_rec; try omega. rewrite ! lift_rec_null.
-replace (subst_rec (swap (Ref 0)) (Op o) 0) 
-with  (swap (Op o)) by (unfold swap; unfold_op; unfold subst_rec; auto). 
-rewrite ! subst_rec_closed.  
-2: inversion H2; simpl in H4; max_out; omega. 
-2: inversion H2; simpl in H4; max_out; omega. 
+do 4 eval_tac. 
+eapply transitive_red.  eapply preserves_app_sf_red.  eapply preserves_app_sf_red.  eapply preserves_app_sf_red.
 eapply transitive_red. eapply preserves_app_sf_red. 
-eapply preserves_app_sf_red. eapply preserves_app_sf_red. 
+auto. eval_tac. 
 eapply2 unequal_op. 
-eapply2 programs_are_factorable.  discriminate. auto. auto. auto. 
-unfold_op; eval_tac. eval_tac. eval_tac. 
+eapply2 programs_are_factorable.  eapply2 program_is_program. discriminate.
+eval_tac. eval_tac. eval_tac. do 7 eval_tac. 
 eapply2 preserves_app_sf_red;  eval_tac.
 (* 1 *) 
 assert(is_program (App P1 P2) = false) by 
 eapply2 not_true_iff_false. 
 rewrite H2. 
-eval_tac. eval_tac. eval_tac. eval_tac. eval_tac. eval_tac. eval_tac. eval_tac. 
-eval_tac. eval_tac. eapply transitive_red. eapply preserves_app_sf_red.
-eapply succ_red. eapply2 f_op_red. auto. eval_tac. auto.  
+do 14 eval_tac. eapply2 preserves_app_sf_red. eval_tac. 
 Qed. 
 
+(* 
 
 Lemma extension_normal: forall P M  R,normal M -> normal R -> normal (extension P M R).
 Proof.
@@ -1682,7 +1662,7 @@ eapply2 case_pattern_normal
 end. 
 Qed. 
 
-
+*) 
  
 Lemma active_not_closed: forall P, status P = Active -> maxvar P <>0. 
 Proof.
@@ -1756,7 +1736,7 @@ assert(status (App P1 P2) = Passive). eapply2 closed_implies_passive.
 rewrite H1 in H4; discriminate. 
 eapply transitive_red. eapply2 equal_compounds. simpl. 
 eapply transitive_red. eapply preserves_app_sf_red. eapply preserves_app_sf_red. 
-eapply2 IHP1. max_out. auto. auto. eval_tac.  eval_tac. 
+eapply2 IHP1. max_out. auto. auto. eval_tac.  eval_tac. eval_tac. 
 assert(M1 = P1 /\ sigma1 = nil). eapply2 program_matching3. max_out. inversion H1; subst. 
 eapply transitive_red. eapply2 equal_compounds. simpl. 
 eapply transitive_red. eapply preserves_app_sf_red.  eapply preserves_app_sf_red. 
@@ -1775,74 +1755,44 @@ Proof.
   induction P; intros; inversion H; subst.
   (* 7 *)
   unfold case, maxvar; unfold_op. 
-gen_case H2 o. eval_tac. 
-eapply transitive_red. eapply preserves_app_sf_red. eapply preserves_app_sf_red. 
-eapply succ_red. eapply2 s_red. auto. eval_tac.  auto. 
-inversion H1. inversion H0; subst. 
-assert(x = Fop). gen_case H2 x.  assert False by eapply2 H2; noway. subst.
-eval_tac. eval_tac. eval_tac. eval_tac. eval_tac. eval_tac. eval_tac. 
-eval_tac. eval_tac. eval_tac. eval_tac. eval_tac. eval_tac. eval_tac. 
-eval_tac. eval_tac. 
-  eapply transitive_red. eapply preserves_app_sf_red.  eapply succ_red. eapply2 f_op_red.
-auto. eval_tac. auto. 
-(* 8 *) 
- eapply transitive_red. eapply preserves_app_sf_red.  eapply succ_red. 
-eapply2 f_compound_red. eval_tac. auto. eval_tac. eval_tac. eval_tac. eval_tac. 
-eval_tac. 
- eapply transitive_red. eapply preserves_app_sf_red.  eapply succ_red. 
-eapply2 f_op_red. auto.  eval_tac. auto.
-(* 7 *) 
- eval_tac.
-eapply transitive_red. eapply preserves_app_sf_red. eapply preserves_app_sf_red. 
-eapply succ_red. eapply2 s_red. auto. eval_tac.  auto. 
-inversion H1. inversion H0; subst. 
-assert(x = Sop). gen_case H2 x.  assert False by eapply2 H2; noway. subst.
-eval_tac. eval_tac. eval_tac. eval_tac. eval_tac. eval_tac. eval_tac. 
-eval_tac. eval_tac. eval_tac. eval_tac. 
-  eapply transitive_red. eapply preserves_app_sf_red. 
-eapply preserves_app_sf_red. eapply preserves_app_sf_red.  eapply succ_red. 
-eapply2 f_compound_red. eval_tac. eval_tac. 
-auto. auto.  eval_tac. eval_tac. eval_tac. 
- eapply transitive_red. eapply preserves_app_sf_red.  eapply succ_red. 
-eapply2 f_op_red. auto.  eval_tac. auto.
- eapply transitive_red. eapply preserves_app_sf_red.  eapply succ_red. 
-eapply2 f_compound_red. eval_tac.  auto.  eval_tac. eval_tac. eval_tac. eval_tac. 
-eval_tac. 
- eapply transitive_red. eapply preserves_app_sf_red.  eapply succ_red. 
-eapply2 f_op_red.   auto.  eval_tac. auto. 
+  gen_case H2 o. eval_tac. eval_tac. 
+  inversion H1. inversion H0; subst. 
+  assert(x = Fop). gen_case H2 x.  assert False by eapply2 H2; noway. subst.
+  do 20 eval_tac.  eapply2 preserves_app_sf_red.  eval_tac. 
+  (* 8 *) 
+  eapply transitive_red. eapply preserves_app_sf_red.  eapply succ_red. 
+  eapply2 f_compound_red. repeat eval_tac. auto. do 10 eval_tac.
+  eapply2 preserves_app_sf_red.  eval_tac. 
+  (* 7 *)
+  unfold subst; unfold_op; simpl; eval_tac. eval_tac. 
+  inversion H1. inversion H0; subst. 
+  assert(x = Sop). gen_case H2 x.  assert False by eapply2 H2; noway. subst.
+  do 20 eval_tac.  
+  (* 8 *) 
+  eapply transitive_red. eapply preserves_app_sf_red. eapply preserves_app_sf_red. eapply preserves_app_sf_red.  eapply succ_red. 
+  eapply2 f_compound_red. repeat eval_tac. repeat eval_tac. eval_tac. auto. do 7 eval_tac.
+  eapply2 preserves_app_sf_red.  eval_tac. 
+  eapply transitive_red. eapply preserves_app_sf_red.  eapply succ_red. 
+  eapply2 f_compound_red. repeat eval_tac. auto. do 10 eval_tac.
+  eapply2 preserves_app_sf_red.  eval_tac. 
   (* 6 *) 
   unfold case; fold case.
 assert(is_program (App P1 P2) = true \/ is_program(App P1 P2) <> true)
 by decide equality. 
 inversion H0. 
 rewrite H1. 
-assert(program (App P1 P2)) by eapply2 program_is_program. 
-eapply transitive_red.  eapply preserves_app_sf_red. 
-eapply2 star_opt_beta. auto. 
-unfold subst; rewrite ! subst_rec_app. rewrite subst_rec_closed.
-unfold  subst_rec; fold subst_rec.  
-insert_Ref_out. 2: rewrite equal_comb_closed; omega. 
-unfold lift; rewrite subst_rec_lift_rec; try omega. rewrite ! lift_rec_null.
-replace (subst_rec (swap (Ref 0)) (Op o) 0) 
-with  (swap (Op o)) by (unfold swap; unfold_op; unfold subst_rec; auto). 
-rewrite ! subst_rec_closed. 
-2: unfold_op; auto.  
-eapply transitive_red. eapply preserves_app_sf_red. 
-eapply preserves_app_sf_red. eapply preserves_app_sf_red. 
+assert(program (App P1 P2)) by eapply2 program_is_program.
+eval_tac. eval_tac. eval_tac. 
+  eapply transitive_red. eapply preserves_app_sf_red. eapply preserves_app_sf_red. eapply preserves_app_sf_red.  eapply transitive_red. eapply preserves_app_sf_red. auto. eval_tac. 
 eapply2 unequal_op. 
-eapply2 programs_are_factorable.  discriminate. auto. auto. auto. 
-unfold_op; eval_tac. eval_tac. eval_tac. 
+eapply2 programs_are_factorable.  discriminate. eval_tac. eval_tac. auto.
+do 7 eval_tac. 
 eapply2 preserves_app_sf_red;  eval_tac.
-inversion H2. simpl in H5; max_out; omega. 
-inversion H2; simpl in H5; max_out; omega. 
 (* 6 *) 
 assert(is_program (App P1 P2) = false) by 
 eapply2 not_true_iff_false. 
 rewrite H2. 
-unfold case_app_nf.  eval_tac. eval_tac.  eval_tac. 
-eval_tac. eval_tac. eval_tac. eval_tac. eval_tac. 
-  eapply transitive_red. eapply preserves_app_sf_red. eapply succ_red. 
-eapply2  f_op_red. auto. eval_tac. auto. 
+unfold case_app_nf.  do 12 eval_tac.  eapply2 preserves_app_sf_red. eval_tac. 
 (* 5 *) 
   unfold case; fold case.
 assert(is_program (App P1 P2) = true \/ is_program(App P1 P2) <> true)
@@ -1850,32 +1800,20 @@ by decide equality.
 inversion H0. 
 rewrite H1. 
 assert(program (App P1 P2)) by eapply2 program_is_program. 
-eapply transitive_red.  eapply preserves_app_sf_red. 
-eapply2 star_opt_beta. auto. 
-unfold subst; rewrite ! subst_rec_app.  rewrite subst_rec_closed. 
-unfold subst_rec; fold subst_rec. insert_Ref_out.  
-2: rewrite equal_comb_closed; omega. 
-unfold lift; rewrite subst_rec_lift_rec; try omega. rewrite ! lift_rec_null.
-replace (subst_rec (swap (Ref 0)) (Op o) 0) 
-with  (swap (Op o)) by (unfold swap; unfold_op; unfold subst_rec; auto). 
-rewrite ! subst_rec_closed. 
-2: unfold_op; auto.  
-eapply transitive_red. eapply preserves_app_sf_red. 
-eapply preserves_app_sf_red. eapply preserves_app_sf_red. 
+do 3 eval_tac. 
+eapply transitive_red.  eapply preserves_app_sf_red.  eapply preserves_app_sf_red.
+eapply preserves_app_sf_red.
+eapply transitive_red. eapply preserves_app_sf_red. auto.  eval_tac. 
 eapply2 unequal_op. 
-eapply2 programs_are_factorable.  discriminate. auto. auto. auto. 
-unfold_op; eval_tac. eval_tac. eval_tac. 
+eapply2 programs_are_factorable.  discriminate. eval_tac. eval_tac. auto.
+do 7 eval_tac. 
 eapply2 preserves_app_sf_red;  eval_tac.
-inversion H2. simpl in H5; max_out; omega. 
-inversion H2; simpl in H5; max_out; omega. 
 (* 5 *) 
 assert(is_program (App P1 P2) = false) by 
 eapply2 not_true_iff_false. 
 rewrite H2. 
-  unfold case; fold case. unfold case_app_nf.  eval_tac. eval_tac.  eval_tac. 
-eval_tac. eval_tac. eval_tac. eval_tac. eval_tac. 
-  eapply transitive_red. eapply preserves_app_sf_red. eapply succ_red. 
-eapply2  f_op_red. auto. eval_tac. auto. 
+unfold case_app_nf.  do 12 eval_tac.
+eapply2 preserves_app_sf_red. eval_tac. 
 (* 4 *) 
   unfold case; fold case.
 assert(is_program (App P1 P2) = true \/ is_program(App P1 P2) <> true)
@@ -1883,89 +1821,62 @@ by decide equality.
 inversion H0. 
 rewrite H1. 
 assert(program (App P1 P2)) by eapply2 program_is_program. 
-eapply transitive_red.  eapply preserves_app_sf_red. 
-eapply2 star_opt_beta. auto. 
-unfold subst; rewrite ! subst_rec_app. rewrite subst_rec_closed. 
-unfold subst_rec; fold subst_rec. insert_Ref_out. 2: rewrite equal_comb_closed; omega. 
-unfold lift; rewrite subst_rec_lift_rec; try omega. rewrite ! lift_rec_null.
-replace (subst_rec (swap (Ref 0)) (App M1 M2) 0)
-with (swap (App M1 M2))
-by (unfold swap; unfold_op; unfold subst_rec; fold subst_rec; 
-insert_Ref_out; unfold lift; rewrite lift_rec_null; auto). 
-rewrite ! subst_rec_closed. 
-2: unfold_op; auto.  
-eapply transitive_red. eapply preserves_app_sf_red. 
-eapply preserves_app_sf_red. eapply preserves_app_sf_red. 
-eapply2 equal_compounds. auto. auto. auto.  simpl. 
+do 3 eval_tac. 
+eapply transitive_red.  eapply preserves_app_sf_red.  eapply preserves_app_sf_red.
+eapply preserves_app_sf_red.
+eapply transitive_red. eapply preserves_app_sf_red. auto.  eval_tac. 
+eapply2 equal_compounds. eval_tac. eval_tac. auto. simpl. 
 eapply transitive_red. eapply preserves_app_sf_red.  eapply preserves_app_sf_red. 
 eapply preserves_app_sf_red.  eapply preserves_app_sf_red. eapply preserves_app_sf_red. 
-eapply2 matchfail_unequal. inversion H4.  simpl in H7; max_out. auto. auto. auto. auto. auto. 
-eval_tac. eval_tac. eval_tac. eval_tac. 
+eapply2 matchfail_unequal. inversion H4.  simpl in H7; max_out. auto. auto. auto. eval_tac. auto. 
+do 9 eval_tac. 
 eapply2 preserves_app_sf_red; eval_tac. 
-inversion H4; simpl in H7; max_out; omega. 
-inversion H4; simpl in H7; max_out; omega. 
 assert(is_program (App P1 P2) = false) by 
 eapply2 not_true_iff_false. 
 rewrite H4. 
-  unfold case; fold case. unfold case_app_nf. eval_tac.  eval_tac.  eval_tac. 
+  unfold case_app_nf. do 3 eval_tac.  
   eapply transitive_red. eapply preserves_app_sf_red. 
 eapply preserves_app_sf_red. eapply succ_red. 
-eapply2  f_compound_red. eval_tac. eval_tac.  auto.  eval_tac. eval_tac.  
+eapply2  f_compound_red. eval_tac. eval_tac.  auto.  do 5 eval_tac. 
  eapply transitive_red. eapply preserves_app_sf_red.  eapply preserves_app_sf_red. 
-eapply preserves_app_sf_red.  eapply preserves_app_sf_red. eapply succ_red. eapply2 s_red. 
+eapply preserves_app_sf_red.  eapply preserves_app_sf_red. 
 eapply2 IHP1. auto. eval_tac. eval_tac. auto. 
-eval_tac. eval_tac. eval_tac. 
-  eapply transitive_red. eapply preserves_app_sf_red.  eapply succ_red. eapply2 f_op_red. auto. 
-  eapply succ_red. eapply2 f_op_red. auto. auto. 
+do 9 eval_tac.  eapply2 preserves_app_sf_red.  eval_tac. 
 (* 3 *) 
   unfold case; fold case.
 assert(is_program (App P1 P2) = true \/ is_program(App P1 P2) <> true)
 by decide equality. 
 inversion H0. 
 rewrite H1. 
-assert(program (App P1 P2)) by eapply2 program_is_program. 
-eapply transitive_red.  eapply preserves_app_sf_red. 
-eapply2 star_opt_beta. auto. 
-unfold subst. rewrite ! subst_rec_app. rewrite subst_rec_closed. 
-unfold subst_rec; fold subst_rec. insert_Ref_out. 2: rewrite equal_comb_closed; omega. 
-unfold lift; rewrite subst_rec_lift_rec; try omega. rewrite ! lift_rec_null.
-replace (subst_rec (swap (Ref 0)) (App M1 M2) 0)
-with (swap (App M1 M2))
-by (unfold swap; unfold_op; unfold subst_rec; fold subst_rec; 
-insert_Ref_out; unfold lift; rewrite lift_rec_null; auto). 
-rewrite ! subst_rec_closed. 
-2: unfold_op; auto.  
-eapply transitive_red. eapply preserves_app_sf_red. 
-eapply preserves_app_sf_red. eapply preserves_app_sf_red. 
-eapply2 equal_compounds. auto. auto. auto.  simpl. 
+assert(program (App P1 P2)) by eapply2 program_is_program.
+do 3 eval_tac. 
+eapply transitive_red.  eapply preserves_app_sf_red.
+eapply preserves_app_sf_red.  eapply preserves_app_sf_red.
+eapply transitive_red. eapply preserves_app_sf_red. auto.  eval_tac. 
+eapply2 equal_compounds. eval_tac. eval_tac. auto. simpl. 
 eapply transitive_red. eapply preserves_app_sf_red.  eapply preserves_app_sf_red. 
 eapply preserves_app_sf_red.  eapply preserves_app_sf_red. eapply preserves_app_sf_red. 
 assert(M1 = P1 /\ sigma1 = nil). eapply2 program_matching3. 
 inversion H5; simpl in *; max_out. inversion H7; subst. 
 eapply2 equal_programs.
-eapply2 (program_app P1 P2).  auto. auto. auto. auto. auto. 
-unfold_op. eapply transitive_red. eapply preserves_app_sf_red. 
-eapply preserves_app_sf_red. eapply preserves_app_sf_red. eval_tac. auto. auto. auto. 
+eapply2 (program_app P1 P2).  auto. auto. auto. eval_tac. auto. eval_tac. 
 eapply transitive_red. eapply preserves_app_sf_red. 
 eapply preserves_app_sf_red. eapply preserves_app_sf_red. 
 eapply2 matchfail_unequal. inversion H5; simpl in *; max_out. 
-auto. auto. auto.  eval_tac. eval_tac. eval_tac.  
+auto. auto. auto.  do 6 eval_tac. 
 eapply2 preserves_app_sf_red; eval_tac. 
-inversion H5; simpl in *; max_out; omega. 
-inversion H5; simpl in *; max_out; omega. 
+(* 3 *) 
 assert(is_program (App P1 P2) = false) by 
 eapply2 not_true_iff_false. 
 rewrite H5. 
- unfold case_app_nf. eval_tac.  eval_tac.  eval_tac. 
+ unfold case_app_nf. do 3 eval_tac.  
   eapply transitive_red. eapply preserves_app_sf_red. 
 eapply preserves_app_sf_red. eapply succ_red. 
-eapply2  f_compound_red. eval_tac. eval_tac.  auto.  eval_tac. eval_tac.  
+eapply2  f_compound_red. eval_tac. eval_tac.  auto.  do 5 eval_tac. 
  eapply transitive_red. eapply preserves_app_sf_red.  eapply preserves_app_sf_red. 
-eapply preserves_app_sf_red.  eapply preserves_app_sf_red. eapply succ_red. eapply2 s_red. 
+eapply preserves_app_sf_red.  eapply preserves_app_sf_red. 
 eapply preserves_app_sf_red. eapply2 case_by_matching.  eval_tac. auto. eval_tac. eval_tac. auto.  
-unfold_op.  eapply transitive_red. eapply preserves_app_sf_red.  eapply preserves_app_sf_red. 
-eapply preserves_app_sf_red.  eapply preserves_app_sf_red. eapply succ_red. eapply2 f_op_red.
-auto. auto. auto. auto. auto.  
+eval_tac. 
 rewrite fold_subst_list.
 rewrite fold_subst_list.
 rewrite fold_subst_list.
@@ -1974,11 +1885,11 @@ eapply transitive_red. eapply list_subst_preserves_sf_red.
 eapply preserves_app_sf_red. eapply preserves_app_sf_red.
 eapply IHP2. eapply2 matchfail_lift. 
 unfold lift; simpl. auto. unfold lift; simpl. auto. 
-eapply transitive_red. eapply list_subst_preserves_sf_red. unfold swap.  eval_tac. 
-eapply transitive_red. eapply list_subst_preserves_sf_red. eval_tac. 
-repeat rewrite list_subst_preserves_app. repeat rewrite list_subst_preserves_op. eval_tac. 
- eapply transitive_red. eapply preserves_app_sf_red. eapply succ_red.  eapply2 f_op_red. auto. 
-eapply succ_red.  eapply2 f_op_red. auto. 
+eapply transitive_red. eapply list_subst_preserves_sf_red. unfold lift; simpl.  eval_tac.
+eapply transitive_red. eapply list_subst_preserves_sf_red.
+do 6 (eapply transitive_red; [eval_tac|]). auto. 
+repeat rewrite list_subst_preserves_app. repeat rewrite list_subst_preserves_op.
+ eapply transitive_red. eapply preserves_app_sf_red. auto. eval_tac. 
 replace(lift_rec M1 0 (length sigma1)) with (lift (length sigma1) M1) by auto. 
 replace(lift_rec M2 0 (length sigma1)) with (lift (length sigma1) M2) by auto.
 eapply2 preserves_app_sf_red. 
@@ -1989,99 +1900,36 @@ replace (lift_rec R 0 (length sigma1)) with (lift (length sigma1) R) by auto.
 assert(is_program (App P1 P2) = true \/ is_program(App P1 P2) <> true)
 by decide equality. 
 inversion H0. 
-rewrite H1. 
+assert(status(App P1 P2) = Passive) . eapply2 closed_implies_passive.
 assert(program (App P1 P2)) by eapply2 program_is_program. 
-eapply transitive_red.  eapply preserves_app_sf_red. 
-eapply2 star_opt_beta. auto. 
-unfold subst. rewrite ! subst_rec_app. rewrite subst_rec_closed. 
-unfold subst_rec; fold subst_rec.
-insert_Ref_out. 2: rewrite equal_comb_closed; omega. 
-unfold lift; rewrite subst_rec_lift_rec; try omega. rewrite ! lift_rec_null.
-replace (subst_rec (swap (Ref 0)) (App M1 M2) 0)
-with (swap (App M1 M2))
-by (unfold swap; unfold_op; unfold subst_rec; fold subst_rec; 
-insert_Ref_out; unfold lift; rewrite lift_rec_null; auto). 
-rewrite ! subst_rec_closed. 
-2: unfold_op; auto.  
-eapply transitive_red. eapply preserves_app_sf_red. 
-eapply preserves_app_sf_red. eapply preserves_app_sf_red. 
-eapply2 equal_compounds. inversion H4. inversion H6. 
-assert(status(App P1 P2) = Passive) by eapply2 closed_implies_passive.
-rewrite H13 in H12. discriminate. auto.  auto. auto. auto. simpl. 
-eapply transitive_red. eapply preserves_app_sf_red.  eapply preserves_app_sf_red. 
-eapply preserves_app_sf_red.  eapply preserves_app_sf_red. eapply preserves_app_sf_red.
-eapply2 matchfail_unequal.  inversion H4; simpl in *; max_out. 
-auto. auto. auto. auto. auto. 
-eval_tac. eval_tac. eval_tac. eval_tac. 
-eapply2 preserves_app_sf_red; eval_tac. 
-inversion H4; simpl in *; max_out; omega. 
-inversion H4; simpl in *; max_out; omega. 
-assert(is_program (App P1 P2) = false) by 
-eapply2 not_true_iff_false. 
+inversion H4; auto. rewrite H4 in H2. discriminate.
+assert(is_program (App P1 P2) = false) by eapply2 not_true_iff_false. 
 rewrite H4. 
- unfold case_app_nf. eval_tac.  eval_tac.  eval_tac. 
+ unfold case_app_nf. do 3 eval_tac.  
   eapply transitive_red. eapply preserves_app_sf_red. 
 eapply preserves_app_sf_red. eapply succ_red. 
-eapply2  f_compound_red. eval_tac. eval_tac.  auto.  eval_tac. eval_tac.  
+eapply2  f_compound_red. eval_tac. eval_tac.  auto.  do 5 eval_tac. 
  eapply transitive_red. eapply preserves_app_sf_red.  eapply preserves_app_sf_red. 
-eapply preserves_app_sf_red.  eapply preserves_app_sf_red. eapply succ_red. eapply2 s_red. 
-eapply2 IHP1. auto. eval_tac. eval_tac. auto. 
-eval_tac. eval_tac. eval_tac. 
-  eapply transitive_red. eapply preserves_app_sf_red.  eapply succ_red. eapply2 f_op_red. auto. 
-  eapply succ_red. eapply2 f_op_red. auto. auto. 
+eapply preserves_app_sf_red.  eapply preserves_app_sf_red. eapply transitive_red. 
+eapply2 IHP1. eval_tac. auto. eval_tac. eval_tac. auto. do 8 eval_tac. 
+eapply2 preserves_app_sf_red.  eval_tac. 
 (* 1 *) 
    unfold case; fold case.
 assert(is_program (App P1 P2) = true \/ is_program(App P1 P2) <> true)
 by decide equality. 
 inversion H0. 
-rewrite H1. 
+assert(status(App P1 P2) = Passive) . eapply2 closed_implies_passive.
 assert(program (App P1 P2)) by eapply2 program_is_program. 
-eapply transitive_red.  eapply preserves_app_sf_red. 
-eapply2 star_opt_beta. auto. 
-unfold subst. rewrite ! subst_rec_app. rewrite subst_rec_closed. 
-unfold  subst_rec; fold subst_rec. insert_Ref_out. 2: rewrite equal_comb_closed; omega. 
-unfold lift; rewrite subst_rec_lift_rec; try omega. rewrite ! lift_rec_null.
-replace (subst_rec (swap (Ref 0)) (App M1 M2) 0)
-with (swap (App M1 M2))
-by (unfold swap; unfold_op; unfold subst_rec; fold subst_rec; 
-insert_Ref_out; unfold lift; rewrite lift_rec_null; auto). 
-rewrite ! subst_rec_closed. 
-2: unfold_op; auto.  
-eapply transitive_red. eapply preserves_app_sf_red. 
-eapply preserves_app_sf_red. eapply preserves_app_sf_red. 
-eapply2 equal_compounds.  inversion H5. inversion H7. 
-assert(status (App P1 P2) = Passive) by eapply2 closed_implies_passive. 
-rewrite H14 in H13; discriminate. auto. auto. auto. auto. simpl. 
-eapply transitive_red. eapply preserves_app_sf_red. 
-eapply preserves_app_sf_red. eapply preserves_app_sf_red. 
-eapply preserves_app_sf_red.  eapply preserves_app_sf_red. 
-assert(M1 = P1 /\ sigma1 = nil). eapply2 program_matching3. 
-inversion H5; simpl in *; max_out. inversion H7; subst. 
-eapply2 equal_programs.
-eapply2 (program_app P1 P2).  auto. auto. auto. auto. auto. 
-unfold_op. eapply transitive_red. eapply preserves_app_sf_red. 
- eapply preserves_app_sf_red.  eapply preserves_app_sf_red. eval_tac.
-auto. auto. auto. 
-eapply transitive_red. eapply preserves_app_sf_red. 
-eapply preserves_app_sf_red. eapply preserves_app_sf_red. 
-eapply2 matchfail_unequal. inversion H5; simpl in *; max_out. 
-auto. auto. auto.  eval_tac. eval_tac. eval_tac. 
-eapply2 preserves_app_sf_red; eval_tac. 
-inversion H5; simpl in *; max_out; omega. 
-inversion H5; simpl in *; max_out; omega. 
-assert(is_program (App P1 P2) = false) by 
-eapply2 not_true_iff_false. 
+inversion H5; auto. rewrite H5 in H2. discriminate.
+assert(is_program (App P1 P2) = false) by eapply2 not_true_iff_false. 
 rewrite H5. 
- unfold case_app_nf. eval_tac.  eval_tac.  eval_tac. 
+ unfold case_app_nf. do 3 eval_tac.  
   eapply transitive_red. eapply preserves_app_sf_red. 
 eapply preserves_app_sf_red. eapply succ_red. 
-eapply2  f_compound_red. eval_tac. eval_tac.  auto.  eval_tac. eval_tac.  
+eapply2  f_compound_red. eval_tac. eval_tac.  auto.  do 5 eval_tac. 
  eapply transitive_red. eapply preserves_app_sf_red.  eapply preserves_app_sf_red. 
-eapply preserves_app_sf_red.  eapply preserves_app_sf_red. eapply succ_red. eapply2 s_red. 
-eapply preserves_app_sf_red. eapply2 case_by_matching.  eval_tac. auto. eval_tac. eval_tac. auto.  
-unfold_op.  eapply transitive_red. eapply preserves_app_sf_red.  eapply preserves_app_sf_red. 
-eapply preserves_app_sf_red.  eapply preserves_app_sf_red. eapply succ_red. eapply2 f_op_red.
-auto. auto. auto. auto. auto.  
+ eapply preserves_app_sf_red.  eapply preserves_app_sf_red. eapply preserves_app_sf_red. 
+ eapply2 case_by_matching.  eval_tac. auto. eval_tac. eval_tac. auto.  eval_tac. 
 rewrite fold_subst_list.
 rewrite fold_subst_list.
 rewrite fold_subst_list.
@@ -2089,17 +1937,21 @@ rewrite fold_subst_list.
 eapply transitive_red. eapply list_subst_preserves_sf_red. 
 eapply preserves_app_sf_red. eapply preserves_app_sf_red.
 eapply IHP2. eapply2 matchfail_lift. 
-unfold lift; simpl. auto. unfold lift; simpl. auto. 
-eapply transitive_red. eapply list_subst_preserves_sf_red. unfold swap.  eval_tac. 
-eapply transitive_red. eapply list_subst_preserves_sf_red. eval_tac. 
-repeat rewrite list_subst_preserves_app. repeat rewrite list_subst_preserves_op. eval_tac. 
- eapply transitive_red. eapply preserves_app_sf_red. eapply succ_red.  eapply2 f_op_red. auto. 
-eapply succ_red.  eapply2 f_op_red. auto. 
+unfold lift; simpl. auto. unfold lift; simpl. auto.  unfold lift; simpl. 
+eapply transitive_red. eapply list_subst_preserves_sf_red.
+eapply transitive_red; [eval_tac|].
+eapply transitive_red; [eval_tac|].
+eapply transitive_red; [eval_tac|].
+eapply transitive_red; [eval_tac|].
+eapply transitive_red; [eval_tac|].
+eapply transitive_red; [eval_tac|].
+eapply transitive_red; [eval_tac|].
+eapply transitive_red; eapply preserves_app_sf_red. auto. eval_tac. auto. auto. 
+repeat rewrite list_subst_preserves_app.  
 replace(lift_rec M1 0 (length sigma1)) with (lift (length sigma1) M1) by auto. 
 replace(lift_rec M2 0 (length sigma1)) with (lift (length sigma1) M2) by auto.
-eapply2 preserves_app_sf_red. 
 replace (lift_rec R 0 (length sigma1)) with (lift (length sigma1) R) by auto. 
- rewrite list_subst_lift; auto.  rewrite ! list_subst_lift; auto. 
+ rewrite ! list_subst_lift; auto.  
 Qed. 
 
 
